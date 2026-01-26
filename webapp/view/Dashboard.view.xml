@@ -171,6 +171,7 @@
 			<OverflowToolbar>
 				<ToolbarSpacer />
 				<Button text="View Logs" press="onPressLogs" type="Emphasized" />
+                <Button icon="sap-icon://log" tooltip="Logout" press="onLogoutPress" />
 			</OverflowToolbar>
 		</footer>
 	</Page>

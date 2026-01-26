@@ -7,17 +7,32 @@ import MessageBox from "sap/m/MessageBox";
 
 export default class Dashboard extends Controller {
     public formatter = formatter;
+    private _timer: ReturnType<typeof setInterval> | undefined;
 
     public onInit(): void {
         this.getView()?.setModel(new JSONModel());
         this.onRefreshStats();
+
+        // Start Auto-Refresh (every 5 seconds)
+        this._timer = setInterval(() => {
+            this.onRefreshStats(true); // true = silent refresh
+        }, 5000);
     }
 
-    public async onRefreshStats(): Promise<void> {
+    public onExit(): void {
+        if (this._timer) {
+            clearInterval(this._timer);
+            this._timer = undefined;
+        }
+    }
+
+    public async onRefreshStats(silent: boolean = false): Promise<void> {
         const model = this.getView()?.getModel() as JSONModel;
         if (!model) return;
 
-        this.getView()?.setBusy(true);
+        if (!silent) {
+            this.getView()?.setBusy(true);
+        }
 
         try {
             const data = await AdGuardService.getInstance().getStats();
@@ -29,13 +44,20 @@ export default class Dashboard extends Controller {
             });
         } catch (error) {
             if ((error as Error).message === "Unauthorized") {
+                // Stop timer on auth error to prevent endless loops
+                if (this._timer) clearInterval(this._timer);
                 UIComponent.getRouterFor(this).navTo("login");
                 return;
             }
-            MessageBox.error((error as Error).message);
-            console.error("Failed to fetch stats", error); // Kept console.error for debugging
+            // Suppress errors during silent refresh to avoid popup span
+            if (!silent) {
+                MessageBox.error((error as Error).message);
+            }
+            console.error("Failed to fetch stats", error);
         } finally {
-            this.getView()?.setBusy(false);
+            if (!silent) {
+                this.getView()?.setBusy(false);
+            }
         }
     }
 
@@ -51,5 +73,11 @@ export default class Dashboard extends Controller {
                 status: "Blocked"
             }
         });
+    }
+
+    public onLogoutPress(): void {
+        AdGuardService.getInstance().logout();
+        UIComponent.getRouterFor(this).navTo("login");
+        MessageBox.success("Logged out successfully.");
     }
 }
