@@ -31,5 +31,5 @@ server:
       configuration:
         baseUri: "https://192.168.178.37:8443/control/"
         strictSSL: false
-        username: "sbozbuga"
-        password: "Taslica.78"
+        # username: "PLACEHOLDER"
+        # password: "PLACEHOLDER"
