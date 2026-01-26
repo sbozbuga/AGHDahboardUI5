@@ -1,0 +1,25 @@
+<mvc:View
+    controllerName="ui5.aghd.controller.Login"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    displayBlock="true">
+    <App>
+        <Page title="AdGuard Home Login">
+            <VBox class="sapUiSmallMargin" justifyContent="Center" alignItems="Center" height="100%">
+                <Panel width="300px" headerText="Sign In">
+                    <content>
+                        <VBox>
+                            <Label text="Username" labelFor="usernameInput"/>
+                            <Input id="usernameInput" value="{/username}" />
+                            
+                            <Label text="Password" labelFor="passwordInput" class="sapUiSmallMarginTop"/>
+                            <Input id="passwordInput" value="{/password}" type="Password" />
+                            
+                            <Button text="Login" type="Emphasized" press="onLoginPress" class="sapUiMediumMarginTop" width="100%"/>
+                        </VBox>
+                    </content>
+                </Panel>
+            </VBox>
+        </Page>
+    </App>
+</mvc:View>

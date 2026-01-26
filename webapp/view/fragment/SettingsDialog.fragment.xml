@@ -1,0 +1,41 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core">
+	<Dialog
+		id="settingsDialog"
+		title="Settings"
+		contentWidth="400px">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<Label text="Gemini API Key" labelFor="apiKeyInput" />
+				<Input
+					id="apiKeyInput"
+					value="{/apiKey}"
+					placeholder="Enter your Gemini API Key"
+					type="Password"
+					width="100%" />
+				<Label text="Gemini Model" labelFor="modelSelect" class="sapUiSmallMarginTop"/>
+				<Select
+					id="modelSelect"
+					selectedKey="{/selectedModel}"
+					items="{/availableModels}"
+					width="100%">
+					<core:Item key="{key}" text="{text}" />
+				</Select>
+				<Label text="System Context (Optional)" labelFor="contextInput" class="sapUiSmallMarginTop"/>
+				<TextArea
+					id="contextInput"
+					value="{/systemContext}"
+					placeholder="Describe your network (e.g., Raspberry Pi 5, Unbound, IoT devices...)"
+					rows="4"
+					width="100%" />
+				<Text text="Your API key is stored locally in your browser." class="sapUiTinyMarginTop sapUiSmallMarginBottom" />
+                <Link text="Get an API Key" href="https://aistudio.google.com/app/apikey" target="_blank" />
+			</VBox>
+		</content>
+		<buttons>
+			<Button text="Save" press="onSaveSettings" type="Emphasized" />
+			<Button text="Cancel" press="onCancelSettings" />
+		</buttons>
+	</Dialog>
+</core:FragmentDefinition>

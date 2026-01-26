@@ -1,0 +1,92 @@
+{
+	"_version": "1.68.0",
+	"sap.app": {
+		"id": "ui5.aghd",
+		"type": "application",
+		"i18n": "i18n/i18n.properties",
+		"title": "UI5 AGH Dashboard",
+		"description": "UI5 AGH Dashboard",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"ach": "set-ach"
+	},
+	"sap.fiori": {},
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		}
+	},
+	"sap.ui5": {
+		"rootView": {
+			"viewName": "ui5.aghd.view.App",
+			"type": "XML",
+			"async": true,
+			"id": "app"
+		},
+		"dependencies": {
+			"minUI5Version": "1.104.0",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.ui.layout": {},
+				"sap.ui.unified": {},
+				"sap.m": {},
+				"sap.f": {}
+			}
+		},
+		"handleValidation": true,
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {},
+		"resourceRoots": {
+			"@google": "./thirdparty/@google"
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"viewType": "XML",
+				"viewPath": "ui5.aghd.view",
+				"controlId": "app",
+				"controlAggregation": "pages",
+				"async": true
+			},
+			"routes": [
+				{
+					"pattern": "login",
+					"name": "login",
+					"target": "login"
+				},
+				{
+					"pattern": "",
+					"name": "dashboard",
+					"target": "dashboard"
+				},
+				{
+					"pattern": "logs:?query:",
+					"name": "logs",
+					"target": "logs"
+				}
+			],
+			"targets": {
+				"login": {
+					"viewId": "login",
+					"viewName": "Login"
+				},
+				"dashboard": {
+					"viewId": "dashboard",
+					"viewName": "Dashboard"
+				},
+				"logs": {
+					"viewId": "logs",
+					"viewName": "Logs"
+				}
+			}
+		}
+	}
+}

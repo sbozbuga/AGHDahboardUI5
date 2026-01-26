@@ -1,0 +1,177 @@
+<mvc:View
+	controllerName="ui5.aghd.controller.Dashboard"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.f"
+	xmlns:card="sap.f.cards"
+	displayBlock="true">
+
+	<Page title="AdGuard Home Dashboard">
+		<content>
+			<GenericTile
+				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
+				header="Total Queries"
+				subheader="Last 24 hours"
+				press="onPressLogs">
+				<TileContent>
+					<NumericContent value="{/num_dns_queries}" icon="sap-icon://line-chart" />
+				</TileContent>
+			</GenericTile>
+
+			<GenericTile
+				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
+				header="Blocked Queries"
+				subheader="Last 24 hours"
+				press="onPressBlockedLogs">
+				<TileContent>
+					<NumericContent value="{/num_blocked_filtering}" icon="sap-icon://shield" valueColor="Error" />
+				</TileContent>
+			</GenericTile>
+
+			<GenericTile
+				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
+				header="Processing Time"
+				subheader="Average"
+				frameType="OneByOne">
+				<TileContent>
+					<NumericContent value="{/avg_processing_time}" scale="ms" icon="sap-icon://performance" valueColor="Good" />
+				</TileContent>
+			</GenericTile>
+
+			<GenericTile
+				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
+				header="Blocked %"
+				subheader="Efficiency"
+				frameType="OneByOne">
+				<TileContent>
+					<NumericContent value="{/block_percentage}" scale="%" icon="sap-icon://pie-chart" valueColor="Critical" />
+				</TileContent>
+			</GenericTile>
+
+            <f:GridContainer class="sapUiSmallMarginTop">
+                <f:layout>
+                    <f:GridContainerSettings rowSize="84px" columnSize="84px" gap="8px" />
+                </f:layout>
+                <f:layoutXS>
+                    <f:GridContainerSettings rowSize="70px" columnSize="70px" gap="8px" />
+                </f:layoutXS>
+                
+                <!-- Top Clients Card -->
+                <f:Card>
+                    <f:layoutData>
+                        <f:GridContainerItemLayoutData columns="4" rows="6" />
+                    </f:layoutData>
+                    <f:header>
+                        <card:Header title="Top Clients" iconSrc="sap-icon://group" />
+                    </f:header>
+                    <f:content>
+                        <Table items="{/top_clients}" inset="false" fixedLayout="false" class="sapUiSizeCompact">
+                            <columns>
+                                <Column><Text text="Client" /></Column>
+                                <Column hAlign="End" width="30%"><Text text="Count" /></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <Text text="{name}" />
+                                        <Text text="{count}" />
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </f:content>
+                </f:Card>
+
+                <!-- Top Domains Card -->
+                <f:Card>
+                    <f:layoutData>
+                        <f:GridContainerItemLayoutData columns="4" rows="6" />
+                    </f:layoutData>
+                    <f:header>
+                        <card:Header title="Top Queried Domains" iconSrc="sap-icon://world" />
+                    </f:header>
+                     <f:content>
+                        <Table items="{/top_queried_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact">
+                             <columns>
+                                <Column><Text text="Domain" /></Column>
+                                <Column hAlign="End" width="30%"><Text text="Count" /></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <Text text="{name}" />
+                                        <Text text="{count}" />
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </f:content>
+                </f:Card>
+
+                <!-- Top Blocked Domains Card -->
+                <f:Card>
+                    <f:layoutData>
+                        <f:GridContainerItemLayoutData columns="4" rows="6" />
+                    </f:layoutData>
+                    <f:header>
+                        <card:Header title="Top Blocked Domains" iconSrc="sap-icon://decline" />
+                    </f:header>
+                     <f:content>
+                        <Table items="{/top_blocked_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact">
+                             <columns>
+                                <Column><Text text="Domain" /></Column>
+                                <Column hAlign="End" width="30%"><Text text="Count" /></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <Text text="{name}" />
+                                        <Text text="{count}" />
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </f:content>
+                </f:Card>
+
+                <!-- Slowest Queries Card -->
+                <f:Card>
+                    <f:layoutData>
+                        <f:GridContainerItemLayoutData columns="4" rows="6" />
+                    </f:layoutData>
+                    <f:header>
+                        <card:Header title="Slowest Queries (Last 1000)" iconSrc="sap-icon://time-account" />
+                    </f:header>
+                     <f:content>
+                        <Table items="{/slowest_queries}" inset="false" fixedLayout="false" class="sapUiSizeCompact">
+                             <columns>
+                                <Column><Text text="Domain" /></Column>
+                                <Column hAlign="End" width="30%"><Text text="Time (ms)" /></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <Text text="{domain}" />
+                                        <ObjectNumber
+											number="{
+												path: 'elapsedMs',
+												formatter: '.formatter.formatElapsed'
+											}"
+											unit="ms"
+											state="Warning" />
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </f:content>
+                </f:Card>
+            </f:GridContainer>
+		</content>
+		<footer>
+			<OverflowToolbar>
+				<ToolbarSpacer />
+				<Button text="View Logs" press="onPressLogs" type="Emphasized" />
+			</OverflowToolbar>
+		</footer>
+	</Page>
+</mvc:View>

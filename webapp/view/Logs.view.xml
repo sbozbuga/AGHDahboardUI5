@@ -1,0 +1,162 @@
+<mvc:View
+	controllerName="ui5.aghd.controller.Logs"
+	displayBlock="true"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core">
+
+	<App id="app">
+		<Page
+			title="AdGuard Home Logs"
+			id="page">
+				<Table
+					id="logsTable"
+					items="{/data}"
+					inset="false"
+					growing="true"
+					growingThreshold="20"
+					growingScrollToLoad="true">
+					<headerToolbar>
+						<OverflowToolbar>
+							<Button icon="sap-icon://nav-back" press="onNavBack" tooltip="Back" />
+							<Title text="AdGuard Home Query Log" level="H2"/>
+							<ToolbarSpacer/>
+							<Select change="onRefreshLogs" selectedKey="{/limit}" items="{/limitOptions}">
+                                <core:Item key="{key}" text="{text}" />
+                            </Select>
+                            <Button icon="sap-icon://navigation-left-arrow" press="onPagePrevious" enabled="{/hasPrevious}" tooltip="Previous Page" />
+                            <Button icon="sap-icon://navigation-right-arrow" press="onPageNext" tooltip="Next Page" />
+							<SearchField width="20%" search="onSearch" placeholder="Search Domain/Client" />
+							<Button icon="sap-icon://sort" press="onOpenViewSettings" tooltip="Sort/Group/Filter"/>
+							<Button icon="sap-icon://refresh" press="onRefreshLogs" tooltip="Refresh"/>
+                            <ToolbarSeparator />
+                            <Button text="Smart Analysis" icon="sap-icon://lightbulb" press="onAnalyzeLogs" type="Emphasized" tooltip="Generate AI Insights" />
+                            <Button icon="sap-icon://action-settings" press="onOpenSettings" tooltip="Settings" />
+						</OverflowToolbar>
+					</headerToolbar>
+					<columns>
+						<Column width="11rem" id="colTime">
+							<header>
+								<Button text="Time" press="onSort" type="Transparent">
+									<customData>
+										<core:CustomData key="key" value="time" />
+									</customData>
+								</Button>
+							</header>
+						</Column>
+						<Column width="4rem" hAlign="Center" id="colSource">
+							<header>
+								<Text text="Src" />
+							</header>
+						</Column>
+						<Column width="16rem" demandPopin="true" minScreenWidth="Tablet" id="colClient">
+							<header>
+								<Button text="Client" press="onSort" type="Transparent">
+									<customData>
+										<core:CustomData key="key" value="client" />
+									</customData>
+								</Button>
+							</header>
+						</Column>
+						<Column id="colQuestion">
+							<header>
+								<Button text="Question" press="onSort" type="Transparent">
+									<customData>
+										<core:CustomData key="key" value="question/name" />
+									</customData>
+								</Button>
+							</header>
+						</Column>
+						<Column width="6rem" demandPopin="true" minScreenWidth="Tablet" id="colStatus">
+							<header>
+								<Button text="Status" press="onSort" type="Transparent">
+									<customData>
+										<core:CustomData key="key" value="status" />
+									</customData>
+								</Button>
+							</header>
+						</Column>
+						<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" hAlign="End" id="colElapsed">
+							<header>
+								<Button text="Elapsed" press="onSort" type="Transparent">
+									<customData>
+										<core:CustomData key="key" value="elapsedMs" />
+									</customData>
+								</Button>
+							</header>
+						</Column>
+						<Column width="22rem" demandPopin="true" minScreenWidth="Desktop" id="colUpstream">
+							<header>
+								<Button text="Upstream" press="onSort" type="Transparent">
+									<customData>
+										<core:CustomData key="key" value="upstream" />
+									</customData>
+								</Button>
+							</header>
+						</Column>
+						<Column width="10rem" demandPopin="true" minScreenWidth="Desktop" id="colReason">
+							<header>
+								<Button text="Reason" press="onSort" type="Transparent">
+									<customData>
+										<core:CustomData key="key" value="reason" />
+									</customData>
+								</Button>
+							</header>
+						</Column>
+						<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" id="colFilterId">
+							<header>
+								<Button text="Filter ID" press="onSort" type="Transparent">
+									<customData>
+										<core:CustomData key="key" value="filterId" />
+									</customData>
+								</Button>
+							</header>
+						</Column>
+						<Column demandPopin="true" minScreenWidth="Desktop" id="colRule">
+							<header>
+								<Button text="Rule" press="onSort" type="Transparent">
+									<customData>
+										<core:CustomData key="key" value="rule" />
+									</customData>
+								</Button>
+							</header>
+						</Column>
+					</columns>
+					<items>
+						<ColumnListItem vAlign="Middle">
+							<cells>
+								<Text text="{
+									path: 'time',
+									type: 'sap.ui.model.type.DateTime',
+									formatOptions: {
+										pattern: 'yyyy-MM-dd HH:mm:ss.SSS'
+									}
+								}" />
+								<core:Icon src="sap-icon://database" 
+									color="Positive" 
+									visible="{= ${reason}.indexOf('served from cache') > -1 || ${reason} === 'Rewrite' }" 
+									tooltip="{reason}" />
+								<Text text="{client}" />
+								<Text text="{question/name} ({question/type})" wrapping="true" maxLines="2" />
+								<ObjectStatus
+									text="{status}"
+									state="{= ${status} === 'OK' ? 'Success' : 'Error'}" />
+								<ObjectNumber
+									number="{
+										path: 'elapsedMs',
+										formatter: '.formatter.formatElapsed'
+									}"
+									unit="ms"
+									state="None" />
+								<Text text="{upstream}" wrapping="true" maxLines="2" />
+								<Text text="{reason}" wrapping="true" maxLines="2" />
+								<Text text="{filterId}" />
+								<Text text="{rule}" wrapping="true" maxLines="2" />
+							</cells>
+						</ColumnListItem>
+					</items>
+				</Table>
+		</Page>
+	</App>
+
+</mvc:View>

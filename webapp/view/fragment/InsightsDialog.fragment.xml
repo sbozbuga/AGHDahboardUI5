@@ -1,0 +1,23 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core">
+	<Dialog
+		id="insightsDialog"
+		title="AdGuard AI Insights"
+		contentWidth="600px"
+		contentHeight="500px"
+		resizable="true">
+		<content>
+			<VBox class="sapUiSmallMargin">
+                <Text text="Analysis based on recent logs:" class="sapUiSmallMarginBottom" />
+				<FormattedText 
+                    htmlText="{/analysisHtml}" 
+                    width="100%" 
+                    class="sapUiSmallMarginBottom" />
+			</VBox>
+		</content>
+		<buttons>
+			<Button text="Close" press="onCloseInsights" />
+		</buttons>
+	</Dialog>
+</core:FragmentDefinition>
