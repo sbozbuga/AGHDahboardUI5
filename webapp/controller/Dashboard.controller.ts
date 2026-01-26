@@ -35,8 +35,11 @@ export default class Dashboard extends Controller {
         }
 
         try {
-            const data = await AdGuardService.getInstance().getStats();
-            const slowest = await AdGuardService.getInstance().getSlowestQueries(1000);
+            // Parallelize API calls to improve performance
+            const [data, slowest] = await Promise.all([
+                AdGuardService.getInstance().getStats(),
+                AdGuardService.getInstance().getSlowestQueries(1000)
+            ]);
 
             model.setData({
                 ...data,
