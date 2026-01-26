@@ -28,9 +28,27 @@ export interface AdGuardData {
     data: LogEntry[];
 }
 
+export interface StatsEntry {
+    name: string;
+    count: number;
+    [key: string]: string | number | undefined;
+}
+
 export interface AdGuardStats {
     num_dns_queries: number;
     num_blocked_filtering: number;
     avg_processing_time: number;
-    block_percentage?: number;
+    block_percentage: number;
+    top_queried_domains: StatsEntry[];
+    top_blocked_domains: StatsEntry[];
+    top_clients: StatsEntry[];
+}
+
+export interface RawAdGuardStats {
+    num_dns_queries: number;
+    num_blocked_filtering: number;
+    avg_processing_time: number;
+    top_queried_domains: unknown[];
+    top_blocked_domains: unknown[];
+    top_clients: unknown[];
 }

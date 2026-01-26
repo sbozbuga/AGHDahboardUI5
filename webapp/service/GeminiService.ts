@@ -11,6 +11,16 @@ interface LogSummary {
     top_upstreams: [string, number][];
 }
 
+interface GeminiModel {
+    name: string;
+    displayName: string;
+    supportedGenerationMethods: string[];
+}
+
+interface GeminiResponse {
+    models: GeminiModel[];
+}
+
 export default class GeminiService {
     private static instance: GeminiService;
 
@@ -38,7 +48,7 @@ export default class GeminiService {
 
             // Generate Content
             const result = await model.generateContent(prompt);
-            const response = await result.response;
+            const response = result.response;
             const text = response.text();
 
             return text || "No insights generated.";
@@ -127,13 +137,13 @@ export default class GeminiService {
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
             if (!response.ok) return [];
 
-            const data = await response.json();
-            const models = data.models || [];
+            const data = await response.json() as GeminiResponse;
+            const models = (data.models || []);
 
             // Filter for models that support 'generateContent'
             return models
-                .filter((m: any) => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
-                .map((m: any) => ({
+                .filter((m) => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
+                .map((m) => ({
                     key: m.name.replace("models/", ""), // remove prefix for cleaner ID
                     text: m.displayName || m.name
                 }));

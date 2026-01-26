@@ -2,7 +2,6 @@ import MessageBox from "sap/m/MessageBox";
 import Controller from "sap/ui/core/mvc/Controller";
 import AppComponent from "../Component";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import { AdGuardData } from "../model/AdGuardTypes";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import UIComponent from "sap/ui/core/UIComponent";
@@ -15,9 +14,23 @@ import formatter from "../model/formatter";
 import Dialog from "sap/m/Dialog";
 import Button from "sap/m/Button";
 import Column from "sap/m/Column";
+import Table from "sap/m/Table";
 import SettingsService from "../service/SettingsService";
 import GeminiService from "../service/GeminiService";
 import { LogEntry } from "../model/AdGuardTypes";
+import ViewSettingsItem from "sap/m/ViewSettingsItem";
+
+interface RouteArguments {
+	"?query"?: {
+		status?: string;
+	};
+}
+
+interface ViewSettingsEventParams {
+	sortItem?: ViewSettingsItem;
+	sortDescending: boolean;
+	filterItems?: ViewSettingsItem[];
+}
 
 /**
  * @namespace ui5.aghd.controller
@@ -52,7 +65,7 @@ export default class Logs extends Controller {
 		}
 
 		const router = UIComponent.getRouterFor(this);
-		router.getRoute("logs")?.attachPatternMatched(this.onRouteMatched, this);
+		router.getRoute("logs")?.attachPatternMatched(this.onRouteMatched.bind(this), this);
 
 		// "Trick": Global key listener to track Ctrl key for multi-sort
 		window.addEventListener("keydown", (e) => {
@@ -68,7 +81,7 @@ export default class Logs extends Controller {
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 
-		const args = (event as any).getParameter("arguments");
+		const args = event.getParameters().arguments as RouteArguments;
 		const query = args["?query"];
 
 		if (query && query.status === "Blocked") {
@@ -79,7 +92,7 @@ export default class Logs extends Controller {
 			model.setProperty("/offset", 0);
 		}
 
-		this.onRefreshLogs();
+		void this.onRefreshLogs();
 	}
 
 
@@ -88,9 +101,9 @@ export default class Logs extends Controller {
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 
-		const limit = model.getProperty("/limit") || 50;
-		const offset = model.getProperty("/offset") || 0;
-		const filterStatus = model.getProperty("/filterStatus") || "";
+		const limit = (model.getProperty("/limit") as number) || 50;
+		const offset = (model.getProperty("/offset") as number) || 0;
+		const filterStatus = (model.getProperty("/filterStatus") as string) || "";
 
 		view.setBusy(true);
 
@@ -121,11 +134,11 @@ export default class Logs extends Controller {
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 
-		const limit = model.getProperty("/limit");
-		const currentOffset = model.getProperty("/offset");
+		const limit = model.getProperty("/limit") as number;
+		const currentOffset = model.getProperty("/offset") as number;
 
 		model.setProperty("/offset", currentOffset + limit);
-		this.onRefreshLogs();
+		void this.onRefreshLogs();
 	}
 
 	public onPagePrevious(): void {
@@ -133,15 +146,16 @@ export default class Logs extends Controller {
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 
-		const limit = model.getProperty("/limit");
-		const currentOffset = model.getProperty("/offset");
+		const limit = model.getProperty("/limit") as number;
+		const currentOffset = model.getProperty("/offset") as number;
 
 		const newOffset = Math.max(0, currentOffset - limit);
 		model.setProperty("/offset", newOffset);
-		this.onRefreshLogs();
+		void this.onRefreshLogs();
 	}
 
 	public onSearch(event: Event): void {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 		const query = (event.getSource() as SearchField).getValue();
 		const filters: Filter[] = [];
 
@@ -157,7 +171,7 @@ export default class Logs extends Controller {
 
 		const view = this.getView();
 		if (view) {
-			const table = view.byId("logsTable") as any;
+			const table = view.byId("logsTable") as Table;
 			const binding = table.getBinding("items") as ListBinding;
 			binding.filter(filters);
 		}
@@ -195,9 +209,12 @@ export default class Logs extends Controller {
 		const view = this.getView();
 		if (!view) return;
 
-		const table = view.byId("logsTable") as any;
+		const table = view.byId("logsTable") as Table;
+
 		const binding = table.getBinding("items") as ListBinding;
-		const params = (event as any).getParameters();
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+		const params = event.getParameters() as unknown as ViewSettingsEventParams;
 
 		const sortPath = params.sortItem ? params.sortItem.getKey() : null;
 		const sortDescending = params.sortDescending;
@@ -206,12 +223,13 @@ export default class Logs extends Controller {
 			this._aSorters.push(new Sorter(sortPath, sortDescending, false));
 		}
 
-		binding.sort(this._aSorters);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+		binding.sort(this._aSorters as any);
 
 		// ... Filters logic remains same ...
 		const dialogFilters: Filter[] = [];
 		if (params.filterItems) {
-			params.filterItems.forEach((item: any) => {
+			params.filterItems.forEach((item: ViewSettingsItem) => {
 				const key = item.getKey();
 				dialogFilters.push(new Filter("status", FilterOperator.EQ, key));
 			});
@@ -261,8 +279,10 @@ export default class Logs extends Controller {
 		// Apply Binding
 		const view = this.getView();
 		if (view) {
-			const table = view.byId("logsTable") as any;
-			const binding = table.getBinding("items") as ListBinding;
+			const table = view.byId("logsTable") as Table;
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+			const binding = table.getBinding("items") as any;
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 			binding.sort(this._aSorters);
 		}
 	}
@@ -274,11 +294,12 @@ export default class Logs extends Controller {
 
 		// Heuristic: iterate over known IDs or just Query?
 		// We'll iterate the columns of the table
-		const table = view.byId("logsTable") as any;
+		const table = view.byId("logsTable") as Table;
 		table.getColumns().forEach((col: Column) => {
 			const header = col.getHeader();
-			if (header && header !== activeButton && (header as any).setIcon) {
-				(header as any).setIcon(""); // Clear icon
+			// Check if header is a button and not the active one
+			if (header && header !== activeButton && header instanceof Button) {
+				header.setIcon(""); // Clear icon
 			}
 		});
 	}
@@ -320,7 +341,7 @@ export default class Logs extends Controller {
 				if (models.length > 0 && !models.find(m => m.key === currentModel)) {
 					model.setProperty("/selectedModel", models[0].key);
 				}
-			} catch (e) {
+			} catch {
 				// verify silent fail or user toast?
 			} finally {
 				dialog.setBusy(false);
@@ -332,11 +353,11 @@ export default class Logs extends Controller {
 		const view = this.getView();
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
-		const apiKey = model.getProperty("/apiKey");
-		const selectedModel = model.getProperty("/selectedModel");
+		const apiKey = model.getProperty("/apiKey") as string;
+		const selectedModel = model.getProperty("/selectedModel") as string;
 
 		SettingsService.getInstance().setApiKey(apiKey);
-		const systemContext = model.getProperty("/systemContext");
+		const systemContext = model.getProperty("/systemContext") as string;
 		SettingsService.getInstance().setSystemContext(systemContext);
 		if (selectedModel) {
 			SettingsService.getInstance().setModel(selectedModel);
@@ -355,7 +376,7 @@ export default class Logs extends Controller {
 	public async onAnalyzeLogs(): Promise<void> {
 		if (!SettingsService.getInstance().hasApiKey()) {
 			MessageBox.warning("Please configure your Gemini API Key in Settings first.");
-			this.onOpenSettings();
+			void this.onOpenSettings();
 			return;
 		}
 
@@ -376,12 +397,12 @@ export default class Logs extends Controller {
 
 			// Format Markdown to HTML (simple conversion or use a library if available, 
 			// for now we'll do a very basic replacement for bold and newlines for the FormattedText control)
-			let html = insights
+			const html = insights
 				.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Bold
 				.replace(/\n/g, "<br/>"); // Newlines
 
 			model.setProperty("/analysisHtml", html);
-			this.onOpenInsights();
+			void this.onOpenInsights();
 		} catch (error) {
 			MessageBox.error((error as Error).message);
 		} finally {

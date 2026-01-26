@@ -11,11 +11,11 @@ export default class Dashboard extends Controller {
 
     public onInit(): void {
         this.getView()?.setModel(new JSONModel());
-        this.onRefreshStats();
+        void this.onRefreshStats();
 
         // Start Auto-Refresh (every 5 seconds)
         this._timer = setInterval(() => {
-            this.onRefreshStats(true); // true = silent refresh
+            void this.onRefreshStats(true); // true = silent refresh
         }, 5000);
     }
 
