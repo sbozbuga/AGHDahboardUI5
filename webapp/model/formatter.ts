@@ -4,7 +4,7 @@ export default {
      * @param ms Elapsed time in milliseconds (number or string)
      * @returns Formatted string "0.000"
      */
-    formatElapsed: function (ms: any): string {
+    formatElapsed: function (ms: number | string | null | undefined): string {
         if (ms === null || ms === undefined) {
             return "0.000";
         }

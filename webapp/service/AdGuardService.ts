@@ -1,4 +1,4 @@
-import { AdGuardData, AdGuardStats } from "../model/AdGuardTypes";
+import { AdGuardData, AdGuardStats, RawAdGuardStats, StatsEntry } from "../model/AdGuardTypes";
 
 /**
  * Service for interacting with AdGuard Home API
@@ -44,7 +44,7 @@ export default class AdGuardService {
     /**
      * Fetches dashboard statistics
      */
-    public async getStats(): Promise<any> {
+    public async getStats(): Promise<AdGuardStats> {
         const response = await fetch("/control/stats");
         if (response.status === 401) {
             // intercept 401 and throw specific error or handle via event/router
@@ -54,14 +54,15 @@ export default class AdGuardService {
         if (!response.ok) {
             throw new Error(`Error fetching stats: ${response.statusText}`);
         }
-        const rawData = await response.json();
+        const rawData = await response.json() as RawAdGuardStats;
 
         const block_percentage = rawData.num_dns_queries > 0
             ? (rawData.num_blocked_filtering / rawData.num_dns_queries) * 100
             : 0;
 
         return {
-            ...rawData,
+            num_dns_queries: rawData.num_dns_queries,
+            num_blocked_filtering: rawData.num_blocked_filtering,
             avg_processing_time: parseFloat((rawData.avg_processing_time * 1000).toFixed(2)),
             block_percentage: parseFloat(block_percentage.toFixed(2)),
             top_queried_domains: this.transformList(rawData.top_queried_domains, "domain").slice(0, 10),
@@ -97,7 +98,7 @@ export default class AdGuardService {
      * Fetches the last N records and returns the top 5 slowest queries
      * @param scanDepth Number of records to scan (default 1000)
      */
-    public async getSlowestQueries(scanDepth: number = 1000): Promise<any[]> {
+    public async getSlowestQueries(scanDepth: number = 1000): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; }[]> {
         try {
             const data = await this.getQueryLog(scanDepth, 0);
 
@@ -127,28 +128,29 @@ export default class AdGuardService {
     /**
      * Helper to transform Map/Object/Array responses from AdGuard API into a unified Array format
      */
-    private transformList(list: any, preferredKey: string): any[] {
+    private transformList(list: unknown, preferredKey: string): StatsEntry[] {
         if (!list) return [];
         if (Array.isArray(list)) {
-            return list.map((item: any) => {
+            return list.map((item: unknown) => {
+                const obj = item as Record<string, unknown>;
+
                 // Case 1: Standard Object (already has keys like ip, domain, or name)
-                if (item.count !== undefined || item[preferredKey] !== undefined || item.name !== undefined) {
-                    const fallbackKey = Object.keys(item).find(k => k !== 'count' && k !== 'source' && typeof item[k] === 'string');
-                    const nameVal = item[preferredKey] || item.name || item.ip || item.domain || (fallbackKey ? item[fallbackKey] : "Unknown");
+                if (obj.count !== undefined || obj[preferredKey] !== undefined || obj.name !== undefined) {
+                    const fallbackKey = Object.keys(obj).find(k => k !== 'count' && k !== 'source' && typeof obj[k] === 'string');
+                    const nameVal = obj[preferredKey] || obj.name || obj.ip || obj.domain || (fallbackKey ? obj[fallbackKey] : "Unknown");
                     return {
-                        ...item,
-                        name: nameVal,
-                        count: item.count
+                        name: String(nameVal),
+                        count: Number(obj.count)
                     };
                 }
 
                 // Case 2: Single-Key Object { "192.168.1.1": 123 }
-                const keys = Object.keys(item);
+                const keys = Object.keys(obj);
                 if (keys.length > 0) {
                     const key = keys[0];
                     return {
                         name: key,
-                        count: item[key]
+                        count: Number(obj[key])
                     };
                 }
 
@@ -156,9 +158,9 @@ export default class AdGuardService {
             });
         } else if (typeof list === 'object') {
             // Case 3: Map { "192.168.1.1": 123 }
-            return Object.entries(list).map(([key, count]) => ({
+            return Object.entries(list as Record<string, unknown>).map(([key, count]) => ({
                 name: key,
-                count: count
+                count: Number(count)
             }));
         }
         return [];
