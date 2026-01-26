@@ -20,7 +20,7 @@ export default class SettingsService {
     }
 
     public getApiKey(): string {
-        return this.storage.get(this.STORAGE_KEY_API_KEY) || "";
+        return (this.storage.get(this.STORAGE_KEY_API_KEY) as string) || "";
     }
 
     public setApiKey(key: string): void {
@@ -32,7 +32,7 @@ export default class SettingsService {
     }
 
     public getModel(): string {
-        return this.storage.get(this.STORAGE_KEY_MODEL) || this.DEFAULT_MODEL;
+        return (this.storage.get(this.STORAGE_KEY_MODEL) as string) || this.DEFAULT_MODEL;
     }
 
     public setModel(model: string): void {
@@ -40,7 +40,7 @@ export default class SettingsService {
     }
 
     public getSystemContext(): string {
-        return this.storage.get(this.STORAGE_KEY_CONTEXT) || "";
+        return (this.storage.get(this.STORAGE_KEY_CONTEXT) as string) || "";
     }
 
     public setSystemContext(context: string): void {

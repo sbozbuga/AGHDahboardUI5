@@ -22,8 +22,8 @@ export default class Login extends Controller {
         if (!view) return;
 
         const model = view.getModel() as JSONModel;
-        const username = model.getProperty("/username");
-        const password = model.getProperty("/password");
+        const username = model.getProperty("/username") as string;
+        const password = model.getProperty("/password") as string;
 
         if (!username || !password) {
             MessageBox.error("Please enter both username and password.");
@@ -42,7 +42,7 @@ export default class Login extends Controller {
             // Clear password
             model.setProperty("/password", "");
 
-        } catch (error) {
+        } catch {
             MessageBox.error("Login failed. Please check your credentials.");
         } finally {
             view.setBusy(false);
