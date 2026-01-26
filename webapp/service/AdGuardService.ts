@@ -33,6 +33,15 @@ export default class AdGuardService {
     }
 
     /**
+     * Clears local session (cookie is cleared by browser or ignored on redirect)
+     */
+    public logout(): void {
+        // Since it's a cookie, we can't delete it client-side if it's HttpOnly.
+        // But we can redirect to login. AdGuard Home doesn't seem to have a logout endpoint.
+        // We will just trust the redirect.
+    }
+
+    /**
      * Fetches dashboard statistics
      */
     public async getStats(): Promise<any> {
