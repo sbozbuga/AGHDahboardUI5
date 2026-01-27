@@ -44,14 +44,6 @@ export default class Logs extends Controller {
 
 	private static readonly DEFAULT_LIMIT = 1000;
 
-	private _handleKeyDown = (e: KeyboardEvent): void => {
-		if (e.key === "Control") this._isCtrlPressed = true;
-	};
-
-	private _handleKeyUp = (e: KeyboardEvent): void => {
-		if (e.key === "Control") this._isCtrlPressed = false;
-	};
-
 	public onInit(): void {
 		// apply content density mode to root view
 		const view = this.getView();
@@ -66,19 +58,29 @@ export default class Logs extends Controller {
 				total: 0 // Track total records if API provides it, or infer
 			});
 			view.setModel(model);
+
+			// Attach event delegates to table column headers to detect Ctrl key
+			const table = view.byId("logsTable") as Table;
+			if (table) {
+				table.getColumns().forEach((col: Column) => {
+					const header = col.getHeader();
+					if (header instanceof Button) {
+						header.addEventDelegate({
+							ontap: (oEvent: { ctrlKey: boolean; metaKey: boolean }) => {
+								this._isCtrlPressed = oEvent.ctrlKey || oEvent.metaKey;
+							}
+						}, this, true);
+					}
+				});
+			}
 		}
 
 		const router = UIComponent.getRouterFor(this);
 		router.getRoute("logs")?.attachPatternMatched(this.onRouteMatched.bind(this), this);
-
-		// Global key listener to track Ctrl key for multi-sort
-		window.addEventListener("keydown", this._handleKeyDown);
-		window.addEventListener("keyup", this._handleKeyUp);
 	}
 
 	public onExit(): void {
-		window.removeEventListener("keydown", this._handleKeyDown);
-		window.removeEventListener("keyup", this._handleKeyUp);
+		// Cleanup if necessary
 	}
 
 	public onRouteMatched(event: Event): void {
@@ -278,17 +280,8 @@ export default class Logs extends Controller {
 
 		const key = source.getCustomData()[0].getValue() as string; // "time", "client", etc.
 
-		// Trick: UI5 often keeps the last event or we can try to access logic.
-		// Since we cannot easily get the event object's modifier from 'press', 
-		// we will assume a standard single sort unless we can prove otherwise. 
-		// HOWEVER, we can stick a quick 'click' delegate on the buttons in onInit to capture this.
-		// For now, let's implement the logic assuming we have 'isCtrlPressed'.
-
-		// Hack to detect Ctrl Key:
-		// We can't easily get it here. 
-		// Let's use a simpler heuristic or just implement the logic for now, 
-		// I will add the delegate in onInit to set a flag on the controller.
-
+		// The 'isCtrlPressed' flag is set by an event delegate attached in onInit,
+		// as the 'press' event does not carry modifier keys directly.
 		const isCtrlPressed = this._isCtrlPressed === true;
 
 		const currentDesc = source.getIcon() === "sap-icon://sort-descending";
