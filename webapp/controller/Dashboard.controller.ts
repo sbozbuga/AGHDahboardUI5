@@ -8,13 +8,13 @@ import MessageBox from "sap/m/MessageBox";
 export default class Dashboard extends Controller {
     public formatter = formatter;
     private _timer: ReturnType<typeof setInterval> | undefined;
-    private static readonly REFRESH_INTERVAL = 5000;
+    private static readonly REFRESH_INTERVAL = 15000;
 
     public onInit(): void {
         this.getView()?.setModel(new JSONModel());
         void this.onRefreshStats();
 
-        // Start Auto-Refresh (every 5 seconds)
+        // Start Auto-Refresh
         this._timer = setInterval(() => {
             void this.onRefreshStats(true); // true = silent refresh
         }, Dashboard.REFRESH_INTERVAL);
