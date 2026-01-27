@@ -19,6 +19,7 @@ import SettingsService from "../service/SettingsService";
 import GeminiService from "../service/GeminiService";
 import { LogEntry } from "../model/AdGuardTypes";
 import ViewSettingsItem from "sap/m/ViewSettingsItem";
+import encodeXML from "sap/base/security/encodeXML";
 
 interface RouteArguments {
 	"?query"?: {
@@ -419,12 +420,7 @@ export default class Logs extends Controller {
 
 		try {
 			const insights = await GeminiService.getInstance().generateInsights(logs);
-
-			// Format Markdown to HTML (simple conversion or use a library if available, 
-			// for now we'll do a very basic replacement for bold and newlines for the FormattedText control)
-			const html = insights
-				.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Bold
-				.replace(/\n/g, "<br/>"); // Newlines
+			const html = this.formatInsights(insights);
 
 			model.setProperty("/analysisHtml", html);
 			void this.onOpenInsights();
@@ -433,6 +429,20 @@ export default class Logs extends Controller {
 		} finally {
 			view.setBusy(false);
 		}
+	}
+
+	public formatInsights(text: string): string {
+		if (!text) return "";
+		// 1. Sanitize HTML
+		let safeText = encodeXML(text);
+
+		// 2. Apply formatting
+		// Note: encodeXML replaces < with &lt;, so our tags <br/> and <strong> are safe to add afterwards.
+		safeText = safeText
+			.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Bold
+			.replace(/\n/g, "<br/>"); // Newlines
+
+		return safeText;
 	}
 
 	public async onOpenInsights(): Promise<void> {
