@@ -75,8 +75,8 @@ export default class Logs extends Controller {
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const args = (event.getParameters() as any).arguments as RouteArguments;
+		const params = event.getParameters() as { arguments: RouteArguments };
+		const args = params.arguments;
 		const query = args["?query"];
 
 		if (query && query.status === "Blocked") {
@@ -138,12 +138,11 @@ export default class Logs extends Controller {
 	}
 
 	public onUpdateFinished(event: Event): void {
-		const table = event.getSource() as Table;
+		const table = event.getSource() as unknown as Table;
 		const binding = table.getBinding("items") as ListBinding;
 		if (!binding) return;
 
-		const total = binding.getLength();
-		const actual = (table.getItems() || []).length;
+
 
 		// If we showed all loaded items, try to load more
 		// Use a small buffer or check if actual == total 
@@ -176,8 +175,8 @@ export default class Logs extends Controller {
 
 
 	public onSearch(event: Event): void {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-		const query = (event.getSource() as SearchField).getValue();
+
+		const query = (event.getSource() as unknown as SearchField).getValue();
 		const filters: Filter[] = [];
 
 		if (query && query.length > 0) {
@@ -234,7 +233,7 @@ export default class Logs extends Controller {
 
 		const binding = table.getBinding("items") as ListBinding;
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+
 		const params = event.getParameters() as unknown as ViewSettingsEventParams;
 
 		const sortPath = params.sortItem ? params.sortItem.getKey() : null;
@@ -244,8 +243,7 @@ export default class Logs extends Controller {
 			this._aSorters.push(new Sorter(sortPath, sortDescending, false));
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-		binding.sort(this._aSorters as any);
+		binding.sort(this._aSorters);
 
 		// ... Filters logic remains same ...
 		const dialogFilters: Filter[] = [];
@@ -262,8 +260,8 @@ export default class Logs extends Controller {
 
 	public onSort(event: Event): void {
 		// ...
-		const source = event.getSource() as Button;
-		const key = source.getCustomData()[0].getValue(); // "time", "client", etc.
+		const source = event.getSource() as unknown as Button;
+		const key = source.getCustomData()[0].getValue() as string; // "time", "client", etc.
 
 		// Trick: UI5 often keeps the last event or we can try to access logic.
 		// Since we cannot easily get the event object's modifier from 'press', 
@@ -301,9 +299,7 @@ export default class Logs extends Controller {
 		const view = this.getView();
 		if (view) {
 			const table = view.byId("logsTable") as Table;
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-			const binding = table.getBinding("items") as any;
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+			const binding = table.getBinding("items") as ListBinding;
 			binding.sort(this._aSorters);
 		}
 	}
