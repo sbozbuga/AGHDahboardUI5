@@ -139,8 +139,11 @@ export default class AdGuardService {
 
                 // Case 1: Standard Object (already has keys like ip, domain, or name)
                 if (obj.count !== undefined || obj[preferredKey] !== undefined || obj.name !== undefined) {
-                    const fallbackKey = Object.keys(obj).find(k => k !== 'count' && k !== 'source' && typeof obj[k] === 'string');
-                    const nameVal = obj[preferredKey] || obj.name || obj.ip || obj.domain || (fallbackKey ? obj[fallbackKey] : "Unknown");
+                    let nameVal = obj[preferredKey] || obj.name || obj.ip || obj.domain;
+                    if (!nameVal) {
+                        const fallbackKey = Object.keys(obj).find(k => k !== 'count' && k !== 'source' && typeof obj[k] === 'string');
+                        nameVal = fallbackKey ? obj[fallbackKey] : "Unknown";
+                    }
                     return {
                         name: String(nameVal),
                         count: Number(obj.count)
