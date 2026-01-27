@@ -51,15 +51,9 @@ export default class Logs extends Controller {
 			// Initialize Model with Pagination Defaults
 			const model = new JSONModel({
 				data: [],
-				limit: 50,
+				limit: 1000,
 				offset: 0,
-				hasPrevious: false,
-				limitOptions: [
-					{ key: 10, text: "10 items" },
-					{ key: 50, text: "50 items" },
-					{ key: 100, text: "100 items" },
-					{ key: 500, text: "500 items" }
-				]
+				total: 0 // Track total records if API provides it, or infer
 			});
 			view.setModel(model);
 		}
@@ -81,7 +75,8 @@ export default class Logs extends Controller {
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 
-		const args = event.getParameters().arguments as RouteArguments;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const args = (event.getParameters() as any).arguments as RouteArguments;
 		const query = args["?query"];
 
 		if (query && query.status === "Blocked") {
@@ -96,13 +91,19 @@ export default class Logs extends Controller {
 	}
 
 
-	public async onRefreshLogs(): Promise<void> {
+	public async onRefreshLogs(bAppend: boolean = false): Promise<void> {
 		const view = this.getView();
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 
-		const limit = (model.getProperty("/limit") as number) || 50;
-		const offset = (model.getProperty("/offset") as number) || 0;
+		const limit = (model.getProperty("/limit") as number) || 1000;
+		// If appending, use current offset; if refreshing, reset to 0
+		let offset = (model.getProperty("/offset") as number) || 0;
+		if (!bAppend) {
+			offset = 0;
+			model.setProperty("/offset", 0);
+		}
+
 		const filterStatus = (model.getProperty("/filterStatus") as string) || "";
 
 		view.setBusy(true);
@@ -110,17 +111,24 @@ export default class Logs extends Controller {
 		try {
 			const data = await AdGuardService.getInstance().getQueryLog(limit, offset, filterStatus);
 
-			// Transform ISO date strings to JS Date objects for the DateTime type
+			// Transform ISO date strings to JS Date objects
 			const processedData = data.data.map(item => ({
 				...item,
 				time: new Date(item.time),
 				elapsedMs: parseFloat(item.elapsedMs)
 			}));
 
-			model.setProperty("/data", processedData);
+			if (bAppend) {
+				const currentData = model.getProperty("/data") as LogEntry[];
+				model.setProperty("/data", [...currentData, ...processedData]);
+			} else {
+				model.setProperty("/data", processedData);
+			}
 
-			// Update Pagination State
-			model.setProperty("/hasPrevious", offset > 0);
+			// Increment offset for next fetch
+			if (processedData.length > 0) {
+				model.setProperty("/offset", offset + processedData.length);
+			}
 
 		} catch (error) {
 			MessageBox.error((error as Error).message);
@@ -129,30 +137,43 @@ export default class Logs extends Controller {
 		}
 	}
 
-	public onPageNext(): void {
-		const view = this.getView();
-		if (!view) return;
-		const model = view.getModel() as JSONModel;
+	public onUpdateFinished(event: Event): void {
+		const table = event.getSource() as Table;
+		const binding = table.getBinding("items") as ListBinding;
+		if (!binding) return;
 
-		const limit = model.getProperty("/limit") as number;
-		const currentOffset = model.getProperty("/offset") as number;
+		const total = binding.getLength();
+		const actual = (table.getItems() || []).length;
 
-		model.setProperty("/offset", currentOffset + limit);
-		void this.onRefreshLogs();
+		// If we showed all loaded items, try to load more
+		// Use a small buffer or check if actual == total 
+		// Logic depends on 'growing' mechanism. 
+		// With growing=true, UI5 manages the 'growing' automatically for Client-Side models 
+		// IF the model has all data. 
+		// Since we are doing server-side pagination manually via 'append', 
+		// we can check if the last fetch returned < limit.
+
+		// Actually, for "Infinity Scroll" with server-side pagination in UI5 with JSONModel,
+		// typically user scrolls to bottom -> 'updateFinished' triggering with reason 'Growing'.
+
+		// However, 'growing' feature in sap.m.Table works best with complete data or OData. 
+		// For manual JSON, we might need 'growingTriggerText' or custom logic.
+		// Let's rely on the fact that if we scroll to bottom, we want more.
+
+		const reason = (event.getParameters() as { reason: string }).reason;
+
+		// If the table grew, it means user clicked "More" or scrolled down.
+		// BUT, since we have JSONModel with limited data, matching 'total' matches 'data.length'.
+		// We need to fetch MORE from server if we reached the end of local data.
+
+		if (reason === "Growing") {
+			// Attempt to fetch next chunk
+			void this.onRefreshLogs(true);
+		}
 	}
 
-	public onPagePrevious(): void {
-		const view = this.getView();
-		if (!view) return;
-		const model = view.getModel() as JSONModel;
+	// Pagination controls removed
 
-		const limit = model.getProperty("/limit") as number;
-		const currentOffset = model.getProperty("/offset") as number;
-
-		const newOffset = Math.max(0, currentOffset - limit);
-		model.setProperty("/offset", newOffset);
-		void this.onRefreshLogs();
-	}
 
 	public onSearch(event: Event): void {
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
