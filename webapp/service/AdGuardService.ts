@@ -15,6 +15,9 @@ export default class AdGuardService {
         return AdGuardService.instance;
     }
 
+    private static readonly DEFAULT_SCAN_DEPTH = 1000;
+    private static readonly TOP_LIST_LIMIT = 10;
+
     /**
      * Authenticates with AdGuard Home
      */
@@ -65,9 +68,9 @@ export default class AdGuardService {
             num_blocked_filtering: rawData.num_blocked_filtering,
             avg_processing_time: parseFloat((rawData.avg_processing_time * 1000).toFixed(2)),
             block_percentage: parseFloat(block_percentage.toFixed(2)),
-            top_queried_domains: this.transformList(rawData.top_queried_domains, "domain").slice(0, 10),
-            top_blocked_domains: this.transformList(rawData.top_blocked_domains, "domain").slice(0, 10),
-            top_clients: this.transformList(rawData.top_clients, "ip").slice(0, 10)
+            top_queried_domains: this.transformList(rawData.top_queried_domains, "domain").slice(0, AdGuardService.TOP_LIST_LIMIT),
+            top_blocked_domains: this.transformList(rawData.top_blocked_domains, "domain").slice(0, AdGuardService.TOP_LIST_LIMIT),
+            top_clients: this.transformList(rawData.top_clients, "ip").slice(0, AdGuardService.TOP_LIST_LIMIT)
         };
     }
 
@@ -98,7 +101,7 @@ export default class AdGuardService {
      * Fetches the last N records and returns the top 5 slowest queries
      * @param scanDepth Number of records to scan (default 1000)
      */
-    public async getSlowestQueries(scanDepth: number = 1000): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; }[]> {
+    public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; }[]> {
         try {
             const data = await this.getQueryLog(scanDepth, 0);
 
@@ -112,8 +115,8 @@ export default class AdGuardService {
                 return elapsedB - elapsedA;
             });
 
-            // Return Top 5
-            return sorted.slice(0, 10).map(e => ({
+            // Return Top N
+            return sorted.slice(0, AdGuardService.TOP_LIST_LIMIT).map(e => ({
                 domain: e.question.name,
                 elapsedMs: parseFloat(e.elapsedMs),
                 client: e.client,
