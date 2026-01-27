@@ -42,6 +42,16 @@ export default class Logs extends Controller {
 	private _pSettingsDialog: Promise<Dialog> | undefined;
 	private _pInsightsDialog: Promise<Dialog> | undefined;
 
+	private static readonly DEFAULT_LIMIT = 1000;
+
+	private _handleKeyDown = (e: KeyboardEvent): void => {
+		if (e.key === "Control") this._isCtrlPressed = true;
+	};
+
+	private _handleKeyUp = (e: KeyboardEvent): void => {
+		if (e.key === "Control") this._isCtrlPressed = false;
+	};
+
 	public onInit(): void {
 		// apply content density mode to root view
 		const view = this.getView();
@@ -51,7 +61,7 @@ export default class Logs extends Controller {
 			// Initialize Model with Pagination Defaults
 			const model = new JSONModel({
 				data: [],
-				limit: 1000,
+				limit: Logs.DEFAULT_LIMIT,
 				offset: 0,
 				total: 0 // Track total records if API provides it, or infer
 			});
@@ -61,13 +71,14 @@ export default class Logs extends Controller {
 		const router = UIComponent.getRouterFor(this);
 		router.getRoute("logs")?.attachPatternMatched(this.onRouteMatched.bind(this), this);
 
-		// "Trick": Global key listener to track Ctrl key for multi-sort
-		window.addEventListener("keydown", (e) => {
-			if (e.key === "Control") this._isCtrlPressed = true;
-		});
-		window.addEventListener("keyup", (e) => {
-			if (e.key === "Control") this._isCtrlPressed = false;
-		});
+		// Global key listener to track Ctrl key for multi-sort
+		window.addEventListener("keydown", this._handleKeyDown);
+		window.addEventListener("keyup", this._handleKeyUp);
+	}
+
+	public onExit(): void {
+		window.removeEventListener("keydown", this._handleKeyDown);
+		window.removeEventListener("keyup", this._handleKeyUp);
 	}
 
 	public onRouteMatched(event: Event): void {
@@ -96,7 +107,7 @@ export default class Logs extends Controller {
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 
-		const limit = (model.getProperty("/limit") as number) || 1000;
+		const limit = (model.getProperty("/limit") as number) || Logs.DEFAULT_LIMIT;
 		// If appending, use current offset; if refreshing, reset to 0
 		let offset = (model.getProperty("/offset") as number) || 0;
 		if (!bAppend) {
@@ -138,7 +149,8 @@ export default class Logs extends Controller {
 	}
 
 	public onUpdateFinished(event: Event): void {
-		const table = event.getSource() as unknown as Table;
+		const table = event.getSource();
+		if (!(table instanceof Table)) return;
 		const binding = table.getBinding("items") as ListBinding;
 		if (!binding) return;
 
@@ -175,8 +187,9 @@ export default class Logs extends Controller {
 
 
 	public onSearch(event: Event): void {
-
-		const query = (event.getSource() as unknown as SearchField).getValue();
+		const source = event.getSource();
+		if (!(source instanceof SearchField)) return;
+		const query = source.getValue();
 		const filters: Filter[] = [];
 
 		if (query && query.length > 0) {
@@ -260,7 +273,9 @@ export default class Logs extends Controller {
 
 	public onSort(event: Event): void {
 		// ...
-		const source = event.getSource() as unknown as Button;
+		const source = event.getSource();
+		if (!(source instanceof Button)) return;
+
 		const key = source.getCustomData()[0].getValue() as string; // "time", "client", etc.
 
 		// Trick: UI5 often keeps the last event or we can try to access logic.
