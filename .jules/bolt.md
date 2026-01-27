@@ -1,3 +1,7 @@
 ## 2026-01-26 - Parallelize Independent Async Operations
 **Learning:** In `Dashboard.controller.ts`, sequential `await` calls for independent API requests (`getStats` and `getSlowestQueries`) unnecessarily blocked the UI update. Parallelizing them with `Promise.all` reduces total latency to the maximum of the two requests rather than the sum.
 **Action:** Always check for independent async operations in `onInit` or refresh cycles and use `Promise.all` to execute them concurrently.
+
+## 2026-01-27 - Efficient Sorting with Schwartzian Transform
+**Learning:** In `AdGuardService.ts`, sorting log entries involved repeatedly parsing string timestamps inside the comparator. This $O(N \log N)$ parsing overhead is inefficient. Using the "map-sort-map" pattern (Schwartzian transform) creates an intermediate array with pre-parsed values, reducing parsing to $O(N)$ and significantly improving performance.
+**Action:** When sorting arrays based on derived values (especially if derivation is expensive, like parsing or DOM access), pre-calculate the values before sorting.

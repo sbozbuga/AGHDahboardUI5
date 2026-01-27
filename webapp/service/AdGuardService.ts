@@ -108,19 +108,21 @@ export default class AdGuardService {
             // Filter out entries with invalid elapsed times
             const validEntries = data.data.filter(e => e.elapsedMs);
 
+            // Map to intermediate structure with parsed value for efficient sorting
+            const mapped = validEntries.map(e => ({
+                origin: e,
+                elapsedVal: parseFloat(e.elapsedMs) || 0
+            }));
+
             // Sort by elapsedMs descending
-            const sorted = validEntries.sort((a, b) => {
-                const elapsedA = parseFloat(a.elapsedMs) || 0;
-                const elapsedB = parseFloat(b.elapsedMs) || 0;
-                return elapsedB - elapsedA;
-            });
+            mapped.sort((a, b) => b.elapsedVal - a.elapsedVal);
 
             // Return Top N
-            return sorted.slice(0, AdGuardService.TOP_LIST_LIMIT).map(e => ({
-                domain: e.question.name,
-                elapsedMs: parseFloat(e.elapsedMs),
-                client: e.client,
-                reason: e.reason
+            return mapped.slice(0, AdGuardService.TOP_LIST_LIMIT).map(item => ({
+                domain: item.origin.question.name,
+                elapsedMs: item.elapsedVal,
+                client: item.origin.client,
+                reason: item.origin.reason
             }));
         } catch (error) {
             console.error("Failed to fetch slowest queries", error);
