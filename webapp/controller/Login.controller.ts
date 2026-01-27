@@ -3,6 +3,9 @@ import JSONModel from "sap/ui/model/json/JSONModel";
 import AdGuardService from "../service/AdGuardService";
 import MessageBox from "sap/m/MessageBox";
 import UIComponent from "sap/ui/core/UIComponent";
+import Input from "sap/m/Input";
+import { ValueState } from "sap/ui/core/library";
+import Event from "sap/ui/base/Event";
 
 /**
  * @namespace ui5.aghd.controller
@@ -17,6 +20,15 @@ export default class Login extends Controller {
         this.getView()?.setModel(model);
     }
 
+    public onInputChange(event: Event): void {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        const input = event.getSource() as Input;
+        if (input.getValueState() === ValueState.Error) {
+            input.setValueState(ValueState.None);
+            input.setValueStateText("");
+        }
+    }
+
     public async onLoginPress(): Promise<void> {
         const view = this.getView();
         if (!view) return;
@@ -25,8 +37,27 @@ export default class Login extends Controller {
         const username = model.getProperty("/username") as string;
         const password = model.getProperty("/password") as string;
 
-        if (!username || !password) {
-            MessageBox.error("Please enter both username and password.");
+        const usernameInput = view.byId("usernameInput") as Input;
+        const passwordInput = view.byId("passwordInput") as Input;
+        let bValidationError = false;
+
+        if (!username) {
+            usernameInput.setValueState(ValueState.Error);
+            usernameInput.setValueStateText("Username is required");
+            bValidationError = true;
+        } else {
+            usernameInput.setValueState(ValueState.None);
+        }
+
+        if (!password) {
+            passwordInput.setValueState(ValueState.Error);
+            passwordInput.setValueStateText("Password is required");
+            bValidationError = true;
+        } else {
+            passwordInput.setValueState(ValueState.None);
+        }
+
+        if (bValidationError) {
             return;
         }
 
