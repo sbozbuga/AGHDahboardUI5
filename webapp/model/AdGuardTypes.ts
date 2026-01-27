@@ -22,6 +22,7 @@ export interface LogEntry {
     reason: string;
     filterId: number;
     rule: string;
+    blocked?: boolean;
 }
 
 export interface AdGuardData {
