@@ -10,10 +10,10 @@
                     <content>
                         <VBox>
                             <Label text="Username" labelFor="usernameInput"/>
-                            <Input id="usernameInput" value="{/username}" placeholder="Enter your username" submit="onLoginPress" />
+                            <Input id="usernameInput" value="{/username}" placeholder="Enter your username" submit="onLoginPress" liveChange="onInputChange" />
                             
                             <Label text="Password" labelFor="passwordInput" class="sapUiSmallMarginTop"/>
-                            <Input id="passwordInput" value="{/password}" type="Password" placeholder="Enter your password" submit="onLoginPress" />
+                            <Input id="passwordInput" value="{/password}" type="Password" placeholder="Enter your password" submit="onLoginPress" liveChange="onInputChange" />
                             
                             <Button text="Login" type="Emphasized" press="onLoginPress" class="sapUiMediumMarginTop" width="100%"/>
                         </VBox>
