@@ -72,6 +72,11 @@
 								</Button>
 							</header>
 						</Column>
+						<Column width="5rem" demandPopin="true" minScreenWidth="Tablet" id="colBlocked" hAlign="Center">
+							<header>
+								<Text text="Blocked" />
+							</header>
+						</Column>
 						<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" hAlign="End" id="colElapsed">
 							<header>
 								<Button text="Elapsed" press="onSort" type="Transparent">
@@ -137,6 +142,7 @@
 								<ObjectStatus
 									text="{status}"
 									state="{= ${status} === 'OK' ? 'Success' : 'Error'}" />
+								<core:Icon src="{= ${blocked} ? 'sap-icon://decline' : '' }" color="Negative" visible="{= ${blocked} === true }" />
 								<ObjectNumber
 									number="{
 										path: 'elapsedMs',
