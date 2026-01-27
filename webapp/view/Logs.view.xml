@@ -14,18 +14,14 @@
 					items="{/data}"
 					inset="false"
 					growing="true"
-					growingThreshold="20"
-					growingScrollToLoad="true">
+					growingThreshold="50"
+					growingScrollToLoad="true"
+					updateFinished="onUpdateFinished">
 					<headerToolbar>
 						<OverflowToolbar>
 							<Button icon="sap-icon://nav-back" press="onNavBack" tooltip="Back" />
 							<Title text="AdGuard Home Query Log" level="H2"/>
 							<ToolbarSpacer/>
-							<Select change="onRefreshLogs" selectedKey="{/limit}" items="{/limitOptions}">
-                                <core:Item key="{key}" text="{text}" />
-                            </Select>
-                            <Button icon="sap-icon://navigation-left-arrow" press="onPagePrevious" enabled="{/hasPrevious}" tooltip="Previous Page" />
-                            <Button icon="sap-icon://navigation-right-arrow" press="onPageNext" tooltip="Next Page" />
 							<SearchField width="20%" search="onSearch" placeholder="Search Domain/Client" />
 							<Button icon="sap-icon://sort" press="onOpenViewSettings" tooltip="Sort/Group/Filter"/>
 							<Button icon="sap-icon://refresh" press="onRefreshLogs" tooltip="Refresh"/>
