@@ -37,7 +37,6 @@ interface ViewSettingsEventParams {
  */
 export default class Logs extends Controller {
 	public formatter = formatter;
-	private _isCtrlPressed: boolean = false;
 	private _pViewSettingsDialog: Promise<Dialog> | undefined;
 	private _pSettingsDialog: Promise<Dialog> | undefined;
 	private _pInsightsDialog: Promise<Dialog> | undefined;
@@ -59,20 +58,6 @@ export default class Logs extends Controller {
 			});
 			view.setModel(model);
 
-			// Attach event delegates to table column headers to detect Ctrl key
-			const table = view.byId("logsTable") as Table;
-			if (table) {
-				table.getColumns().forEach((col: Column) => {
-					const header = col.getHeader();
-					if (header instanceof Button) {
-						header.addEventDelegate({
-							ontap: (oEvent: { ctrlKey: boolean; metaKey: boolean }) => {
-								this._isCtrlPressed = oEvent.ctrlKey || oEvent.metaKey;
-							}
-						}, this, true);
-					}
-				});
-			}
 		}
 
 		const router = UIComponent.getRouterFor(this);
@@ -280,25 +265,16 @@ export default class Logs extends Controller {
 
 		const key = source.getCustomData()[0].getValue() as string; // "time", "client", etc.
 
-		// The 'isCtrlPressed' flag is set by an event delegate attached in onInit,
-		// as the 'press' event does not carry modifier keys directly.
-		const isCtrlPressed = this._isCtrlPressed === true;
-
 		const currentDesc = source.getIcon() === "sap-icon://sort-descending";
 		const newDesc = !currentDesc;
 
 		source.setIcon(newDesc ? "sap-icon://sort-descending" : "sap-icon://sort-ascending");
 
-		// Update Sorter Stack
-		if (!isCtrlPressed) {
-			this._aSorters = []; // Clear stack if Ctrl not held
+		// Update Sorter Stack - Single Column Sort Mode
+		this._aSorters = []; // Clear stack
 
-			// Reset icons on other columns (Visual cleanup)
-			this.resetColumnIcons(source);
-		}
-
-		// Remove existing sorter for this key if present (to re-add at end or flip)
-		this._aSorters = this._aSorters.filter(s => s.getPath() !== key);
+		// Reset icons on other columns (Visual cleanup)
+		this.resetColumnIcons(source);
 
 		// Add new sorter
 		this._aSorters.push(new Sorter(key, newDesc, false));
