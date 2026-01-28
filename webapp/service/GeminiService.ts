@@ -31,6 +31,12 @@ export default class GeminiService {
         return GeminiService.instance;
     }
 
+    public sanitizeInput(str: string): string {
+        // Remove control characters (0-31 and 127) to prevent prompt injection via newlines etc.
+        // eslint-disable-next-line no-control-regex
+        return str.replace(/[\x00-\x1F\x7F]/g, "").trim();
+    }
+
     public async generateInsights(logs: LogEntry[]): Promise<string> {
         const apiKey = SettingsService.getInstance().getApiKey();
         if (!apiKey) {
@@ -73,15 +79,15 @@ export default class GeminiService {
             }
 
             // Client counts
-            const client = log.client || "Unknown";
+            const client = this.sanitizeInput(log.client || "Unknown");
             clientCounts[client] = (clientCounts[client] || 0) + 1;
 
             // Domain counts
-            const domain = log.question?.name || "Unknown";
+            const domain = this.sanitizeInput(log.question?.name || "Unknown");
             domainCounts[domain] = (domainCounts[domain] || 0) + 1;
 
             // Upstream counts
-            const upstream = log.upstream || "Unknown";
+            const upstream = this.sanitizeInput(log.upstream || "Unknown");
             upstreamCounts[upstream] = (upstreamCounts[upstream] || 0) + 1;
         }
 
@@ -148,7 +154,10 @@ export default class GeminiService {
                     text: m.displayName || m.name
                 }));
         } catch (error) {
-            console.error("Failed to fetch models", error);
+            const msg = error instanceof Error ? error.message : String(error);
+            // Safe redaction without Regex issues
+            const safeMsg = apiKey ? msg.split(apiKey).join("[REDACTED]") : msg;
+            console.error("Failed to fetch models", safeMsg);
             return [];
         }
     }
