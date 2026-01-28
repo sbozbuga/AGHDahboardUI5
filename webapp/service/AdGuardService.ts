@@ -68,9 +68,9 @@ export default class AdGuardService {
             num_blocked_filtering: rawData.num_blocked_filtering,
             avg_processing_time: parseFloat((rawData.avg_processing_time * 1000).toFixed(2)),
             block_percentage: parseFloat(block_percentage.toFixed(2)),
-            top_queried_domains: this.transformList(rawData.top_queried_domains, "domain").slice(0, AdGuardService.TOP_LIST_LIMIT),
-            top_blocked_domains: this.transformList(rawData.top_blocked_domains, "domain").slice(0, AdGuardService.TOP_LIST_LIMIT),
-            top_clients: this.transformList(rawData.top_clients, "ip").slice(0, AdGuardService.TOP_LIST_LIMIT)
+            top_queried_domains: this.transformList(rawData.top_queried_domains, "domain", AdGuardService.TOP_LIST_LIMIT),
+            top_blocked_domains: this.transformList(rawData.top_blocked_domains, "domain", AdGuardService.TOP_LIST_LIMIT),
+            top_clients: this.transformList(rawData.top_clients, "ip", AdGuardService.TOP_LIST_LIMIT)
         };
     }
 
@@ -133,10 +133,14 @@ export default class AdGuardService {
     /**
      * Helper to transform Map/Object/Array responses from AdGuard API into a unified Array format
      */
-    private transformList(list: unknown, preferredKey: string): StatsEntry[] {
+    private transformList(list: unknown, preferredKey: string, limit?: number): StatsEntry[] {
         if (!list) return [];
         if (Array.isArray(list)) {
-            return list.map((item: unknown) => {
+            let targetList = list;
+            if (limit && list.length > limit) {
+                targetList = list.slice(0, limit);
+            }
+            return targetList.map((item: unknown) => {
                 const obj = item as Record<string, unknown>;
 
                 // Case 1: Standard Object (already has keys like ip, domain, or name)
@@ -166,7 +170,11 @@ export default class AdGuardService {
             });
         } else if (typeof list === 'object') {
             // Case 3: Map { "192.168.1.1": 123 }
-            return Object.entries(list as Record<string, unknown>).map(([key, count]) => ({
+            let entries = Object.entries(list as Record<string, unknown>);
+            if (limit && entries.length > limit) {
+                entries = entries.slice(0, limit);
+            }
+            return entries.map(([key, count]) => ({
                 name: key,
                 count: Number(count)
             }));
