@@ -94,7 +94,24 @@ export default class AdGuardService {
             throw new Error(`Error fetching logs: ${response.statusText}`);
         }
 
-        return await response.json() as AdGuardData;
+        const data = await response.json() as AdGuardData;
+
+        // Post-process to add blocked status
+        data.data.forEach(entry => {
+            // Heuristic: If reason starts with "Filtered" (e.g. FilteredBlackList, FilteredSafeBrowsing), it is blocked.
+            // "NotFiltered..." reasons are obviously not blocked.
+            if (entry.reason && entry.reason.startsWith("Filtered")) {
+                entry.blocked = true;
+            } else if (entry.reason && entry.reason === "SafeBrowsing") {
+                // Some versions might just say SafeBrowsing? Rare but safe to add if needed.
+                // Stick to Filtered for now as per screenshot.
+                entry.blocked = true;
+            } else {
+                entry.blocked = false;
+            }
+        });
+
+        return data;
     }
 
     /**
