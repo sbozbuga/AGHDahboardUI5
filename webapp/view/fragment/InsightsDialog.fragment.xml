@@ -17,6 +17,7 @@
 			</VBox>
 		</content>
 		<buttons>
+			<Button text="Copy" icon="sap-icon://copy" press="onCopyInsights" tooltip="Copy Analysis to Clipboard" />
 			<Button text="Close" press="onCloseInsights" />
 		</buttons>
 	</Dialog>
