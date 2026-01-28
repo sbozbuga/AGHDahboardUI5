@@ -1,4 +1,5 @@
 import MessageBox from "sap/m/MessageBox";
+import MessageToast from "sap/m/MessageToast";
 import Controller from "sap/ui/core/mvc/Controller";
 import AppComponent from "../Component";
 import JSONModel from "sap/ui/model/json/JSONModel";
@@ -399,12 +400,30 @@ export default class Logs extends Controller {
 			const html = this.formatInsights(insights);
 
 			model.setProperty("/analysisHtml", html);
+			model.setProperty("/analysisText", insights);
 			void this.onOpenInsights();
 		} catch (error) {
 			MessageBox.error((error as Error).message);
 		} finally {
 			view.setBusy(false);
 		}
+	}
+
+	public onCopyInsights(): void {
+		const view = this.getView();
+		if (!view) return;
+		const model = view.getModel() as JSONModel;
+		const text = model.getProperty("/analysisText") as string;
+
+		if (!text) return;
+
+		// Use Clipboard API
+		navigator.clipboard.writeText(text).then(() => {
+			MessageToast.show("Insights copied to clipboard.");
+		}).catch((err) => {
+			console.error("Could not copy text: ", err);
+			MessageBox.error("Failed to copy insights to clipboard.");
+		});
 	}
 
 	public formatInsights(text: string): string {
