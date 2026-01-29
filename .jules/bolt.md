@@ -13,3 +13,7 @@
 ## 2026-01-28 - Slice Before Transform
 **Learning:** In `AdGuardService.ts`, the `transformList` method processed the entire array of domains (mapping, type checking, searching keys) before `getStats` sliced the result to the top 10. This wasted CPU cycles on items that were immediately discarded.
 **Action:** Apply `slice` or `limit` constraints as early as possible in the data processing pipeline, ideally before expensive mapping or transformation logic.
+
+## 2026-01-29 - Conditional Data Enrichment
+**Learning:** In `AdGuardService.ts`, `getQueryLog` was performing O(N) string analysis to set a `blocked` property on every record, even when the caller (e.g., `getSlowestQueries`) didn't use that property. This wasted CPU cycles during frequent polling.
+**Action:** Add optional flags to data fetching methods to skip expensive post-processing or enrichment steps when the caller only needs raw or partial data.
