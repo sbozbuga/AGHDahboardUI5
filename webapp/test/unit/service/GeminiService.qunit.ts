@@ -25,4 +25,14 @@ QUnit.test("sanitizeInput removes control characters", function (assert) {
     input = "Null\0Byte";
     expected = "NullByte";
     assert.strictEqual(service.sanitizeInput(input), expected, "Null bytes are removed");
+
+    // 5. C1 Control Characters (e.g. \u009F)
+    input = "Test\u009FControl";
+    expected = "TestControl";
+    assert.strictEqual(service.sanitizeInput(input), expected, "C1 Control characters are removed");
+
+    // 6. Mixed Control Characters
+    input = "A\nB\tC\u0080D";
+    expected = "ABCD";
+    assert.strictEqual(service.sanitizeInput(input), expected, "Mixed control characters are removed");
 });
