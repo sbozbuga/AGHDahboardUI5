@@ -32,9 +32,9 @@ export default class GeminiService {
     }
 
     public sanitizeInput(str: string): string {
-        // Remove control characters (0-31 and 127) to prevent prompt injection via newlines etc.
+        // Remove control characters (0-31, 127, and C1 128-159) to prevent prompt injection via newlines etc.
         // eslint-disable-next-line no-control-regex
-        return str.replace(/[\x00-\x1F\x7F]/g, "").trim();
+        return str.replace(/[\x00-\x1F\x7F-\x9F]/g, "").trim();
     }
 
     public async generateInsights(logs: LogEntry[]): Promise<string> {
@@ -59,7 +59,10 @@ export default class GeminiService {
 
             return text || "No insights generated.";
         } catch (error) {
-            console.error("Gemini API Error:", error);
+            const msg = error instanceof Error ? error.message : String(error);
+            // Safe redaction without Regex issues
+            const safeMsg = apiKey ? msg.split(apiKey).join("[REDACTED]") : msg;
+            console.error("Gemini API Error:", safeMsg);
             throw new Error("Failed to generate insights. Check your API Key and network connection.");
         }
     }
