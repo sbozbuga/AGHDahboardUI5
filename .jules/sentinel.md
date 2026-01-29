@@ -7,3 +7,13 @@
 **Vulnerability:** Aggregated log data (domains, client names) containing control characters or newlines could manipulate the AI system prompt (Prompt Injection), potentially causing the AI to ignore instructions or leak context.
 **Learning:** Data fed into LLM prompts via string interpolation is essentially code injection. Simple JSON serialization is insufficient protection against semantic manipulation.
 **Prevention:** Sanitize all variable input into prompts by stripping control characters and normalizing whitespace before serialization.
+
+## 2025-05-21 - API Key Leakage in Error Logs
+**Vulnerability:** Upstream API errors often include the request URL. When using SDKs or REST calls with API keys, logging the raw error object to the console can expose these credentials.
+**Learning:** Standard error logging (`console.error(error)`) is unsafe for operations involving secrets. SDK-thrown errors are not guaranteed to be sanitized.
+**Prevention:** Always catch errors from sensitive operations and explicitly redact known secrets (e.g., `msg.split(apiKey).join("[REDACTED]")`) before logging or re-throwing.
+
+## 2025-05-21 - Unicode Control Character Injection
+**Vulnerability:** Standard ASCII control character stripping (`\x00-\x1F`) fails to remove Unicode C1 control characters (`\x80-\x9F`), which can still cause issues in downstream processing or display.
+**Learning:** Regex for "control characters" must account for Unicode ranges.
+**Prevention:** Use expanded regex `[\x00-\x1F\x7F-\x9F]` to cover both C0 and C1 control sets.
