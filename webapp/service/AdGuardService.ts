@@ -79,8 +79,9 @@ export default class AdGuardService {
      * @param limit Number of items to fetch
      * @param offset Offset for pagination
      * @param filterStatus Optional status filter (e.g., "Blocked")
+     * @param skipEnrichment Optional flag to skip post-processing (e.g. for simple stats)
      */
-    public async getQueryLog(limit: number, offset: number, filterStatus?: string): Promise<AdGuardData> {
+    public async getQueryLog(limit: number, offset: number, filterStatus?: string, skipEnrichment: boolean = false): Promise<AdGuardData> {
         let url = `/control/querylog?limit=${limit}&offset=${offset}`;
         if (filterStatus) {
             url += `&response_status=${filterStatus}`;
@@ -96,20 +97,22 @@ export default class AdGuardService {
 
         const data = await response.json() as AdGuardData;
 
-        // Post-process to add blocked status
-        data.data.forEach(entry => {
-            // Heuristic: If reason starts with "Filtered" (e.g. FilteredBlackList, FilteredSafeBrowsing), it is blocked.
-            // "NotFiltered..." reasons are obviously not blocked.
-            if (entry.reason && entry.reason.startsWith("Filtered")) {
-                entry.blocked = true;
-            } else if (entry.reason && entry.reason === "SafeBrowsing") {
-                // Some versions might just say SafeBrowsing? Rare but safe to add if needed.
-                // Stick to Filtered for now as per screenshot.
-                entry.blocked = true;
-            } else {
-                entry.blocked = false;
-            }
-        });
+        if (!skipEnrichment) {
+            // Post-process to add blocked status
+            data.data.forEach(entry => {
+                // Heuristic: If reason starts with "Filtered" (e.g. FilteredBlackList, FilteredSafeBrowsing), it is blocked.
+                // "NotFiltered..." reasons are obviously not blocked.
+                if (entry.reason && entry.reason.startsWith("Filtered")) {
+                    entry.blocked = true;
+                } else if (entry.reason && entry.reason === "SafeBrowsing") {
+                    // Some versions might just say SafeBrowsing? Rare but safe to add if needed.
+                    // Stick to Filtered for now as per screenshot.
+                    entry.blocked = true;
+                } else {
+                    entry.blocked = false;
+                }
+            });
+        }
 
         return data;
     }
@@ -120,7 +123,7 @@ export default class AdGuardService {
      */
     public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; }[]> {
         try {
-            const data = await this.getQueryLog(scanDepth, 0);
+            const data = await this.getQueryLog(scanDepth, 0, undefined, true);
 
             // Filter out entries with invalid elapsed times
             const validEntries = data.data.filter(e => e.elapsedMs);
