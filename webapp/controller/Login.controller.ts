@@ -20,6 +20,16 @@ export default class Login extends Controller {
         this.getView()?.setModel(model);
     }
 
+    public onAfterRendering(): void {
+        const view = this.getView();
+        if (view) {
+            const usernameInput = view.byId("usernameInput") as Input;
+            if (usernameInput) {
+                usernameInput.focus();
+            }
+        }
+    }
+
     public onInputChange(event: Event): void {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const input = event.getSource() as Input;
