@@ -15,12 +15,36 @@ export default class Dashboard extends Controller {
         void this.onRefreshStats();
 
         // Start Auto-Refresh
-        this._timer = setInterval(() => {
-            void this.onRefreshStats(true); // true = silent refresh
-        }, Dashboard.REFRESH_INTERVAL);
+        this.startPolling();
+
+        // Optimize: Pause polling when tab is inactive
+        document.addEventListener("visibilitychange", this.onVisibilityChange);
     }
 
     public onExit(): void {
+        this.stopPolling();
+        document.removeEventListener("visibilitychange", this.onVisibilityChange);
+    }
+
+    private onVisibilityChange = (): void => {
+        if (document.hidden) {
+            this.stopPolling();
+        } else {
+            // Refresh immediately when becoming visible to show latest data
+            void this.onRefreshStats(true);
+            this.startPolling();
+        }
+    };
+
+    private startPolling(): void {
+        if (!this._timer) {
+            this._timer = setInterval(() => {
+                void this.onRefreshStats(true); // true = silent refresh
+            }, Dashboard.REFRESH_INTERVAL);
+        }
+    }
+
+    private stopPolling(): void {
         if (this._timer) {
             clearInterval(this._timer);
             this._timer = undefined;
