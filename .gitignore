@@ -28,3 +28,4 @@ dist
 coverage
 report
 .nyc_output
+.ui5-tooling-modules/
