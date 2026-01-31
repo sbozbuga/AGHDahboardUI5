@@ -1,5 +1,5 @@
 {
-	"_version": "1.68.0",
+	"_version": "2.0.0",
 	"sap.app": {
 		"id": "ui5.aghd",
 		"type": "application",
@@ -8,8 +8,7 @@
 		"description": "UI5 AGH Dashboard",
 		"applicationVersion": {
 			"version": "1.0.0"
-		},
-		"ach": "set-ach"
+		}
 	},
 	"sap.fiori": {},
 	"sap.ui": {
@@ -25,15 +24,13 @@
 		"rootView": {
 			"viewName": "ui5.aghd.view.App",
 			"type": "XML",
-			"async": true,
 			"id": "app"
 		},
 		"dependencies": {
-			"minUI5Version": "1.104.0",
+			"minUI5Version": "1.136.0",
 			"libs": {
 				"sap.ui.core": {},
 				"sap.ui.layout": {},
-				"sap.ui.unified": {},
 				"sap.m": {},
 				"sap.f": {}
 			}
@@ -53,8 +50,7 @@
 				"viewType": "XML",
 				"viewPath": "ui5.aghd.view",
 				"controlId": "app",
-				"controlAggregation": "pages",
-				"async": true
+				"controlAggregation": "pages"
 			},
 			"routes": [
 				{
