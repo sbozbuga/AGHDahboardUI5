@@ -21,6 +21,7 @@ import GeminiService from "../service/GeminiService";
 import { LogEntry } from "../model/AdGuardTypes";
 import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import encodeXML from "sap/base/security/encodeXML";
+import Context from "sap/ui/model/Context";
 
 interface RouteArguments {
 	"?query"?: {
@@ -42,6 +43,12 @@ export default class Logs extends Controller {
 	private _pViewSettingsDialog: Promise<Dialog> | undefined;
 	private _pSettingsDialog: Promise<Dialog> | undefined;
 	private _pInsightsDialog: Promise<Dialog> | undefined;
+	private _pAdvancedFilterDialog: Promise<Dialog> | undefined;
+
+	// Filter State
+	private _sSearchQuery: string = "";
+	private _aViewSettingsFilters: Filter[] = [];
+	private _aSorters: Sorter[] = [];
 
 	private static readonly DEFAULT_LIMIT = 1000;
 
@@ -56,10 +63,10 @@ export default class Logs extends Controller {
 				data: [],
 				limit: Logs.DEFAULT_LIMIT,
 				offset: 0,
-				total: 0 // Track total records if API provides it, or infer
+				total: 0, // Track total records if API provides it, or infer
+				advancedFilters: [] // { column, operator, value }
 			});
 			view.setModel(model);
-
 		}
 
 		const router = UIComponent.getRouterFor(this);
@@ -143,23 +150,6 @@ export default class Logs extends Controller {
 		const binding = table.getBinding("items") as ListBinding;
 		if (!binding) return;
 
-
-
-		// If we showed all loaded items, try to load more
-		// Use a small buffer or check if actual == total 
-		// Logic depends on 'growing' mechanism. 
-		// With growing=true, UI5 manages the 'growing' automatically for Client-Side models 
-		// IF the model has all data. 
-		// Since we are doing server-side pagination manually via 'append', 
-		// we can check if the last fetch returned < limit.
-
-		// Actually, for "Infinity Scroll" with server-side pagination in UI5 with JSONModel,
-		// typically user scrolls to bottom -> 'updateFinished' triggering with reason 'Growing'.
-
-		// However, 'growing' feature in sap.m.Table works best with complete data or OData. 
-		// For manual JSON, we might need 'growingTriggerText' or custom logic.
-		// Let's rely on the fact that if we scroll to bottom, we want more.
-
 		const reason = (event.getParameters() as { reason: string }).reason;
 
 		// If the table grew, it means user clicked "More" or scrolled down.
@@ -172,38 +162,64 @@ export default class Logs extends Controller {
 		}
 	}
 
-	// Pagination controls removed
-
-
 	public onSearch(event: Event): void {
 		const source = event.getSource();
 		if (!(source instanceof SearchField)) return;
-		const query = source.getValue();
-		const filters: Filter[] = [];
+		this._sSearchQuery = source.getValue();
+		this._applyFilters();
+	}
 
-		if (query && query.length > 0) {
-			filters.push(new Filter({
+	private _applyFilters(): void {
+		const view = this.getView();
+		if (!view) return;
+		const table = view.byId("logsTable") as Table;
+		const binding = table.getBinding("items") as ListBinding;
+
+		const aFilters: Filter[] = [];
+
+		// 1. Search Query Filters
+		if (this._sSearchQuery && this._sSearchQuery.length > 0) {
+			aFilters.push(new Filter({
 				filters: [
-					new Filter("question/name", FilterOperator.Contains, query),
-					new Filter("client", FilterOperator.Contains, query)
+					new Filter("question/name", FilterOperator.Contains, this._sSearchQuery),
+					new Filter("client", FilterOperator.Contains, this._sSearchQuery)
 				],
 				and: false
 			}));
 		}
 
-		const view = this.getView();
-		if (view) {
-			const table = view.byId("logsTable") as Table;
-			const binding = table.getBinding("items") as ListBinding;
-			binding.filter(filters);
+		// 2. View Settings Filters (Status)
+		if (this._aViewSettingsFilters && this._aViewSettingsFilters.length > 0) {
+			aFilters.push(...this._aViewSettingsFilters);
 		}
+
+		// 3. Advanced Filters
+		const model = view.getModel() as JSONModel;
+		const advancedFilters = model.getProperty("/advancedFilters") as { column: string, operator: string, value: string }[];
+
+		if (advancedFilters && advancedFilters.length > 0) {
+			advancedFilters.forEach(f => {
+				let value: string | number | boolean = f.value;
+				const operator = f.operator as FilterOperator;
+
+				// Type conversion
+				if (f.column === "elapsedMs") {
+					value = parseFloat(f.value);
+				}
+
+				if (f.value !== "") {
+					aFilters.push(new Filter(f.column, operator, value));
+				}
+			});
+		}
+
+		binding.filter(aFilters);
 	}
 
 	public onNavBack(): void {
 		const router = UIComponent.getRouterFor(this);
 		router.navTo("dashboard");
 	}
-	private _aSorters: Sorter[] = [];
 
 	public async onOpenViewSettings(): Promise<void> {
 		const view = this.getView();
@@ -232,9 +248,7 @@ export default class Logs extends Controller {
 		if (!view) return;
 
 		const table = view.byId("logsTable") as Table;
-
 		const binding = table.getBinding("items") as ListBinding;
-
 
 		const params = event.getParameters() as unknown as ViewSettingsEventParams;
 
@@ -255,13 +269,12 @@ export default class Logs extends Controller {
 				dialogFilters.push(new Filter("status", FilterOperator.EQ, key));
 			});
 		}
-		binding.filter(dialogFilters);
+
+		this._aViewSettingsFilters = dialogFilters;
+		this._applyFilters();
 	}
 
-
-
 	public onSort(event: Event): void {
-		// ...
 		const source = event.getSource();
 		if (!(source instanceof Button)) return;
 
@@ -306,7 +319,6 @@ export default class Logs extends Controller {
 			}
 		});
 	}
-
 
 	public async onOpenSettings(): Promise<void> {
 		const view = this.getView();
@@ -461,5 +473,71 @@ export default class Logs extends Controller {
 		const view = this.getView();
 		if (!view) return;
 		(view.byId("insightsDialog") as Dialog).close();
+	}
+
+	// Advanced Filter Handlers
+	public async onOpenAdvancedFilter(): Promise<void> {
+		const view = this.getView();
+		if (!view) return;
+
+		if (!this._pAdvancedFilterDialog) {
+			this._pAdvancedFilterDialog = (this.loadFragment({
+				name: "ui5.aghd.view.fragment.AdvancedFilterDialog"
+			}) as Promise<Dialog>).then((dialog: Dialog) => {
+				view.addDependent(dialog);
+				return dialog;
+			});
+		}
+
+		const dialog = await this._pAdvancedFilterDialog;
+		dialog.open();
+	}
+
+	public onAddFilterRow(): void {
+		const view = this.getView();
+		if (!view) return;
+		const model = view.getModel() as JSONModel;
+		const filters = model.getProperty("/advancedFilters") as any[];
+
+		filters.push({ column: "elapsedMs", operator: "GT", value: "" }); // Default new row
+		model.setProperty("/advancedFilters", filters);
+	}
+
+	public onRemoveFilterRow(event: Event): void {
+		const source = event.getSource();
+		if (!(source instanceof Button)) return;
+		const context = source.getBindingContext();
+		if (!context) return;
+
+		const path = context.getPath();
+		const index = parseInt(path.split("/").pop() || "0", 10);
+
+		const view = this.getView();
+		if (!view) return;
+		const model = view.getModel() as JSONModel;
+		const filters = model.getProperty("/advancedFilters") as any[];
+
+		filters.splice(index, 1);
+		model.setProperty("/advancedFilters", filters);
+	}
+
+	public onConfirmAdvancedFilter(): void {
+		this._applyFilters();
+		this.onCancelAdvancedFilter();
+	}
+
+	public onClearAdvancedFilters(): void {
+		const view = this.getView();
+		if (!view) return;
+		const model = view.getModel() as JSONModel;
+		model.setProperty("/advancedFilters", []);
+		this._applyFilters();
+	}
+
+	public onCancelAdvancedFilter(): void {
+		const view = this.getView();
+		if (!view) return;
+		(view.byId("advancedFilterDialog") as Dialog).close();
+
 	}
 }
