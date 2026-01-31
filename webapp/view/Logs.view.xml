@@ -33,6 +33,7 @@
 							<Button icon="sap-icon://refresh" press=".onRefreshLogs" tooltip="Refresh"/>
                             <ToolbarSeparator />
                             <Button text="Smart Analysis" icon="sap-icon://lightbulb" press=".onAnalyzeLogs" type="Emphasized" tooltip="Generate AI Insights" />
+                            <Button icon="sap-icon://filter" press=".onOpenAdvancedFilter" tooltip="Advanced Filter" type="{= ${/advancedFilters}.length > 0 ? 'Emphasized' : 'Default' }" />
                             <Button icon="sap-icon://action-settings" press=".onOpenSettings" tooltip="Settings" />
 						</OverflowToolbar>
 					</headerToolbar>

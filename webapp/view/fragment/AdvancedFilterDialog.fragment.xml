@@ -1,0 +1,76 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	xmlns:l="sap.ui.layout"
+	xmlns:f="sap.ui.layout.form">
+	<Dialog
+		id="advancedFilterDialog"
+		title="Advanced Filter"
+		contentWidth="600px"
+		resizable="true"
+		draggable="true">
+		<content>
+			<Table
+				id="filterTable"
+				items="{/advancedFilters}"
+				mode="None"
+				growing="false"
+				width="100%">
+				<headerToolbar>
+					<OverflowToolbar>
+						<Title text="Conditions ({= ${/advancedFilters}.length })" level="H4"/>
+						<ToolbarSpacer/>
+						<Button icon="sap-icon://add" text="Add Condition" press=".onAddFilterRow" type="Ghost"/>
+					</OverflowToolbar>
+				</headerToolbar>
+				<columns>
+					<Column width="30%">
+						<Text text="Column" />
+					</Column>
+					<Column width="30%">
+						<Text text="Operator" />
+					</Column>
+					<Column width="30%">
+						<Text text="Value" />
+					</Column>
+					<Column width="10%" hAlign="End">
+						<Text text="" />
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<ComboBox selectedKey="{column}" width="100%">
+								<core:Item key="time" text="Time" />
+								<core:Item key="client" text="Client" />
+								<core:Item key="question/name" text="Question" />
+								<core:Item key="status" text="Status" />
+								<core:Item key="elapsedMs" text="Elapsed (ms)" />
+								<core:Item key="upstream" text="Upstream" />
+								<core:Item key="reason" text="Reason" />
+							</ComboBox>
+							<ComboBox selectedKey="{operator}" width="100%">
+								<core:Item key="EQ" text="Equals" />
+								<core:Item key="Contains" text="Contains" />
+								<core:Item key="GT" text="Greater Than" />
+								<core:Item key="LT" text="Less Than" />
+								<core:Item key="GE" text="Greater or Equal" />
+								<core:Item key="LE" text="Less or Equal" />
+								<core:Item key="NE" text="Not Equal" />
+								<core:Item key="StartsWith" text="Starts With" />
+								<core:Item key="EndsWith" text="Ends With" />
+							</ComboBox>
+							<Input value="{value}" width="100%" placeholder="Value" />
+							<Button icon="sap-icon://delete" type="Transparent" press=".onRemoveFilterRow" />
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</content>
+		<buttons>
+			<Button text="Clear All" press=".onClearAdvancedFilters" type="Transparent" />
+			<Button text="Apply" press=".onConfirmAdvancedFilter" type="Emphasized" />
+			<Button text="Cancel" press=".onCancelAdvancedFilter" />
+		</buttons>
+	</Dialog>
+</core:FragmentDefinition>
