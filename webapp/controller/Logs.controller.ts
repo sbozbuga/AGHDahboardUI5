@@ -18,10 +18,11 @@ import Column from "sap/m/Column";
 import Table from "sap/m/Table";
 import SettingsService from "../service/SettingsService";
 import GeminiService from "../service/GeminiService";
-import { LogEntry } from "../model/AdGuardTypes";
+import { LogEntry, AdvancedFilterRule } from "../model/AdGuardTypes";
 import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import encodeXML from "sap/base/security/encodeXML";
 import Context from "sap/ui/model/Context";
+import { Constants } from "../model/Constants";
 
 interface RouteArguments {
 	"?query"?: {
@@ -40,10 +41,9 @@ interface ViewSettingsEventParams {
  */
 export default class Logs extends Controller {
 	public formatter = formatter;
-	private _pViewSettingsDialog: Promise<Dialog> | undefined;
-	private _pSettingsDialog: Promise<Dialog> | undefined;
-	private _pInsightsDialog: Promise<Dialog> | undefined;
-	private _pAdvancedFilterDialog: Promise<Dialog> | undefined;
+
+	// Dialog Cache
+	private _mDialogs: Map<string, Promise<Dialog>> = new Map();
 
 	// Filter State
 	private _sSearchQuery: string = "";
@@ -59,22 +59,24 @@ export default class Logs extends Controller {
 			view.addStyleClass((this.getOwnerComponent() as AppComponent).getContentDensityClass());
 
 			// Initialize Model with Pagination Defaults
-			const model = new JSONModel({
+			const modelData = {
 				data: [],
 				limit: Logs.DEFAULT_LIMIT,
 				offset: 0,
-				total: 0, // Track total records if API provides it, or infer
-				advancedFilters: [] // { column, operator, value }
-			});
+				total: 0,
+				advancedFilters: []
+			};
+			const model = new JSONModel(modelData);
 			view.setModel(model);
 		}
 
 		const router = UIComponent.getRouterFor(this);
-		router.getRoute("logs")?.attachPatternMatched(this.onRouteMatched.bind(this), this);
+		router.getRoute(Constants.Routes.Logs)?.attachPatternMatched(this.onRouteMatched.bind(this), this);
 	}
 
 	public onExit(): void {
 		// Cleanup if necessary
+		this._mDialogs.clear();
 	}
 
 	public onRouteMatched(event: Event): void {
@@ -87,11 +89,11 @@ export default class Logs extends Controller {
 		const query = args["?query"];
 
 		if (query && query.status === "Blocked") {
-			model.setProperty("/filterStatus", "filtered");
-			model.setProperty("/offset", 0);
+			model.setProperty(Constants.ModelProperties.FilterStatus, "filtered");
+			model.setProperty(Constants.ModelProperties.Offset, 0);
 		} else {
-			model.setProperty("/filterStatus", "");
-			model.setProperty("/offset", 0);
+			model.setProperty(Constants.ModelProperties.FilterStatus, "");
+			model.setProperty(Constants.ModelProperties.Offset, 0);
 		}
 
 		void this.onRefreshLogs();
@@ -103,15 +105,15 @@ export default class Logs extends Controller {
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 
-		const limit = (model.getProperty("/limit") as number) || Logs.DEFAULT_LIMIT;
+		const limit = (model.getProperty(Constants.ModelProperties.Limit) as number) || Logs.DEFAULT_LIMIT;
 		// If appending, use current offset; if refreshing, reset to 0
-		let offset = (model.getProperty("/offset") as number) || 0;
+		let offset = (model.getProperty(Constants.ModelProperties.Offset) as number) || 0;
 		if (!bAppend) {
 			offset = 0;
-			model.setProperty("/offset", 0);
+			model.setProperty(Constants.ModelProperties.Offset, 0);
 		}
 
-		const filterStatus = (model.getProperty("/filterStatus") as string) || "";
+		const filterStatus = (model.getProperty(Constants.ModelProperties.FilterStatus) as string) || "";
 
 		view.setBusy(true);
 
@@ -126,15 +128,15 @@ export default class Logs extends Controller {
 			}));
 
 			if (bAppend) {
-				const currentData = model.getProperty("/data") as LogEntry[];
-				model.setProperty("/data", [...currentData, ...processedData]);
+				const currentData = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
+				model.setProperty(Constants.ModelProperties.Data, [...currentData, ...processedData]);
 			} else {
-				model.setProperty("/data", processedData);
+				model.setProperty(Constants.ModelProperties.Data, processedData);
 			}
 
 			// Increment offset for next fetch
 			if (processedData.length > 0) {
-				model.setProperty("/offset", offset + processedData.length);
+				model.setProperty(Constants.ModelProperties.Offset, offset + processedData.length);
 			}
 
 		} catch (error) {
@@ -151,10 +153,6 @@ export default class Logs extends Controller {
 		if (!binding) return;
 
 		const reason = (event.getParameters() as { reason: string }).reason;
-
-		// If the table grew, it means user clicked "More" or scrolled down.
-		// BUT, since we have JSONModel with limited data, matching 'total' matches 'data.length'.
-		// We need to fetch MORE from server if we reached the end of local data.
 
 		if (reason === "Growing") {
 			// Attempt to fetch next chunk
@@ -181,8 +179,8 @@ export default class Logs extends Controller {
 		if (this._sSearchQuery && this._sSearchQuery.length > 0) {
 			aFilters.push(new Filter({
 				filters: [
-					new Filter("question/name", FilterOperator.Contains, this._sSearchQuery),
-					new Filter("client", FilterOperator.Contains, this._sSearchQuery)
+					new Filter(Constants.ColumnIds.QuestionName, FilterOperator.Contains, this._sSearchQuery),
+					new Filter(Constants.ColumnIds.Client, FilterOperator.Contains, this._sSearchQuery)
 				],
 				and: false
 			}));
@@ -195,7 +193,7 @@ export default class Logs extends Controller {
 
 		// 3. Advanced Filters
 		const model = view.getModel() as JSONModel;
-		const advancedFilters = model.getProperty("/advancedFilters") as { column: string, operator: string, value: string }[];
+		const advancedFilters = model.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
 
 		if (advancedFilters && advancedFilters.length > 0) {
 			advancedFilters.forEach(f => {
@@ -203,7 +201,7 @@ export default class Logs extends Controller {
 				const operator = f.operator as FilterOperator;
 
 				// Type conversion
-				if (f.column === "elapsedMs") {
+				if (f.column === Constants.ColumnIds.ElapsedMs) {
 					value = parseFloat(f.value);
 				}
 
@@ -218,30 +216,42 @@ export default class Logs extends Controller {
 
 	public onNavBack(): void {
 		const router = UIComponent.getRouterFor(this);
-		router.navTo("dashboard");
+		router.navTo(Constants.Routes.Dashboard);
+	}
+
+	/**
+	 * Generic helper to load and cache dialogs
+	 */
+	private async _openDialog(fragmentName: string): Promise<Dialog> {
+		const view = this.getView();
+		if (!view) throw new Error("View not available");
+
+		if (!this._mDialogs.has(fragmentName)) {
+			const pDialog = this.loadFragment({
+				name: fragmentName
+			}) as Promise<Dialog>;
+
+			// Cache the promise immediately
+			this._mDialogs.set(fragmentName, pDialog);
+
+			const dialog = await pDialog;
+			view.addDependent(dialog);
+
+			// Add style class if needed
+			dialog.addStyleClass((this.getOwnerComponent() as AppComponent).getContentDensityClass());
+
+			return dialog;
+		}
+
+		return this._mDialogs.get(fragmentName) as Promise<Dialog>;
 	}
 
 	public async onOpenViewSettings(): Promise<void> {
-		const view = this.getView();
-		if (!view) return;
-
-		// Load fragment if not already loaded
-		if (!this._pViewSettingsDialog) {
-			this._pViewSettingsDialog = (this.loadFragment({
-				name: "ui5.aghd.view.ViewSettingsDialog"
-			}) as Promise<Dialog>).then((dialog: Dialog) => {
-				view.addDependent(dialog);
-				return dialog;
-			});
-		}
-
-		const dialog = await this._pViewSettingsDialog;
+		const dialog = await this._openDialog(Constants.Fragments.ViewSettingsDialog);
 		dialog.open();
 	}
 
 	public onConfirmViewSettings(event: Event): void {
-		// Logic handles Dialog output (single sort usually)
-		// We reset our multi-sort stack if the dialog is used, to avoid confusion.
 		this._aSorters = [];
 
 		const view = this.getView();
@@ -261,12 +271,11 @@ export default class Logs extends Controller {
 
 		binding.sort(this._aSorters);
 
-		// ... Filters logic remains same ...
 		const dialogFilters: Filter[] = [];
 		if (params.filterItems) {
 			params.filterItems.forEach((item: ViewSettingsItem) => {
 				const key = item.getKey();
-				dialogFilters.push(new Filter("status", FilterOperator.EQ, key));
+				dialogFilters.push(new Filter(Constants.ColumnIds.Status, FilterOperator.EQ, key));
 			});
 		}
 
@@ -278,23 +287,17 @@ export default class Logs extends Controller {
 		const source = event.getSource();
 		if (!(source instanceof Button)) return;
 
-		const key = source.getCustomData()[0].getValue() as string; // "time", "client", etc.
+		const key = source.getCustomData()[0].getValue() as string;
 
 		const currentDesc = source.getIcon() === "sap-icon://sort-descending";
 		const newDesc = !currentDesc;
 
 		source.setIcon(newDesc ? "sap-icon://sort-descending" : "sap-icon://sort-ascending");
 
-		// Update Sorter Stack - Single Column Sort Mode
-		this._aSorters = []; // Clear stack
-
-		// Reset icons on other columns (Visual cleanup)
+		this._aSorters = [];
 		this.resetColumnIcons(source);
-
-		// Add new sorter
 		this._aSorters.push(new Sorter(key, newDesc, false));
 
-		// Apply Binding
 		const view = this.getView();
 		if (view) {
 			const table = view.byId("logsTable") as Table;
@@ -304,36 +307,24 @@ export default class Logs extends Controller {
 	}
 
 	private resetColumnIcons(activeButton: Button): void {
-		// Helper to clear icons on other buttons
 		const view = this.getView();
 		if (!view) return;
 
-		// Heuristic: iterate over known IDs or just Query?
-		// We'll iterate the columns of the table
 		const table = view.byId("logsTable") as Table;
 		table.getColumns().forEach((col: Column) => {
 			const header = col.getHeader();
-			// Check if header is a button and not the active one
 			if (header && header !== activeButton && header instanceof Button) {
-				header.setIcon(""); // Clear icon
+				header.setIcon("");
 			}
 		});
 	}
 
 	public async onOpenSettings(): Promise<void> {
+		const dialog = await this._openDialog(Constants.Fragments.SettingsDialog);
+
 		const view = this.getView();
 		if (!view) return;
 
-		if (!this._pSettingsDialog) {
-			this._pSettingsDialog = (this.loadFragment({
-				name: "ui5.aghd.view.fragment.SettingsDialog"
-			}) as Promise<Dialog>).then((dialog: Dialog) => {
-				view.addDependent(dialog);
-				return dialog;
-			});
-		}
-
-		const dialog = await this._pSettingsDialog;
 		const apiKey = SettingsService.getInstance().getApiKey();
 		const currentModel = SettingsService.getInstance().getModel();
 		const model = view.getModel() as JSONModel;
@@ -341,23 +332,21 @@ export default class Logs extends Controller {
 		model.setProperty("/apiKey", apiKey);
 		model.setProperty("/selectedModel", currentModel);
 		model.setProperty("/systemContext", SettingsService.getInstance().getSystemContext());
-		model.setProperty("/availableModels", []); // Clear first
+		model.setProperty("/availableModels", []);
 
 		dialog.open();
 
-		// Fetch models if API key is present
 		if (apiKey) {
 			dialog.setBusy(true);
 			try {
 				const models = await GeminiService.getInstance().getAvailableModels();
 				model.setProperty("/availableModels", models);
 
-				// Ensure selected model is still valid, else default to first or keep current
 				if (models.length > 0 && !models.find(m => m.key === currentModel)) {
 					model.setProperty("/selectedModel", models[0].key);
 				}
 			} catch {
-				// verify silent fail or user toast?
+				// ignore
 			} finally {
 				dialog.setBusy(false);
 			}
@@ -398,7 +387,7 @@ export default class Logs extends Controller {
 		const view = this.getView();
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
-		const logs = model.getProperty("/data") as LogEntry[];
+		const logs = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
 
 		if (!logs || logs.length === 0) {
 			MessageBox.information("No logs available to analyze.");
@@ -429,7 +418,6 @@ export default class Logs extends Controller {
 
 		if (!text) return;
 
-		// Use Clipboard API
 		navigator.clipboard.writeText(text).then(() => {
 			MessageToast.show("Insights copied to clipboard.");
 		}).catch((err) => {
@@ -440,32 +428,15 @@ export default class Logs extends Controller {
 
 	public formatInsights(text: string): string {
 		if (!text) return "";
-		// 1. Sanitize HTML
 		let safeText = encodeXML(text);
-
-		// 2. Apply formatting
-		// Note: encodeXML replaces < with &lt;, so our tags <br/> and <strong> are safe to add afterwards.
 		safeText = safeText
-			.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Bold
-			.replace(/\n/g, "<br/>"); // Newlines
-
+			.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+			.replace(/\n/g, "<br/>");
 		return safeText;
 	}
 
 	public async onOpenInsights(): Promise<void> {
-		const view = this.getView();
-		if (!view) return;
-
-		if (!this._pInsightsDialog) {
-			this._pInsightsDialog = (this.loadFragment({
-				name: "ui5.aghd.view.fragment.InsightsDialog"
-			}) as Promise<Dialog>).then((dialog: Dialog) => {
-				view.addDependent(dialog);
-				return dialog;
-			});
-		}
-
-		const dialog = await this._pInsightsDialog;
+		const dialog = await this._openDialog(Constants.Fragments.InsightsDialog);
 		dialog.open();
 	}
 
@@ -477,19 +448,7 @@ export default class Logs extends Controller {
 
 	// Advanced Filter Handlers
 	public async onOpenAdvancedFilter(): Promise<void> {
-		const view = this.getView();
-		if (!view) return;
-
-		if (!this._pAdvancedFilterDialog) {
-			this._pAdvancedFilterDialog = (this.loadFragment({
-				name: "ui5.aghd.view.fragment.AdvancedFilterDialog"
-			}) as Promise<Dialog>).then((dialog: Dialog) => {
-				view.addDependent(dialog);
-				return dialog;
-			});
-		}
-
-		const dialog = await this._pAdvancedFilterDialog;
+		const dialog = await this._openDialog(Constants.Fragments.AdvancedFilterDialog);
 		dialog.open();
 	}
 
@@ -497,14 +456,15 @@ export default class Logs extends Controller {
 		const view = this.getView();
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
-		const filters = model.getProperty("/advancedFilters") as any[];
+		const filters = model.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
 
-		filters.push({ column: "elapsedMs", operator: "GT", value: "" }); // Default new row
-		model.setProperty("/advancedFilters", filters);
+		filters.push({ column: Constants.ColumnIds.ElapsedMs, operator: "GT", value: "" });
+		model.setProperty(Constants.ModelProperties.AdvancedFilters, filters);
 	}
 
 	public onRemoveFilterRow(event: Event): void {
 		const source = event.getSource();
+		// Type Guard
 		if (!(source instanceof Button)) return;
 		const context = source.getBindingContext();
 		if (!context) return;
@@ -515,10 +475,10 @@ export default class Logs extends Controller {
 		const view = this.getView();
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
-		const filters = model.getProperty("/advancedFilters") as any[];
+		const filters = model.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
 
 		filters.splice(index, 1);
-		model.setProperty("/advancedFilters", filters);
+		model.setProperty(Constants.ModelProperties.AdvancedFilters, filters);
 	}
 
 	public onConfirmAdvancedFilter(): void {
@@ -530,7 +490,7 @@ export default class Logs extends Controller {
 		const view = this.getView();
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
-		model.setProperty("/advancedFilters", []);
+		model.setProperty(Constants.ModelProperties.AdvancedFilters, []);
 		this._applyFilters();
 	}
 

@@ -53,3 +53,9 @@ export interface RawAdGuardStats {
     top_blocked_domains: unknown[];
     top_clients: unknown[];
 }
+
+export interface AdvancedFilterRule {
+    column: string;
+    operator: string;
+    value: string;
+}
