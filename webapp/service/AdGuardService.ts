@@ -82,10 +82,16 @@ export default class AdGuardService {
      * @param skipEnrichment Optional flag to skip post-processing (e.g. for simple stats)
      */
     public async getQueryLog(limit: number, offset: number, filterStatus?: string, skipEnrichment: boolean = false): Promise<AdGuardData> {
-        let url = `/control/querylog?limit=${limit}&offset=${offset}`;
+        const params = new URLSearchParams({
+            limit: limit.toString(),
+            offset: offset.toString()
+        });
+
         if (filterStatus) {
-            url += `&response_status=${filterStatus}`;
+            params.append("response_status", filterStatus);
         }
+
+        const url = `/control/querylog?${params.toString()}`;
 
         const response = await fetch(url);
         if (response.status === 401) {

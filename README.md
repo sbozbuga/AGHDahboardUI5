@@ -5,7 +5,7 @@ A generic, modern Dashboard for AdGuard Home, built with **SAP UI5** (TypeScript
 ## Features
 
 - **📊 Dashboard Stats**: Real-time overview of DNS queries, blocked domains, and client activity.
-- **🤖 Smart Analysis**: Uses **Gemini 1.5** (Flash/Pro) to analyze your query logs and provide actionable security and privacy insights.
+- **🤖 Smart Analysis**: Uses **Gemini** (Flash/Pro) to analyze your query logs and provide actionable security and privacy insights.
 - **📝 Query Logs**: Advanced log viewer with filtering, pagination, and multi-column sorting.
 - **🔐 Native Login**: Direct authentication with your AdGuard Home instance.
 - **⚙️ Configurable**: Set your API Key, choose your preferred AI model, and provide custom network context for better insights.
