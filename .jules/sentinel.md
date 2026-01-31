@@ -17,3 +17,8 @@
 **Vulnerability:** Standard ASCII control character stripping (`\x00-\x1F`) fails to remove Unicode C1 control characters (`\x80-\x9F`), which can still cause issues in downstream processing or display.
 **Learning:** Regex for "control characters" must account for Unicode ranges.
 **Prevention:** Use expanded regex `[\x00-\x1F\x7F-\x9F]` to cover both C0 and C1 control sets.
+
+## 2026-01-31 - Missing CSP in UI5 Application
+**Vulnerability:** The application lacked a Content Security Policy (CSP), exposing it to Cross-Site Scripting (XSS) and data exfiltration risks, particularly concerning for a dashboard handling sensitive logs and API keys.
+**Learning:** Single Page Applications (SPAs) connecting to external APIs (Gemini) must strictly whitelist those connections. However, UI5 (OpenUI5) requires `unsafe-eval` for module loading/bindings and `unsafe-inline` for styles, limiting the strictness of the CSP.
+**Prevention:** Implement a CSP early in development. For UI5 apps, allow specific endpoints (like `generativelanguage.googleapis.com`) and development sockets (`ws:`), but accept the trade-off of allowing `unsafe-eval` as a framework constraint.

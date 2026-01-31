@@ -65,7 +65,7 @@
                         <card:Header title="Top Clients" iconSrc="sap-icon://group" />
                     </f:header>
                     <f:content>
-                        <Table items="{/top_clients}" inset="false" fixedLayout="false" class="sapUiSizeCompact">
+                        <Table items="{/top_clients}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="No active clients found">
                             <columns>
                                 <Column><Text text="Client" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="Count" /></Column>
@@ -91,7 +91,7 @@
                         <card:Header title="Top Queried Domains" iconSrc="sap-icon://world" />
                     </f:header>
                      <f:content>
-                        <Table items="{/top_queried_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact">
+                        <Table items="{/top_queried_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="No queries recorded yet">
                              <columns>
                                 <Column><Text text="Domain" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="Count" /></Column>
@@ -117,7 +117,7 @@
                         <card:Header title="Top Blocked Domains" iconSrc="sap-icon://decline" />
                     </f:header>
                      <f:content>
-                        <Table items="{/top_blocked_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact">
+                        <Table items="{/top_blocked_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="No blocked domains found">
                              <columns>
                                 <Column><Text text="Domain" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="Count" /></Column>
@@ -143,7 +143,7 @@
                         <card:Header title="Slowest Queries (Last 1000)" iconSrc="sap-icon://time-account" />
                     </f:header>
                      <f:content>
-                        <Table items="{/slowest_queries}" inset="false" fixedLayout="false" class="sapUiSizeCompact">
+                        <Table items="{/slowest_queries}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="No query performance data available">
                              <columns>
                                 <Column><Text text="Domain" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="Time (ms)" /></Column>
