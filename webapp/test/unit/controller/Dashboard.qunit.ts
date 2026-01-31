@@ -61,6 +61,14 @@ QUnit.module("Dashboard Polling Logic", {
         window.clearInterval = (() => {
             ctx.clearCalls++;
         }) as unknown as typeof window.clearInterval;
+        window.setInterval = ((() => {
+            ctx.intervalCalls++;
+            return ctx.lastIntervalId;
+        }) as unknown as typeof window.setInterval);
+
+        window.clearInterval = ((() => {
+            ctx.clearCalls++;
+        }) as unknown as typeof window.clearInterval);
 
         // Spy on document.addEventListener
         ctx.originalAddEventListener = document.addEventListener.bind(document);
