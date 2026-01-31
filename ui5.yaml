@@ -4,12 +4,11 @@ metadata:
 type: application
 framework:
   name: OpenUI5
-  version: "1.142.0"
+  version: "1.144.0"
   libraries:
     - name: sap.m
     - name: sap.f
     - name: sap.ui.core
-    - name: sap.ui.unified
     - name: themelib_sap_horizon
 builder:
   customTasks:

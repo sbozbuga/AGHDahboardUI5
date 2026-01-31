@@ -1,0 +1,4 @@
+
+> ui5-agh-dashboard@1.0.0 ui5lint
+> ui5lint --details
+
