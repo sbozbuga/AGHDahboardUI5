@@ -48,15 +48,14 @@ QUnit.module("Dashboard Polling Logic", {
         ctx.clearCalls = 0;
         ctx.lastIntervalId = 123;
 
-        // @ts-expect-error: Mocking setInterval
-        window.setInterval = () => {
+        window.setInterval = ((() => {
             ctx.intervalCalls++;
             return ctx.lastIntervalId;
-        };
-        // @ts-expect-error: Mocking clearInterval
-        window.clearInterval = () => {
+        }) as unknown as typeof window.setInterval);
+
+        window.clearInterval = ((() => {
             ctx.clearCalls++;
-        };
+        }) as unknown as typeof window.clearInterval);
 
         // Spy on document.addEventListener
         ctx.originalAddEventListener = document.addEventListener.bind(document);
