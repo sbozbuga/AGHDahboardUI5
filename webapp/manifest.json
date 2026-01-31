@@ -48,7 +48,7 @@
 			"config": {
 				"routerClass": "sap.m.routing.Router",
 				"viewType": "XML",
-				"viewPath": "ui5.aghd.view",
+				"path": "ui5.aghd.view",
 				"controlId": "app",
 				"controlAggregation": "pages"
 			},
@@ -71,16 +71,19 @@
 			],
 			"targets": {
 				"login": {
-					"viewId": "login",
-					"viewName": "Login"
+					"type": "View",
+					"id": "login",
+					"name": "Login"
 				},
 				"dashboard": {
-					"viewId": "dashboard",
-					"viewName": "Dashboard"
+					"type": "View",
+					"id": "dashboard",
+					"name": "Dashboard"
 				},
 				"logs": {
-					"viewId": "logs",
-					"viewName": "Logs"
+					"type": "View",
+					"id": "logs",
+					"name": "Logs"
 				}
 			}
 		}
