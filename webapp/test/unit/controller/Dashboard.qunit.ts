@@ -1,4 +1,5 @@
 import Dashboard from "ui5/aghd/controller/Dashboard.controller";
+import AdGuardService from "ui5/aghd/service/AdGuardService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import JSONModel from "sap/ui/model/json/JSONModel";
 
@@ -13,6 +14,10 @@ interface TestContext {
     originalRemoveEventListener: typeof document.removeEventListener;
     eventListeners: Record<string, EventListenerOrEventListenerObject>;
     originalHiddenDescriptor: PropertyDescriptor | undefined;
+    model: JSONModel;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockService: any;
+    originalGetInstance: () => AdGuardService;
 }
 
 QUnit.module("Dashboard Controller Performance");
@@ -48,15 +53,14 @@ QUnit.module("Dashboard Polling Logic", {
         ctx.clearCalls = 0;
         ctx.lastIntervalId = 123;
 
-        // @ts-expect-error: Mocking setInterval
-        window.setInterval = () => {
+        window.setInterval = (() => {
             ctx.intervalCalls++;
             return ctx.lastIntervalId;
-        };
-        // @ts-expect-error: Mocking clearInterval
-        window.clearInterval = () => {
+        }) as unknown as typeof window.setInterval;
+
+        window.clearInterval = (() => {
             ctx.clearCalls++;
-        };
+        }) as unknown as typeof window.clearInterval;
 
         // Spy on document.addEventListener
         ctx.originalAddEventListener = document.addEventListener.bind(document);
@@ -137,4 +141,98 @@ QUnit.test("onVisibilityChange pauses polling when hidden", function(this: TestC
     ctx.controller.onVisibilityChange();
 
     assert.strictEqual(ctx.intervalCalls, 1, "Polling restarted when visible");
+});
+
+QUnit.module("Dashboard Data Fetching", {
+    beforeEach: function(this: TestContext) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const ctx = this;
+        ctx.controller = new Dashboard("dashboard");
+        ctx.model = new JSONModel();
+
+        // Mock getView
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        ctx.controller.getView = (() => ({
+            setModel: () => {},
+            getModel: () => ctx.model,
+            setBusy: () => {}
+        })) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+        // Mock AdGuardService
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        ctx.originalGetInstance = AdGuardService.getInstance;
+
+        ctx.mockService = {
+            getStats: () => Promise.resolve({ num_dns_queries: 100 }),
+            getQueryLog: () => Promise.resolve({ data: [{ time: "2023-01-01T12:00:00" }] }),
+            getSlowestQueries: () => Promise.resolve([{ domain: "slow.com", elapsedMs: 500 }])
+        };
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        AdGuardService.getInstance = () => ctx.mockService;
+    },
+    afterEach: function(this: TestContext) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const ctx = this;
+        ctx.controller.destroy();
+        AdGuardService.getInstance = ctx.originalGetInstance;
+    }
+});
+
+QUnit.test("onRefreshStats fetches slowest queries on first run", async function(this: TestContext, assert: Assert) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const ctx = this;
+    let called = false;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    ctx.mockService.getSlowestQueries = () => {
+        called = true;
+        return Promise.resolve([]);
+    };
+
+    await ctx.controller.onRefreshStats(true);
+    assert.ok(called, "getSlowestQueries called on first run");
+});
+
+QUnit.test("onRefreshStats skips slowest queries if logs unchanged", async function(this: TestContext, assert: Assert) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const ctx = this;
+
+    // First run
+    await ctx.controller.onRefreshStats(true);
+
+    // Reset spy
+    let called = false;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    ctx.mockService.getSlowestQueries = () => {
+        called = true;
+        return Promise.resolve([]);
+    };
+
+    // Second run - same log time
+    await ctx.controller.onRefreshStats(true);
+    assert.notOk(called, "getSlowestQueries skipped when log time matches");
+});
+
+QUnit.test("onRefreshStats fetches slowest queries if logs changed", async function(this: TestContext, assert: Assert) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const ctx = this;
+
+    // First run
+    await ctx.controller.onRefreshStats(true);
+
+    // Change log time
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    ctx.mockService.getQueryLog = () => Promise.resolve({ data: [{ time: "2023-01-01T12:00:01" }] });
+
+    // Spy
+    let called = false;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    ctx.mockService.getSlowestQueries = () => {
+        called = true;
+        return Promise.resolve([]);
+    };
+
+    // Second run
+    await ctx.controller.onRefreshStats(true);
+    assert.ok(called, "getSlowestQueries called when log time changed");
 });
