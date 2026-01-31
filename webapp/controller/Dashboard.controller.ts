@@ -8,6 +8,7 @@ import MessageBox from "sap/m/MessageBox";
 export default class Dashboard extends Controller {
     public formatter = formatter;
     private _timer: ReturnType<typeof setInterval> | undefined;
+    private _lastLatestTime: string | undefined;
     private static readonly REFRESH_INTERVAL = 15000;
 
     public onInit(): void {
@@ -15,12 +16,36 @@ export default class Dashboard extends Controller {
         void this.onRefreshStats();
 
         // Start Auto-Refresh
-        this._timer = setInterval(() => {
-            void this.onRefreshStats(true); // true = silent refresh
-        }, Dashboard.REFRESH_INTERVAL);
+        this.startPolling();
+
+        // Optimize: Pause polling when tab is inactive
+        document.addEventListener("visibilitychange", this.onVisibilityChange);
     }
 
     public onExit(): void {
+        this.stopPolling();
+        document.removeEventListener("visibilitychange", this.onVisibilityChange);
+    }
+
+    private onVisibilityChange = (): void => {
+        if (document.hidden) {
+            this.stopPolling();
+        } else {
+            // Refresh immediately when becoming visible to show latest data
+            void this.onRefreshStats(true);
+            this.startPolling();
+        }
+    };
+
+    private startPolling(): void {
+        if (!this._timer) {
+            this._timer = setInterval(() => {
+                void this.onRefreshStats(true); // true = silent refresh
+            }, Dashboard.REFRESH_INTERVAL);
+        }
+    }
+
+    private stopPolling(): void {
         if (this._timer) {
             clearInterval(this._timer);
             this._timer = undefined;
@@ -36,14 +61,25 @@ export default class Dashboard extends Controller {
         }
 
         try {
-            // Parallelize API calls to improve performance
-            const [data, slowest] = await Promise.all([
+            // Check for new logs before fetching heavy "slowest queries" list
+            // We fetch stats (lightweight) and the latest log entry (lightweight)
+            const [stats, latestLog] = await Promise.all([
                 AdGuardService.getInstance().getStats(),
-                AdGuardService.getInstance().getSlowestQueries(1000)
+                AdGuardService.getInstance().getQueryLog(1, 0, undefined, true)
             ]);
 
+            const latestTime = latestLog.data.length > 0 ? latestLog.data[0].time : undefined;
+            const currentData = model.getData() as Record<string, unknown>;
+            let slowest = currentData.slowest_queries || [];
+
+            // Only fetch heavy slowest queries if new data arrived (or first run)
+            if (latestTime !== this._lastLatestTime || !this._lastLatestTime) {
+                slowest = await AdGuardService.getInstance().getSlowestQueries(1000);
+                this._lastLatestTime = latestTime;
+            }
+
             model.setData({
-                ...data,
+                ...stats,
                 slowest_queries: slowest
             });
         } catch (error) {

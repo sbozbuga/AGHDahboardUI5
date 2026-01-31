@@ -16,6 +16,9 @@
 					growing="true"
 					growingThreshold="50"
 					growingScrollToLoad="true"
+					sticky="ColumnHeaders,HeaderToolbar"
+					alternateRowColors="true"
+					noDataText="No logs found. Try adjusting your filters or search."
 					updateFinished="onUpdateFinished">
 					<headerToolbar>
 						<OverflowToolbar>

@@ -17,3 +17,11 @@
 ## 2026-01-29 - Conditional Data Enrichment
 **Learning:** In `AdGuardService.ts`, `getQueryLog` was performing O(N) string analysis to set a `blocked` property on every record, even when the caller (e.g., `getSlowestQueries`) didn't use that property. This wasted CPU cycles during frequent polling.
 **Action:** Add optional flags to data fetching methods to skip expensive post-processing or enrichment steps when the caller only needs raw or partial data.
+
+## 2026-02-01 - Visibility-Aware Polling
+**Learning:** In `Dashboard.controller.ts`, the dashboard continued polling every 15 seconds even when the tab was in the background, wasting network bandwidth and CPU. The `visibilitychange` event can be used to pause/resume polling.
+**Action:** Always implement a `visibilitychange` listener for auto-refreshing components to pause activity when `document.hidden` is true.
+
+## 2026-02-02 - Content-Based Polling Optimization
+**Learning:** In `Dashboard.controller.ts`, fetching and processing the "Slowest Queries" list (1000 items) every 15 seconds consumed significant resources even when no new queries had occurred. By checking the timestamp of the *latest* single query (`limit=1`) first, we can conditionally skip the heavy fetch if the data hasn't changed.
+**Action:** For expensive polled operations, verify if the underlying data has changed using a lightweight "fingerprint" query (e.g., latest timestamp, count, or ETag) before fetching the full dataset.
