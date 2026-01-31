@@ -9,3 +9,7 @@
 ## 2026-01-29 - Login UX Polish
 **Learning:** Autofocusing the primary input on login screens significantly reduces interaction cost. `Label`'s `required` property provides a standard, accessible visual cue without custom CSS.
 **Action:** Use `onAfterRendering` to focus initial inputs and `required="true"` on labels for all form fields.
+
+## 2026-01-31 - Dashboard Empty States
+**Learning:** Tables nested in Dashboard Cards look "broken" when empty if they rely on the default no-data text. Specific messages provide immediate system status context.
+**Action:** Always define context-specific `noDataText` (e.g., "No active clients found") for tables in dashboard widgets.
