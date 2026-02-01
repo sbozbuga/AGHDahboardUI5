@@ -143,7 +143,11 @@ export default class GeminiService {
         try {
             // We use the REST API manually here because the SDK's listModels might be node-only or explicit
             // simpler to just hit the endpoint for this specific list.
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models`, {
+                headers: {
+                    "x-goog-api-key": apiKey
+                }
+            });
             if (!response.ok) return [];
 
             const data = await response.json() as GeminiResponse;
