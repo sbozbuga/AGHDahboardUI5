@@ -22,3 +22,8 @@
 **Vulnerability:** The application lacked a Content Security Policy (CSP), exposing it to Cross-Site Scripting (XSS) and data exfiltration risks, particularly concerning for a dashboard handling sensitive logs and API keys.
 **Learning:** Single Page Applications (SPAs) connecting to external APIs (Gemini) must strictly whitelist those connections. However, UI5 (OpenUI5) requires `unsafe-eval` for module loading/bindings and `unsafe-inline` for styles, limiting the strictness of the CSP.
 **Prevention:** Implement a CSP early in development. For UI5 apps, allow specific endpoints (like `generativelanguage.googleapis.com`) and development sockets (`ws:`), but accept the trade-off of allowing `unsafe-eval` as a framework constraint.
+
+## 2025-05-22 - API Key Exposure in URL
+**Vulnerability:** The Gemini API key was passed as a query parameter in the `getAvailableModels` request, potentially exposing it in logs and browser history.
+**Learning:** Even when using HTTPS, query parameters are part of the URL and can be logged. Headers are the preferred way to transmit secrets.
+**Prevention:** Use HTTP headers (e.g., `x-goog-api-key`) for API authentication whenever supported by the provider.
