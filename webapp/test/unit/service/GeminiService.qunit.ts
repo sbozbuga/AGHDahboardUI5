@@ -1,4 +1,5 @@
 import GeminiService from "ui5/aghd/service/GeminiService";
+import SettingsService from "ui5/aghd/service/SettingsService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 
 QUnit.module("Gemini Service");
@@ -35,4 +36,63 @@ QUnit.test("sanitizeInput removes control characters", function (assert) {
     input = "A\nB\tC\u0080D";
     expected = "ABCD";
     assert.strictEqual(service.sanitizeInput(input), expected, "Mixed control characters are removed");
+});
+
+interface TestContext {
+    originalFetch: typeof window.fetch;
+    originalGetApiKey: () => string;
+}
+
+QUnit.module("Gemini Service - API Security", {
+    beforeEach: function (this: TestContext) {
+        this.originalFetch = window.fetch;
+        const settings = SettingsService.getInstance();
+        // Bind to preserve context or just store reference if it's bound.
+        // Since we are replacing it, we just need the original function.
+        // But eslint complains about unbound method if we just access it.
+        this.originalGetApiKey = settings.getApiKey.bind(settings);
+
+        // Mock API Key
+        settings.getApiKey = () => "TEST_API_KEY";
+    },
+    afterEach: function (this: TestContext) {
+        window.fetch = this.originalFetch;
+        SettingsService.getInstance().getApiKey = this.originalGetApiKey;
+    }
+});
+
+QUnit.test("getAvailableModels uses header for API key (not URL)", async function (assert) {
+    const service = GeminiService.getInstance();
+    const done = assert.async();
+
+    // Mock fetch
+    // eslint-disable-next-line @typescript-eslint/require-await
+    window.fetch = async (url: RequestInfo | URL, options?: RequestInit) => {
+        // We know GeminiService calls with string, so simple cast avoids linter error about Object.toString()
+        const urlStr = url as string;
+
+        // 1. Verify URL does NOT contain key
+        assert.ok(urlStr.indexOf("key=") === -1, "API Key should NOT be in the URL query parameters");
+
+        // 2. Verify Header DOES contain key
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        const headers = options?.headers as Record<string, string>;
+        assert.ok(headers, "Headers object should exist");
+        assert.strictEqual(headers["x-goog-api-key"], "TEST_API_KEY", "API Key should be in 'x-goog-api-key' header");
+
+        done();
+
+        return {
+            ok: true,
+            // eslint-disable-next-line @typescript-eslint/require-await
+            json: async () => ({ models: [] })
+        } as Response;
+    };
+
+    try {
+        await service.getAvailableModels();
+    } catch {
+        // Ignore errors, we just want to check the fetch call
+    }
 });
