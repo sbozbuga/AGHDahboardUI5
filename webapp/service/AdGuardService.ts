@@ -1,4 +1,4 @@
-import { AdGuardData, AdGuardStats, RawAdGuardStats, StatsEntry } from "../model/AdGuardTypes";
+import { AdGuardData, AdGuardStats, RawAdGuardStats, StatsEntry, LogEntry } from "../model/AdGuardTypes";
 
 /**
  * Service for interacting with AdGuard Home API
@@ -131,14 +131,17 @@ export default class AdGuardService {
         try {
             const data = await this.getQueryLog(scanDepth, 0, undefined, true);
 
-            // Filter out entries with invalid elapsed times
-            const validEntries = data.data.filter(e => e.elapsedMs);
-
             // Map to intermediate structure with parsed value for efficient sorting
-            const mapped = validEntries.map(e => ({
-                origin: e,
-                elapsedVal: parseFloat(e.elapsedMs) || 0
-            }));
+            // Combine filter and map to avoid intermediate array allocation
+            const mapped: { origin: LogEntry; elapsedVal: number }[] = [];
+            for (const e of data.data) {
+                if (e.elapsedMs) {
+                    mapped.push({
+                        origin: e,
+                        elapsedVal: parseFloat(e.elapsedMs) || 0
+                    });
+                }
+            }
 
             // Sort by elapsedMs descending
             mapped.sort((a, b) => b.elapsedVal - a.elapsedVal);
