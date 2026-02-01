@@ -13,3 +13,7 @@
 ## 2026-01-31 - Dashboard Empty States
 **Learning:** Tables nested in Dashboard Cards look "broken" when empty if they rely on the default no-data text. Specific messages provide immediate system status context.
 **Action:** Always define context-specific `noDataText` (e.g., "No active clients found") for tables in dashboard widgets.
+
+## 2026-02-01 - Accessible Icon Buttons in Dialogs
+**Learning:** Icon-only buttons in dynamic table rows (like "Remove" actions) are frequently missed during accessibility sweeps because they lack text. This creates a "trap" for screen reader users who encounter an unlabeled button.
+**Action:** Always verify icon-only buttons in dialogs have explicit `tooltip` or `ariaLabelledBy` properties during implementation, not just during QA.
