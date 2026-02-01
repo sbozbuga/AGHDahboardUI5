@@ -25,5 +25,10 @@ export const Constants = {
         Dashboard: "dashboard",
         Logs: "logs",
         Login: "login"
+    },
+    ApiEndpoints: {
+        Login: "/control/login",
+        Stats: "/control/stats",
+        QueryLog: "/control/querylog"
     }
 };

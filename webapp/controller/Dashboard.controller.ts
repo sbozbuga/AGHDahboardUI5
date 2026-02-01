@@ -4,6 +4,7 @@ import UIComponent from "sap/ui/core/UIComponent";
 import AdGuardService from "../service/AdGuardService";
 import formatter from "../model/formatter";
 import MessageBox from "sap/m/MessageBox";
+import { Constants } from "../model/Constants";
 
 export default class Dashboard extends Controller {
     public formatter = formatter;
@@ -86,7 +87,7 @@ export default class Dashboard extends Controller {
             if ((error as Error).message === "Unauthorized") {
                 // Stop timer on auth error to prevent endless loops
                 if (this._timer) clearInterval(this._timer);
-                UIComponent.getRouterFor(this).navTo("login");
+                UIComponent.getRouterFor(this).navTo(Constants.Routes.Login);
                 return;
             }
             // Suppress errors during silent refresh to avoid popup span
@@ -103,12 +104,12 @@ export default class Dashboard extends Controller {
 
     public onPressLogs(): void {
         const router = UIComponent.getRouterFor(this);
-        router.navTo("logs");
+        router.navTo(Constants.Routes.Logs);
     }
 
     public onPressBlockedLogs(): void {
         const router = UIComponent.getRouterFor(this);
-        router.navTo("logs", {
+        router.navTo(Constants.Routes.Logs, {
             query: {
                 status: "Blocked"
             }
@@ -117,7 +118,7 @@ export default class Dashboard extends Controller {
 
     public onLogoutPress(): void {
         AdGuardService.getInstance().logout();
-        UIComponent.getRouterFor(this).navTo("login");
+        UIComponent.getRouterFor(this).navTo(Constants.Routes.Login);
         MessageBox.success("Logged out successfully.");
     }
 }
