@@ -21,7 +21,6 @@ import GeminiService from "../service/GeminiService";
 import { LogEntry, AdvancedFilterRule } from "../model/AdGuardTypes";
 import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import encodeXML from "sap/base/security/encodeXML";
-import Context from "sap/ui/model/Context";
 import { Constants } from "../model/Constants";
 
 interface RouteArguments {
