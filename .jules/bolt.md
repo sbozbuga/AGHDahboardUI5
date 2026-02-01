@@ -25,3 +25,7 @@
 ## 2026-02-02 - Content-Based Polling Optimization
 **Learning:** In `Dashboard.controller.ts`, fetching and processing the "Slowest Queries" list (1000 items) every 15 seconds consumed significant resources even when no new queries had occurred. By checking the timestamp of the *latest* single query (`limit=1`) first, we can conditionally skip the heavy fetch if the data hasn't changed.
 **Action:** For expensive polled operations, verify if the underlying data has changed using a lightweight "fingerprint" query (e.g., latest timestamp, count, or ETag) before fetching the full dataset.
+
+## 2026-02-03 - Loop Fusion for Data Processing
+**Learning:** In `AdGuardService.ts`, chaining `filter().map()` created intermediate arrays and iterated twice over the dataset. For frequent operations on large arrays (like log processing), fusing these into a single loop reduces memory allocation and CPU cycles.
+**Action:** Prefer single-pass loops (or `reduce`) over multiple array method chains when processing large datasets where performance is critical.
