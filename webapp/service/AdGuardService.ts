@@ -1,4 +1,5 @@
 import { AdGuardData, AdGuardStats, RawAdGuardStats, StatsEntry } from "../model/AdGuardTypes";
+import { Constants } from "../model/Constants";
 
 /**
  * Service for interacting with AdGuard Home API
@@ -19,20 +20,35 @@ export default class AdGuardService {
     private static readonly TOP_LIST_LIMIT = 10;
 
     /**
+     * Generic wrapper for API requests
+     */
+    private async _request<T>(url: string, options?: RequestInit): Promise<T> {
+        const response = await fetch(url, options);
+
+        if (response.status === 401) {
+            throw new Error("Unauthorized");
+        }
+
+        if (!response.ok) {
+            throw new Error(`Request failed: ${response.statusText}`);
+        }
+
+        // Handle empty bodies (e.g. login)
+        const text = await response.text();
+        return text ? JSON.parse(text) : {} as T;
+    }
+
+    /**
      * Authenticates with AdGuard Home
      */
     public async login(name: string, password: string): Promise<void> {
-        const response = await fetch("/control/login", {
+        await this._request(Constants.ApiEndpoints.Login, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({ name, password })
         });
-
-        if (!response.ok) {
-            throw new Error("Login failed");
-        }
     }
 
     /**
@@ -48,16 +64,7 @@ export default class AdGuardService {
      * Fetches dashboard statistics
      */
     public async getStats(): Promise<AdGuardStats> {
-        const response = await fetch("/control/stats");
-        if (response.status === 401) {
-            // intercept 401 and throw specific error or handle via event/router
-            // For now, let caller handle or we can emit a global event
-            throw new Error("Unauthorized");
-        }
-        if (!response.ok) {
-            throw new Error(`Error fetching stats: ${response.statusText}`);
-        }
-        const rawData = await response.json() as RawAdGuardStats;
+        const rawData = await this._request<RawAdGuardStats>(Constants.ApiEndpoints.Stats);
 
         const block_percentage = rawData.num_dns_queries > 0
             ? (rawData.num_blocked_filtering / rawData.num_dns_queries) * 100
@@ -91,17 +98,8 @@ export default class AdGuardService {
             params.append("response_status", filterStatus);
         }
 
-        const url = `/control/querylog?${params.toString()}`;
-
-        const response = await fetch(url);
-        if (response.status === 401) {
-            throw new Error("Unauthorized");
-        }
-        if (!response.ok) {
-            throw new Error(`Error fetching logs: ${response.statusText}`);
-        }
-
-        const data = await response.json() as AdGuardData;
+        const url = `${Constants.ApiEndpoints.QueryLog}?${params.toString()}`;
+        const data = await this._request<AdGuardData>(url);
 
         if (!skipEnrichment) {
             // Post-process to add blocked status
