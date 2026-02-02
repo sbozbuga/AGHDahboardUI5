@@ -1,6 +1,6 @@
 import AdGuardService from "ui5/aghd/service/AdGuardService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
-import { AdGuardData, RawAdGuardStats } from "ui5/aghd/model/AdGuardTypes";
+import { AdGuardData, RawAdGuardStats, LogEntry } from "ui5/aghd/model/AdGuardTypes";
 
 QUnit.module("AdGuardService");
 
@@ -73,6 +73,72 @@ QUnit.test("getQueryLog constructs correct URL with parameters", async function 
         assert.strictEqual(params.get("limit"), "10", "Limit param correct");
         assert.strictEqual(params.get("offset"), "5", "Offset param correct");
         assert.strictEqual(params.get("response_status"), filterStatus, "Status param correct and decoded");
+
+    } finally {
+        global.fetch = originalFetch;
+    }
+});
+
+QUnit.test("getSlowestQueries returns top 10 sorted items", async function (assert) {
+    const service = AdGuardService.getInstance();
+
+    // Create 50 log entries with random elapsed times
+    const entries: LogEntry[] = Array.from({ length: 50 }, (_, i) => ({
+        answer: [],
+        original_answer: [],
+        upstream: "1.1.1.1",
+        status: "OK",
+        question: { type: "A", name: `domain${i}.com`, class: "IN" },
+        client: "192.168.1.100",
+        time: "2023-01-01T12:00:00Z",
+        elapsedMs: String((i % 10) * 100 + (Math.random() * 100)), // Mixed values
+        reason: "NotFilteredNotFound",
+        filterId: 0,
+        rule: ""
+    }));
+
+    // Explicitly set top values to verify sorting
+    // Top 1: 5000ms
+    entries[10].elapsedMs = "5000";
+    entries[10].question.name = "slowest.com";
+
+    // Top 2: 4000ms
+    entries[20].elapsedMs = "4000";
+    entries[20].question.name = "second.com";
+
+    // Top 3..12: 3000..2100ms (10 items total needed, so we need 8 more high ones)
+    for(let k=0; k<8; k++) {
+        entries[30+k].elapsedMs = String(3000 - k*100); // 3000, 2900, ..., 2300
+        entries[30+k].question.name = `high${k}.com`;
+    }
+
+    const mockResponse: AdGuardData = { data: entries };
+
+    const originalFetch = global.fetch;
+    // @ts-expect-error: Mocking fetch for testing purposes
+    global.fetch = async () => {
+        return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => Promise.resolve(mockResponse)
+        });
+    };
+
+    try {
+        const slowest = await service.getSlowestQueries(50);
+
+        assert.strictEqual(slowest.length, 10, "Should return exactly 10 items");
+        assert.strictEqual(slowest[0].domain, "slowest.com", "First item should be 'slowest.com' (5000ms)");
+        assert.strictEqual(slowest[0].elapsedMs, 5000, "First item elapsedMs should be 5000");
+        assert.strictEqual(slowest[1].domain, "second.com", "Second item should be 'second.com' (4000ms)");
+        assert.strictEqual(slowest[1].elapsedMs, 4000, "Second item elapsedMs should be 4000");
+
+        // Verify sorted order
+        let prev = slowest[0].elapsedMs;
+        for(let i=1; i<slowest.length; i++) {
+            assert.ok(slowest[i].elapsedMs <= prev, `Item ${i} (${slowest[i].elapsedMs}) should be <= previous (${prev})`);
+            prev = slowest[i].elapsedMs;
+        }
 
     } finally {
         global.fetch = originalFetch;
