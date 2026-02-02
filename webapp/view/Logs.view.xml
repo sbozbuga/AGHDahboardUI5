@@ -28,7 +28,7 @@
 							<Button icon="sap-icon://nav-back" press=".onNavBack" tooltip="Back" />
 							<Title text="AdGuard Home Query Log" level="H2"/>
 							<ToolbarSpacer/>
-							<SearchField width="20%" search=".onSearch" placeholder="Search Domain/Client" />
+							<SearchField width="20%" search=".onSearch" placeholder="Search Domain/Client" maxLength="200" />
 							<Button icon="sap-icon://sort" press=".onOpenViewSettings" tooltip="Sort/Group/Filter"/>
 							<Button icon="sap-icon://refresh" press=".onRefreshLogs" tooltip="Refresh"/>
                             <ToolbarSeparator />
