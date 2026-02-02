@@ -17,3 +17,7 @@
 ## 2026-02-01 - Accessible Icon Buttons in Dialogs
 **Learning:** Icon-only buttons in dynamic table rows (like "Remove" actions) are frequently missed during accessibility sweeps because they lack text. This creates a "trap" for screen reader users who encounter an unlabeled button.
 **Action:** Always verify icon-only buttons in dialogs have explicit `tooltip` or `ariaLabelledBy` properties during implementation, not just during QA.
+
+## 2026-02-04 - Semantic Icons Accessibility
+**Learning:** `core:Icon` defaults to `decorative="true"`, causing screen readers to ignore it even if `tooltip` or `alt` is set.
+**Action:** Always set `decorative="false"` and provide `alt`/`tooltip` for icons that convey status or meaning (not just decoration).
