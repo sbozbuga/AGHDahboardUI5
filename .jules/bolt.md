@@ -29,3 +29,7 @@
 ## 2026-02-03 - Loop Fusion for Data Processing
 **Learning:** In `AdGuardService.ts`, chaining `filter().map()` created intermediate arrays and iterated twice over the dataset. For frequent operations on large arrays (like log processing), fusing these into a single loop reduces memory allocation and CPU cycles.
 **Action:** Prefer single-pass loops (or `reduce`) over multiple array method chains when processing large datasets where performance is critical.
+
+## 2026-02-04 - Single-Pass Top N Selection
+**Learning:** In `AdGuardService.ts`, `getSlowestQueries` was allocating an intermediate object for every log entry (1000 items) and sorting the entire array just to extract the top 10. This generated unnecessary garbage and CPU load.
+**Action:** Use a single-pass loop that maintains a small, sorted "Top N" array (bounded insertion sort). This eliminates intermediate allocations for the majority of items and reduces sorting complexity to O(N * K) where K is small.

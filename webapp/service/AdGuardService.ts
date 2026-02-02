@@ -1,4 +1,4 @@
-import { AdGuardData, AdGuardStats, RawAdGuardStats, StatsEntry, LogEntry } from "../model/AdGuardTypes";
+import { AdGuardData, AdGuardStats, RawAdGuardStats, StatsEntry } from "../model/AdGuardTypes";
 import { Constants } from "../model/Constants";
 
 /**
@@ -129,28 +129,49 @@ export default class AdGuardService {
         try {
             const data = await this.getQueryLog(scanDepth, 0, undefined, true);
 
-            // Map to intermediate structure with parsed value for efficient sorting
-            // Combine filter and map to avoid intermediate array allocation
-            const mapped: { origin: LogEntry; elapsedVal: number }[] = [];
+            // Optimization: Maintain a sorted list of top N items in a single pass
+            // This avoids creating intermediate objects for all items and sorting the full array
+            const topList: { domain: string; elapsedMs: number; client: string; reason: string; }[] = [];
+
             for (const e of data.data) {
-                if (e.elapsedMs) {
-                    mapped.push({
-                        origin: e,
-                        elapsedVal: parseFloat(e.elapsedMs) || 0
-                    });
+                const val = parseFloat(e.elapsedMs) || 0;
+                if (val <= 0) {
+                    continue;
+                }
+
+                // Skip if list is full and value is not greater than the smallest item (last one)
+                if (topList.length >= AdGuardService.TOP_LIST_LIMIT && val <= topList[topList.length - 1].elapsedMs) {
+                    continue;
+                }
+
+                const entry = {
+                    domain: e.question.name,
+                    elapsedMs: val,
+                    client: e.client,
+                    reason: e.reason
+                };
+
+                // Insert in sorted position
+                let inserted = false;
+                for (let i = 0; i < topList.length; i++) {
+                    if (val > topList[i].elapsedMs) {
+                        topList.splice(i, 0, entry);
+                        inserted = true;
+                        break;
+                    }
+                }
+
+                if (!inserted && topList.length < AdGuardService.TOP_LIST_LIMIT) {
+                    topList.push(entry);
+                }
+
+                // Trim if needed
+                if (topList.length > AdGuardService.TOP_LIST_LIMIT) {
+                    topList.pop();
                 }
             }
 
-            // Sort by elapsedMs descending
-            mapped.sort((a, b) => b.elapsedVal - a.elapsedVal);
-
-            // Return Top N
-            return mapped.slice(0, AdGuardService.TOP_LIST_LIMIT).map(item => ({
-                domain: item.origin.question.name,
-                elapsedMs: item.elapsedVal,
-                client: item.origin.client,
-                reason: item.origin.reason
-            }));
+            return topList;
         } catch (error) {
             console.error("Failed to fetch slowest queries", error);
             return [];
