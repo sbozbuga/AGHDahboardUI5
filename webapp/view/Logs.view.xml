@@ -149,7 +149,7 @@
 								<ObjectStatus
 									text="{status}"
 									state="{= ${status} === 'OK' ? 'Success' : 'Error'}" />
-								<core:Icon src="sap-icon://decline" color="Negative" visible="{= ${blocked} === true }" />
+								<core:Icon src="sap-icon://decline" color="Negative" visible="{= ${blocked} === true }" tooltip="Request Blocked" alt="Request Blocked" decorative="false" />
 								<ObjectNumber
 									number="{
 										path: 'elapsedMs',

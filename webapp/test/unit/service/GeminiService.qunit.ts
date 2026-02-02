@@ -75,8 +75,6 @@ QUnit.test("getAvailableModels uses header for API key (not URL)", async functio
         assert.ok(urlStr.indexOf("key=") === -1, "API Key should NOT be in the URL query parameters");
 
         // 2. Verify Header DOES contain key
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
         const headers = options?.headers as Record<string, string>;
         assert.ok(headers, "Headers object should exist");
         assert.strictEqual(headers["x-goog-api-key"], "TEST_API_KEY", "API Key should be in 'x-goog-api-key' header");
