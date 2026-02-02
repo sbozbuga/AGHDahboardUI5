@@ -35,7 +35,7 @@ export default class AdGuardService {
 
         // Handle empty bodies (e.g. login)
         const text = await response.text();
-        return text ? (JSON.parse(text) as T) : {} as T;
+        return text ? (JSON.parse(text) as T) : ({} as T);
     }
 
     /**
