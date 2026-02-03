@@ -5,3 +5,4 @@ import "unit/controller/Login.qunit";
 import "unit/controller/Logs.qunit";
 import "unit/service/AdGuardService.qunit";
 import "unit/service/GeminiService.qunit";
+import "unit/controller/DashboardPerformance.qunit";
