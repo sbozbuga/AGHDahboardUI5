@@ -52,6 +52,8 @@ export default class Logs extends Controller {
 	private _aSorters: Sorter[] = [];
 
 	private static readonly DEFAULT_LIMIT = 1000;
+	private static readonly BOLD_REGEX = /\*\*(.*?)\*\*/g;
+	private static readonly NEWLINE_REGEX = /\n/g;
 
 	public onInit(): void {
 		// apply content density mode to root view
@@ -445,8 +447,8 @@ export default class Logs extends Controller {
 		if (!text) return "";
 		let safeText = encodeXML(text);
 		safeText = safeText
-			.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-			.replace(/\n/g, "<br/>");
+			.replace(Logs.BOLD_REGEX, "<strong>$1</strong>")
+			.replace(Logs.NEWLINE_REGEX, "<br/>");
 		return safeText;
 	}
 
