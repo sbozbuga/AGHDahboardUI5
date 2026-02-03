@@ -224,23 +224,33 @@ QUnit.test("onRefreshStats skips slowest queries if logs unchanged", async funct
 QUnit.test("onRefreshStats fetches slowest queries if logs changed", async function(this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
+    const originalDateNow = Date.now;
+    let currentTime = 1000000;
+    Date.now = () => currentTime;
 
-    // First run
-    await ctx.controller.onRefreshStats(true);
+    try {
+        // First run
+        await ctx.controller.onRefreshStats(true);
 
-    // Change log time
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ctx.mockService.getQueryLog = () => Promise.resolve({ data: [{ time: "2023-01-01T12:00:01" }] });
+        // Change log time
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        ctx.mockService.getQueryLog = () => Promise.resolve({ data: [{ time: "2023-01-01T12:00:01" }] });
 
-    // Spy
-    let called = false;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ctx.mockService.getSlowestQueries = () => {
-        called = true;
-        return Promise.resolve([]);
-    };
+        // Spy
+        let called = false;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        ctx.mockService.getSlowestQueries = () => {
+            called = true;
+            return Promise.resolve([]);
+        };
 
-    // Second run
-    await ctx.controller.onRefreshStats(true);
-    assert.ok(called, "getSlowestQueries called when log time changed");
+        // Advance time to bypass throttle
+        currentTime += 61000;
+
+        // Second run
+        await ctx.controller.onRefreshStats(true);
+        assert.ok(called, "getSlowestQueries called when log time changed");
+    } finally {
+        Date.now = originalDateNow;
+    }
 });
