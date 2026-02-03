@@ -75,6 +75,7 @@ export default class Logs extends Controller {
 				advancedFilters: []
 			};
 			const model = new JSONModel(modelData);
+			model.setSizeLimit(Logs.DEFAULT_LIMIT);
 			view.setModel(model);
 		}
 
