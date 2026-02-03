@@ -7,6 +7,8 @@ import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import UIComponent from "sap/ui/core/UIComponent";
 import SearchField from "sap/m/SearchField";
+import Input from "sap/m/Input";
+import { InputType } from "sap/m/library";
 import Event from "sap/ui/base/Event";
 import ListBinding from "sap/ui/model/ListBinding";
 import Sorter from "sap/ui/model/Sorter";
@@ -316,6 +318,20 @@ export default class Logs extends Controller {
 				header.setIcon("");
 			}
 		});
+	}
+
+	public onToggleApiKeyVisibility(event: Event): void {
+		const input = event.getSource();
+		if (!(input instanceof Input)) return;
+
+		const currentType = input.getType();
+		if (currentType === InputType.Password) {
+			input.setType(InputType.Text);
+			input.setValueHelpIconSrc("sap-icon://hide");
+		} else {
+			input.setType(InputType.Password);
+			input.setValueHelpIconSrc("sap-icon://show");
+		}
 	}
 
 	public async onOpenSettings(): Promise<void> {
