@@ -146,7 +146,7 @@
                         <Table items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="No query performance data available">
                              <columns>
                                 <Column><Text text="Domain" /></Column>
-                                <Column hAlign="End" width="30%"><Text text="Time (ms)" /></Column>
+                                <Column hAlign="End" width="30%"><Text text="Elapsed (ms)" /></Column>
                             </columns>
                             <items>
                                 <ColumnListItem
@@ -168,7 +168,6 @@
 												path: 'elapsedMs',
 												formatter: '.formatter.formatElapsed'
 											}"
-											unit="ms"
 											state="Warning" 
                                              />
                                     </cells>

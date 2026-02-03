@@ -86,7 +86,7 @@
 						</Column>
 						<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" hAlign="End" id="colElapsed">
 							<header>
-								<Button text="Elapsed" press=".onSort" type="Transparent">
+								<Button text="Elapsed (ms)" press=".onSort" type="Transparent">
 									<customData>
 										<core:CustomData key="key" value="elapsedMs" />
 									</customData>
@@ -155,7 +155,6 @@
 										path: 'elapsedMs',
 										formatter: '.formatter.formatElapsed'
 									}"
-									unit="ms"
 									state="None" />
 								<Text text="{upstream}" wrapping="true" maxLines="2" />
 								<Text text="{reason}" wrapping="true" maxLines="2" />
