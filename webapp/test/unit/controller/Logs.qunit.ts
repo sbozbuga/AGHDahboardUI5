@@ -3,6 +3,7 @@ import QUnit from "sap/ui/thirdparty/qunit-2";
 import MessageToast from "sap/m/MessageToast";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import View from "sap/ui/core/mvc/View";
+import UIComponent from "sap/ui/core/UIComponent";
 
 QUnit.module("Logs Controller");
 
@@ -92,4 +93,53 @@ QUnit.test("formatInsights sanitizes HTML and applies Markdown", function (asser
     input = "Line 1\nLine 2";
     expected = "Line 1<br/>Line 2";
     assert.strictEqual(controller.formatInsights(input), expected, "Newlines are converted");
+});
+
+QUnit.test("onInit sets model size limit to DEFAULT_LIMIT", function (assert) {
+    const controller = new LogsController("logs");
+
+    // Mock Component
+    const componentStub = {
+        getContentDensityClass: () => "sapUiSizeCompact"
+    };
+
+    // Mock View
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let model: any;
+    const viewStub = {
+        addStyleClass: () => {},
+        setModel: (m: JSONModel) => { model = m; },
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        getModel: () => model,
+        byId: () => null
+    };
+
+    // @ts-expect-error - Mocking
+    controller.getOwnerComponent = () => componentStub;
+    // @ts-expect-error - Mocking
+    controller.getView = () => viewStub;
+
+    // Mock Router
+    const routerStub = {
+        getRoute: () => ({ attachPatternMatched: () => {} })
+    };
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const originalGetRouter = UIComponent.getRouterFor;
+    // @ts-expect-error - Mocking
+    UIComponent.getRouterFor = () => routerStub;
+
+    // Act
+    controller.onInit();
+
+    // Assert
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+    const sizeLimit = model.iSizeLimit;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+    const dataLimit = model.getProperty("/limit");
+
+    assert.strictEqual(dataLimit, 1000, "Model limit data should be 1000");
+    assert.strictEqual(sizeLimit, 1000, "Model size limit should be set to 1000");
+
+    // Cleanup
+    UIComponent.getRouterFor = originalGetRouter;
 });

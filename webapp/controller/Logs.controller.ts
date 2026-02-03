@@ -7,6 +7,8 @@ import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import UIComponent from "sap/ui/core/UIComponent";
 import SearchField from "sap/m/SearchField";
+import Input from "sap/m/Input";
+import { InputType } from "sap/m/library";
 import Event from "sap/ui/base/Event";
 import ListBinding from "sap/ui/model/ListBinding";
 import Sorter from "sap/ui/model/Sorter";
@@ -22,6 +24,11 @@ import { LogEntry, AdvancedFilterRule } from "../model/AdGuardTypes";
 import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import encodeXML from "sap/base/security/encodeXML";
 import { Constants } from "../model/Constants";
+
+interface ProcessedLogEntry extends Omit<LogEntry, "time" | "elapsedMs"> {
+	time: Date;
+	elapsedMs: number;
+}
 
 interface RouteArguments {
 	"?query"?: {
@@ -50,6 +57,8 @@ export default class Logs extends Controller {
 	private _aSorters: Sorter[] = [];
 
 	private static readonly DEFAULT_LIMIT = 1000;
+	private static readonly BOLD_REGEX = /\*\*(.*?)\*\*/g;
+	private static readonly NEWLINE_REGEX = /\n/g;
 
 	public onInit(): void {
 		// apply content density mode to root view
@@ -66,6 +75,7 @@ export default class Logs extends Controller {
 				advancedFilters: []
 			};
 			const model = new JSONModel(modelData);
+			model.setSizeLimit(Logs.DEFAULT_LIMIT);
 			view.setModel(model);
 		}
 
@@ -124,11 +134,12 @@ export default class Logs extends Controller {
 				...item,
 				time: new Date(item.time),
 				elapsedMs: parseFloat(item.elapsedMs)
-			}));
+			})) as ProcessedLogEntry[];
 
 			if (bAppend) {
-				const currentData = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
-				model.setProperty(Constants.ModelProperties.Data, [...currentData, ...processedData]);
+				const currentData = model.getProperty(Constants.ModelProperties.Data) as ProcessedLogEntry[];
+				currentData.push(...processedData);
+				model.refresh(true);
 			} else {
 				model.setProperty(Constants.ModelProperties.Data, processedData);
 			}
@@ -318,6 +329,20 @@ export default class Logs extends Controller {
 		});
 	}
 
+	public onToggleApiKeyVisibility(event: Event): void {
+		const input = event.getSource();
+		if (!(input instanceof Input)) return;
+
+		const currentType = input.getType();
+		if (currentType === InputType.Password) {
+			input.setType(InputType.Text);
+			input.setValueHelpIconSrc("sap-icon://hide");
+		} else {
+			input.setType(InputType.Password);
+			input.setValueHelpIconSrc("sap-icon://show");
+		}
+	}
+
 	public async onOpenSettings(): Promise<void> {
 		const dialog = await this._openDialog(Constants.Fragments.SettingsDialog);
 
@@ -386,7 +411,7 @@ export default class Logs extends Controller {
 		const view = this.getView();
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
-		const logs = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
+		const logs = model.getProperty(Constants.ModelProperties.Data) as ProcessedLogEntry[];
 
 		if (!logs || logs.length === 0) {
 			MessageBox.information("No logs available to analyze.");
@@ -396,7 +421,8 @@ export default class Logs extends Controller {
 		view.setBusy(true);
 
 		try {
-			const insights = await GeminiService.getInstance().generateInsights(logs);
+			// Cast to LogEntry[] as GeminiService doesn't use the time/elapsedMs fields for summary
+			const insights = await GeminiService.getInstance().generateInsights(logs as unknown as LogEntry[]);
 			const html = this.formatInsights(insights);
 
 			model.setProperty("/analysisHtml", html);
@@ -429,8 +455,8 @@ export default class Logs extends Controller {
 		if (!text) return "";
 		let safeText = encodeXML(text);
 		safeText = safeText
-			.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-			.replace(/\n/g, "<br/>");
+			.replace(Logs.BOLD_REGEX, "<strong>$1</strong>")
+			.replace(Logs.NEWLINE_REGEX, "<br/>");
 		return safeText;
 	}
 

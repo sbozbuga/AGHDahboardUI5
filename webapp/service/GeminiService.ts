@@ -23,6 +23,8 @@ interface GeminiResponse {
 
 export default class GeminiService {
     private static instance: GeminiService;
+    // eslint-disable-next-line no-control-regex
+    private static readonly CONTROL_CHARS_REGEX = /[\x00-\x1F\x7F-\x9F]/g;
 
     public static getInstance(): GeminiService {
         if (!GeminiService.instance) {
@@ -33,8 +35,7 @@ export default class GeminiService {
 
     public sanitizeInput(str: string): string {
         // Remove control characters (0-31, 127, and C1 128-159) to prevent prompt injection via newlines etc.
-        // eslint-disable-next-line no-control-regex
-        return str.replace(/[\x00-\x1F\x7F-\x9F]/g, "").trim();
+        return str.replace(GeminiService.CONTROL_CHARS_REGEX, "").trim();
     }
 
     public async generateInsights(logs: LogEntry[]): Promise<string> {
