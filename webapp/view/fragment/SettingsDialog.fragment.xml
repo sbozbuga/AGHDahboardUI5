@@ -13,6 +13,9 @@
 					value="{/apiKey}"
 					placeholder="Enter your Gemini API Key"
 					type="Password"
+					showValueHelp="true"
+					valueHelpIconSrc="sap-icon://show"
+					valueHelpRequest=".onToggleApiKeyVisibility"
 					width="100%"
 					maxLength="100" />
 				<Label text="Gemini Model" labelFor="modelSelect" class="sapUiSmallMarginTop"/>

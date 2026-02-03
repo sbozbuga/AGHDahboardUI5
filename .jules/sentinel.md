@@ -27,3 +27,8 @@
 **Vulnerability:** The Gemini API key was passed as a query parameter in the `getAvailableModels` request, potentially exposing it in logs and browser history.
 **Learning:** Even when using HTTPS, query parameters are part of the URL and can be logged. Headers are the preferred way to transmit secrets.
 **Prevention:** Use HTTP headers (e.g., `x-goog-api-key`) for API authentication whenever supported by the provider.
+
+## 2025-01-31 - Missing Security Headers in Nginx
+**Vulnerability:** The Nginx configuration lacked standard security headers, exposing the application to Clickjacking, MIME sniffing, and information leakage.
+**Learning:** Even for static deployments of UI5 apps, the web server (Nginx) must be explicitly hardened. CSP must be carefully crafted to allow UI5's dynamic nature (`unsafe-eval`, `unsafe-inline`) while restricting external connections.
+**Prevention:** Include a hardened `nginx.conf` template in the repository to guide secure deployment.
