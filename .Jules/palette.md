@@ -21,3 +21,7 @@
 ## 2026-02-04 - Semantic Icons Accessibility
 **Learning:** `core:Icon` defaults to `decorative="true"`, causing screen readers to ignore it even if `tooltip` or `alt` is set.
 **Action:** Always set `decorative="false"` and provide `alt`/`tooltip` for icons that convey status or meaning (not just decoration).
+
+## 2026-02-05 - Password Visibility Toggle
+**Learning:** `sap.m.Input` with `type="Password"` does not provide a native visibility toggle.
+**Action:** Implement manual toggle using `showValueHelp="true"`, `valueHelpIconSrc="sap-icon://show"`, and handling `valueHelpRequest` to switch `type`.
