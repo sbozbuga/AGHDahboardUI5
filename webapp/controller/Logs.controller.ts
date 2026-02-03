@@ -25,6 +25,11 @@ import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import encodeXML from "sap/base/security/encodeXML";
 import { Constants } from "../model/Constants";
 
+interface ProcessedLogEntry extends Omit<LogEntry, "time" | "elapsedMs"> {
+	time: Date;
+	elapsedMs: number;
+}
+
 interface RouteArguments {
 	"?query"?: {
 		status?: string;
@@ -126,11 +131,12 @@ export default class Logs extends Controller {
 				...item,
 				time: new Date(item.time),
 				elapsedMs: parseFloat(item.elapsedMs)
-			}));
+			})) as ProcessedLogEntry[];
 
 			if (bAppend) {
-				const currentData = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
-				model.setProperty(Constants.ModelProperties.Data, [...currentData, ...processedData]);
+				const currentData = model.getProperty(Constants.ModelProperties.Data) as ProcessedLogEntry[];
+				currentData.push(...processedData);
+				model.refresh(true);
 			} else {
 				model.setProperty(Constants.ModelProperties.Data, processedData);
 			}
@@ -402,7 +408,7 @@ export default class Logs extends Controller {
 		const view = this.getView();
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
-		const logs = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
+		const logs = model.getProperty(Constants.ModelProperties.Data) as ProcessedLogEntry[];
 
 		if (!logs || logs.length === 0) {
 			MessageBox.information("No logs available to analyze.");
@@ -412,7 +418,8 @@ export default class Logs extends Controller {
 		view.setBusy(true);
 
 		try {
-			const insights = await GeminiService.getInstance().generateInsights(logs);
+			// Cast to LogEntry[] as GeminiService doesn't use the time/elapsedMs fields for summary
+			const insights = await GeminiService.getInstance().generateInsights(logs as unknown as LogEntry[]);
 			const html = this.formatInsights(insights);
 
 			model.setProperty("/analysisHtml", html);
