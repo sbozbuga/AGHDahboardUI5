@@ -5,6 +5,7 @@ import AdGuardService from "../service/AdGuardService";
 import formatter from "../model/formatter";
 import MessageBox from "sap/m/MessageBox";
 import { Constants } from "../model/Constants";
+import { AdGuardStats } from "../model/AdGuardTypes";
 
 export default class Dashboard extends Controller {
     public formatter = formatter;
@@ -70,13 +71,35 @@ export default class Dashboard extends Controller {
             ]);
 
             const latestTime = latestLog.data.length > 0 ? latestLog.data[0].time : undefined;
-            const currentData = model.getData() as Record<string, unknown>;
-            let slowest = currentData.slowest_queries || [];
+            const currentData = model.getData() as AdGuardStats & { slowest_queries: unknown[] };
+
+            let slowest = currentData?.slowest_queries || [];
+            let slowestChanged = false;
 
             // Only fetch heavy slowest queries if new data arrived (or first run)
             if (latestTime !== this._lastLatestTime || !this._lastLatestTime) {
                 slowest = await AdGuardService.getInstance().getSlowestQueries(1000);
                 this._lastLatestTime = latestTime;
+                slowestChanged = true;
+            }
+
+            // Optimization: Skip model update if data hasn't changed
+            if (!slowestChanged && currentData && currentData.num_dns_queries !== undefined) {
+                const statsUnchanged =
+                   currentData.num_dns_queries === stats.num_dns_queries &&
+                   currentData.num_blocked_filtering === stats.num_blocked_filtering &&
+                   currentData.avg_processing_time === stats.avg_processing_time &&
+                   currentData.block_percentage === stats.block_percentage &&
+                   JSON.stringify(currentData.top_queried_domains) === JSON.stringify(stats.top_queried_domains) &&
+                   JSON.stringify(currentData.top_blocked_domains) === JSON.stringify(stats.top_blocked_domains) &&
+                   JSON.stringify(currentData.top_clients) === JSON.stringify(stats.top_clients);
+
+                if (statsUnchanged) {
+                    if (!silent) {
+                        this.getView()?.setBusy(false);
+                    }
+                    return;
+                }
             }
 
             model.setData({
