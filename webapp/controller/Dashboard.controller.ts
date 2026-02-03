@@ -11,7 +11,9 @@ export default class Dashboard extends Controller {
     public formatter = formatter;
     private _timer: ReturnType<typeof setInterval> | undefined;
     private _lastLatestTime: string | undefined;
+    private _lastSlowestQueryFetchTime: number | undefined;
     private static readonly REFRESH_INTERVAL = 15000;
+    private static readonly SLOWEST_QUERY_INTERVAL = 60000; // 1 minute throttle for heavy queries
 
     public onInit(): void {
         this.getView()?.setModel(new JSONModel());
@@ -77,9 +79,15 @@ export default class Dashboard extends Controller {
             let slowestChanged = false;
 
             // Only fetch heavy slowest queries if new data arrived (or first run)
-            if (latestTime !== this._lastLatestTime || !this._lastLatestTime) {
+            // AND enough time has passed since last fetch to avoid server load
+            const now = Date.now();
+            const isDataNew = latestTime !== this._lastLatestTime || !this._lastLatestTime;
+            const isTimeDue = !this._lastSlowestQueryFetchTime || (now - this._lastSlowestQueryFetchTime >= Dashboard.SLOWEST_QUERY_INTERVAL);
+
+            if (isDataNew && isTimeDue) {
                 slowest = await AdGuardService.getInstance().getSlowestQueries(1000);
                 this._lastLatestTime = latestTime;
+                this._lastSlowestQueryFetchTime = now;
                 slowestChanged = true;
             }
 
