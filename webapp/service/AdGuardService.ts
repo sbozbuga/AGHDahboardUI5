@@ -125,13 +125,10 @@ export default class AdGuardService {
      * Fetches the last N records and returns the top 5 slowest queries
      * @param scanDepth Number of records to scan (default 1000)
      */
-    public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; }[]> {
+    public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[]; }[]> {
         try {
             const data = await this.getQueryLog(scanDepth, 0, undefined, true);
-
-            // Optimization: Maintain a sorted list of top N items in a single pass
-            // This avoids creating intermediate objects for all items and sorting the full array
-            const topList: { domain: string; elapsedMs: number; client: string; reason: string; }[] = [];
+            const domainMap = new Map<string, { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }>();
 
             for (const e of data.data) {
                 const val = parseFloat(e.elapsedMs) || 0;
@@ -139,39 +136,49 @@ export default class AdGuardService {
                     continue;
                 }
 
-                // Skip if list is full and value is not greater than the smallest item (last one)
-                if (topList.length >= AdGuardService.TOP_LIST_LIMIT && val <= topList[topList.length - 1].elapsedMs) {
-                    continue;
-                }
-
-                const entry = {
-                    domain: e.question.name,
-                    elapsedMs: val,
-                    client: e.client,
-                    reason: e.reason
-                };
-
-                // Insert in sorted position
-                let inserted = false;
-                for (let i = 0; i < topList.length; i++) {
-                    if (val > topList[i].elapsedMs) {
-                        topList.splice(i, 0, entry);
-                        inserted = true;
-                        break;
+                // Aggregate by domain
+                if (domainMap.has(e.question.name)) {
+                    const existing = domainMap.get(e.question.name)!;
+                    existing.occurrences.push(val);
+                    // Keep the max elapsed time and its details
+                    if (val > existing.elapsedMs) {
+                        existing.elapsedMs = val;
+                        existing.client = e.client;
+                        existing.reason = e.reason;
                     }
-                }
-
-                if (!inserted && topList.length < AdGuardService.TOP_LIST_LIMIT) {
-                    topList.push(entry);
-                }
-
-                // Trim if needed
-                if (topList.length > AdGuardService.TOP_LIST_LIMIT) {
-                    topList.pop();
+                } else {
+                    domainMap.set(e.question.name, {
+                        domain: e.question.name,
+                        elapsedMs: val,
+                        client: e.client,
+                        reason: e.reason,
+                        occurrences: [val]
+                    });
                 }
             }
 
-            return topList;
+            // Convert to array and sort by elapsedMs descending
+            const sortedList = Array.from(domainMap.values()).sort((a, b) => b.elapsedMs - a.elapsedMs);
+
+            // Get top 10
+            const top10 = sortedList.slice(0, 10);
+
+            if (top10.length > 0) {
+                // Determine threshold from the last item in the top 10 list
+                const lastItem = top10[top10.length - 1];
+                // Sort its occurrences descending
+                const lastItemOccurrences = [...lastItem.occurrences].sort((a, b) => b - a);
+                // Threshold is the 5th slowest (index 4) or the fastest (last) if fewer than 5
+                const thresholdIndex = Math.min(4, lastItemOccurrences.length - 1);
+                const threshold = lastItemOccurrences[thresholdIndex];
+
+                // Filter occurrences for all items in the list
+                top10.forEach(item => {
+                    item.occurrences = item.occurrences.filter(val => val >= threshold);
+                });
+            }
+
+            return top10;
         } catch (error) {
             console.error("Failed to fetch slowest queries", error);
             return [];

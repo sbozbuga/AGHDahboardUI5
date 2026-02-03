@@ -143,22 +143,34 @@
                         <card:Header title="Slowest Queries (Last 1000)" iconSrc="sap-icon://time-account" />
                     </f:header>
                      <f:content>
-                        <Table items="{/slowest_queries}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="No query performance data available">
+                        <Table items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="No query performance data available">
                              <columns>
                                 <Column><Text text="Domain" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="Time (ms)" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem>
+                                <ColumnListItem
+                                    tooltip="{
+                                        path: 'occurrences',
+                                        formatter: '.formatter.slowestTooltip'
+                                    }">
                                     <cells>
-                                        <Text text="{domain}" />
+                                        <Text
+                                            text="{
+                                                parts: [
+                                                    {path: 'domain'},
+                                                    {path: 'occurrences'}
+                                                ],
+                                                formatter: '.formatter.formatDomainWithCount'
+                                            }" />
                                         <ObjectNumber
 											number="{
 												path: 'elapsedMs',
 												formatter: '.formatter.formatElapsed'
 											}"
 											unit="ms"
-											state="Warning" />
+											state="Warning" 
+                                             />
                                     </cells>
                                 </ColumnListItem>
                             </items>
