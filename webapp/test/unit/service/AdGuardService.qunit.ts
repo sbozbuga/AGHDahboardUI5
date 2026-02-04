@@ -23,12 +23,13 @@ QUnit.test("getStats limits the processing of top domains", async function (asse
     };
 
     // Mock fetch
-    const originalFetch = global.fetch;
+    const originalFetch = globalThis.fetch;
     // @ts-expect-error: Mocking fetch for testing purposes
-    global.fetch = async () => {
+    globalThis.fetch = async () => {
         return Promise.resolve({
             ok: true,
             status: 200,
+            text: async () => Promise.resolve(JSON.stringify(mockResponse)),
             json: async () => Promise.resolve(mockResponse)
         });
     };
@@ -39,7 +40,7 @@ QUnit.test("getStats limits the processing of top domains", async function (asse
         assert.strictEqual(stats.top_queried_domains[0].name, "domain0.com", "First item should be correct");
 
     } finally {
-        global.fetch = originalFetch;
+        globalThis.fetch = originalFetch;
     }
 });
 
@@ -47,15 +48,16 @@ QUnit.test("getQueryLog constructs correct URL with parameters", async function 
     const service = AdGuardService.getInstance();
     const mockResponse: AdGuardData = { data: [] };
 
-    const originalFetch = global.fetch;
+    const originalFetch = globalThis.fetch;
     let capturedUrl: string = "";
 
     // @ts-expect-error: Mocking fetch for testing purposes
-    global.fetch = async (url: string) => {
+    globalThis.fetch = async (url: string) => {
         capturedUrl = url;
         return Promise.resolve({
             ok: true,
             status: 200,
+            text: async () => Promise.resolve(JSON.stringify(mockResponse)),
             json: async () => Promise.resolve(mockResponse)
         });
     };
@@ -75,7 +77,7 @@ QUnit.test("getQueryLog constructs correct URL with parameters", async function 
         assert.strictEqual(params.get("response_status"), filterStatus, "Status param correct and decoded");
 
     } finally {
-        global.fetch = originalFetch;
+        globalThis.fetch = originalFetch;
     }
 });
 
@@ -114,12 +116,13 @@ QUnit.test("getSlowestQueries returns top 10 sorted items", async function (asse
 
     const mockResponse: AdGuardData = { data: entries };
 
-    const originalFetch = global.fetch;
+    const originalFetch = globalThis.fetch;
     // @ts-expect-error: Mocking fetch for testing purposes
-    global.fetch = async () => {
+    globalThis.fetch = async () => {
         return Promise.resolve({
             ok: true,
             status: 200,
+            text: async () => Promise.resolve(JSON.stringify(mockResponse)),
             json: async () => Promise.resolve(mockResponse)
         });
     };
@@ -141,6 +144,76 @@ QUnit.test("getSlowestQueries returns top 10 sorted items", async function (asse
         }
 
     } finally {
-        global.fetch = originalFetch;
+        globalThis.fetch = originalFetch;
+    }
+});
+
+QUnit.test("getSlowestQueries strictly limits occurrences to top 5", async function (assert) {
+    const service = AdGuardService.getInstance();
+
+    // Create 50 log entries for the SAME domain with descending elapsed times
+    const entries: LogEntry[] = Array.from({ length: 50 }, (_, i) => ({
+        answer: [],
+        original_answer: [],
+        upstream: "1.1.1.1",
+        status: "OK",
+        question: { type: "A", name: "repeated.com", class: "IN" },
+        client: "192.168.1.100",
+        time: "2023-01-01T12:00:00Z",
+        elapsedMs: String(5000 - i * 10), // 5000, 4990, 4980...
+        reason: "NotFilteredNotFound",
+        filterId: 0,
+        rule: ""
+    }));
+
+    // Add another domain to ensure we have at least 2 items in top list,
+    // to trigger the threshold logic which depends on top 10 list analysis
+    // But since we only have 1 dominant domain, it will be top 1.
+    // Let's add 9 other dummy domains to fill top 10.
+    for(let k=0; k<9; k++) {
+        entries.push({
+            answer: [],
+            original_answer: [],
+            upstream: "1.1.1.1",
+            status: "OK",
+            question: { type: "A", name: `other${k}.com`, class: "IN" },
+            client: "192.168.1.100",
+            time: "2023-01-01T12:00:00Z",
+            elapsedMs: "100", // Fast
+            reason: "NotFilteredNotFound",
+            filterId: 0,
+            rule: ""
+        } as LogEntry);
+    }
+
+    const mockResponse: AdGuardData = { data: entries };
+
+    const originalFetch = globalThis.fetch;
+    // @ts-expect-error: Mocking fetch for testing purposes
+    globalThis.fetch = async () => {
+        return Promise.resolve({
+            ok: true,
+            status: 200,
+            text: async () => Promise.resolve(JSON.stringify(mockResponse)),
+            json: async () => Promise.resolve(mockResponse)
+        });
+    };
+
+    try {
+        const slowest = await service.getSlowestQueries(100);
+
+        assert.strictEqual(slowest[0].domain, "repeated.com", "Top domain is repeated.com");
+
+        // With current logic (threshold based on 10th item), the 10th item is 'other8.com' with 100ms.
+        // Threshold will be 100ms.
+        // So 'repeated.com' will keep ALL 50 occurrences because they are all > 100ms.
+        // We Expect optimization to limit it to 5.
+
+        assert.strictEqual(slowest[0].occurrences.length, 5, `Should only have top 5 occurrences, got ${slowest[0].occurrences.length}`);
+        assert.strictEqual(slowest[0].occurrences[0], 5000, "Top occurrence is correct");
+        assert.strictEqual(slowest[0].occurrences[4], 4960, "5th occurrence is correct");
+
+    } finally {
+        globalThis.fetch = originalFetch;
     }
 });
