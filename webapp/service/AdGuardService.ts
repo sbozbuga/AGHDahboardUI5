@@ -163,20 +163,11 @@ export default class AdGuardService {
             // Get top 10
             const top10 = sortedList.slice(0, 10);
 
-            if (top10.length > 0) {
-                // Determine threshold from the last item in the top 10 list
-                const lastItem = top10[top10.length - 1];
-                // Sort its occurrences descending
-                const lastItemOccurrences = [...lastItem.occurrences].sort((a, b) => b - a);
-                // Threshold is the 5th slowest (index 4) or the fastest (last) if fewer than 5
-                const thresholdIndex = Math.min(4, lastItemOccurrences.length - 1);
-                const threshold = lastItemOccurrences[thresholdIndex];
-
-                // Filter occurrences for all items in the list
-                top10.forEach(item => {
-                    item.occurrences = item.occurrences.filter(val => val >= threshold);
-                });
-            }
+            // Limit occurrences to top 5 for tooltip to ensure lightweight rendering
+            top10.forEach(item => {
+                // Keep only top 5 slowest occurrences per domain
+                item.occurrences = item.occurrences.sort((a, b) => b - a).slice(0, 5);
+            });
 
             return top10;
         } catch (error) {
