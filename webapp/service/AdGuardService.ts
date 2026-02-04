@@ -1,5 +1,6 @@
 import { AdGuardData, AdGuardStats, RawAdGuardStats, StatsEntry } from "../model/AdGuardTypes";
 import { Constants } from "../model/Constants";
+import SettingsService from "./SettingsService";
 
 /**
  * Service for interacting with AdGuard Home API
@@ -58,6 +59,7 @@ export default class AdGuardService {
         // Since it's a cookie, we can't delete it client-side if it's HttpOnly.
         // But we can redirect to login. AdGuard Home doesn't seem to have a logout endpoint.
         // We will just trust the redirect.
+        SettingsService.getInstance().clearCredentials();
     }
 
     /**
