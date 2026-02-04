@@ -46,4 +46,10 @@ export default class SettingsService {
     public setSystemContext(context: string): void {
         this.storage.put(this.STORAGE_KEY_CONTEXT, context);
     }
+
+    public clearCredentials(): void {
+        this.storage.remove(this.STORAGE_KEY_API_KEY);
+        this.storage.remove(this.STORAGE_KEY_MODEL);
+        this.storage.remove(this.STORAGE_KEY_CONTEXT);
+    }
 }
