@@ -13,7 +13,7 @@
                             <Input id="usernameInput" value="{/username}" placeholder="Enter your username" submit=".onLoginPress" liveChange=".onInputChange" maxLength="50" />
                             
                             <Label text="Password" labelFor="passwordInput" class="sapUiSmallMarginTop" required="true"/>
-                            <Input id="passwordInput" value="{/password}" type="Password" placeholder="Enter your password" submit=".onLoginPress" liveChange=".onInputChange" maxLength="100" />
+                            <Input id="passwordInput" value="{/password}" type="Password" placeholder="Enter your password" submit=".onLoginPress" liveChange=".onInputChange" maxLength="100" showValueHelp="true" valueHelpIconSrc="sap-icon://show" valueHelpRequest=".onShowPassword" />
                             
                             <Button text="Login" type="Emphasized" press=".onLoginPress" class="sapUiMediumMarginTop" width="100%"/>
                         </VBox>

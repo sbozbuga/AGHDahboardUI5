@@ -5,6 +5,7 @@ import MessageBox from "sap/m/MessageBox";
 import UIComponent from "sap/ui/core/UIComponent";
 import Input from "sap/m/Input";
 import { ValueState } from "sap/ui/core/library";
+import { InputType } from "sap/m/library";
 import Event from "sap/ui/base/Event";
 
 /**
@@ -36,6 +37,18 @@ export default class Login extends Controller {
         if (input.getValueState() === ValueState.Error) {
             input.setValueState(ValueState.None);
             input.setValueStateText("");
+        }
+    }
+
+    public onShowPassword(event: Event): void {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        const input = event.getSource() as Input;
+        if (input.getType() === InputType.Password) {
+            input.setType(InputType.Text);
+            input.setValueHelpIconSrc("sap-icon://hide");
+        } else {
+            input.setType(InputType.Password);
+            input.setValueHelpIconSrc("sap-icon://show");
         }
     }
 
