@@ -6,6 +6,19 @@ export default class AppPage extends Opa5 {
 	// Add custom actions here
 
 	// Assertions
-	// Add custom assertions here
+	iShouldSeeTheApp() {
+		return this.waitFor({
+			controlType: "sap.m.Page",
+			matchers: {
+				properties: {
+					title: "AdGuard Home Dashboard"
+				}
+			},
+			success: function () {
+				Opa5.assert.ok(true, "The Dashboard view is displayed");
+			},
+			errorMessage: "Did not find the Dashboard page"
+		});
+	}
 
 }
