@@ -25,6 +25,7 @@ export default class GeminiService {
     private static instance: GeminiService;
     // eslint-disable-next-line no-control-regex
     private static readonly CONTROL_CHARS_REGEX = /[\x00-\x1F\x7F-\x9F]/g;
+    private static readonly REQUEST_TIMEOUT = 30000;
 
     public static getInstance(): GeminiService {
         if (!GeminiService.instance) {
@@ -54,7 +55,7 @@ export default class GeminiService {
             const model = genAI.getGenerativeModel({ model: modelName });
 
             // Generate Content
-            const result = await model.generateContent(prompt);
+            const result = await model.generateContent(prompt, { timeout: GeminiService.REQUEST_TIMEOUT });
             const response = result.response;
             const text = response.text();
 
@@ -141,13 +142,17 @@ export default class GeminiService {
         const apiKey = SettingsService.getInstance().getApiKey();
         if (!apiKey) return [];
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), GeminiService.REQUEST_TIMEOUT);
+
         try {
             // We use the REST API manually here because the SDK's listModels might be node-only or explicit
             // simpler to just hit the endpoint for this specific list.
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models`, {
                 headers: {
                     "x-goog-api-key": apiKey
-                }
+                },
+                signal: controller.signal
             });
             if (!response.ok) return [];
 
@@ -167,6 +172,8 @@ export default class GeminiService {
             const safeMsg = apiKey ? msg.split(apiKey).join("[REDACTED]") : msg;
             console.error("Failed to fetch models", safeMsg);
             return [];
+        } finally {
+            clearTimeout(timeoutId);
         }
     }
 }
