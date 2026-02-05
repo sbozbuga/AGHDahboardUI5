@@ -71,7 +71,7 @@
                                 <Column hAlign="End" width="30%"><Text text="Count" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem>
+                                <ColumnListItem type="Navigation" press=".onPressClient">
                                     <cells>
                                         <Text text="{name}" />
                                         <Text text="{count}" />
@@ -97,7 +97,7 @@
                                 <Column hAlign="End" width="30%"><Text text="Count" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem>
+                                <ColumnListItem type="Navigation" press=".onPressDomain">
                                     <cells>
                                         <Text text="{name}" />
                                         <Text text="{count}" />
@@ -123,7 +123,7 @@
                                 <Column hAlign="End" width="30%"><Text text="Count" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem>
+                                <ColumnListItem type="Navigation" press=".onPressBlockedDomain">
                                     <cells>
                                         <Text text="{name}" />
                                         <Text text="{count}" />
