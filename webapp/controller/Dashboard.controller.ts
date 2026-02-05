@@ -5,7 +5,9 @@ import AdGuardService from "../service/AdGuardService";
 import formatter from "../model/formatter";
 import MessageBox from "sap/m/MessageBox";
 import { Constants } from "../model/Constants";
-import { AdGuardStats } from "../model/AdGuardTypes";
+import { AdGuardStats, StatsEntry } from "../model/AdGuardTypes";
+import Event from "sap/ui/base/Event";
+import ColumnListItem from "sap/m/ColumnListItem";
 
 export default class Dashboard extends Controller {
     public formatter = formatter;
@@ -143,6 +145,52 @@ export default class Dashboard extends Controller {
         router.navTo(Constants.Routes.Logs, {
             query: {
                 status: "Blocked"
+            }
+        });
+    }
+
+    public onPressClient(event: Event): void {
+        const item = event.getSource();
+        if (!(item instanceof ColumnListItem)) return;
+        const context = item.getBindingContext();
+        if (!context) return;
+        const entry = context.getObject() as StatsEntry;
+
+        const router = UIComponent.getRouterFor(this);
+        router.navTo(Constants.Routes.Logs, {
+            query: {
+                search: entry.name
+            }
+        });
+    }
+
+    public onPressDomain(event: Event): void {
+        const item = event.getSource();
+        if (!(item instanceof ColumnListItem)) return;
+        const context = item.getBindingContext();
+        if (!context) return;
+        const entry = context.getObject() as StatsEntry;
+
+        const router = UIComponent.getRouterFor(this);
+        router.navTo(Constants.Routes.Logs, {
+            query: {
+                search: entry.name
+            }
+        });
+    }
+
+    public onPressBlockedDomain(event: Event): void {
+        const item = event.getSource();
+        if (!(item instanceof ColumnListItem)) return;
+        const context = item.getBindingContext();
+        if (!context) return;
+        const entry = context.getObject() as StatsEntry;
+
+        const router = UIComponent.getRouterFor(this);
+        router.navTo(Constants.Routes.Logs, {
+            query: {
+                status: "Blocked",
+                search: entry.name
             }
         });
     }
