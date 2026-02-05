@@ -124,6 +124,19 @@ export default class AdGuardService {
     }
 
     /**
+     * Helper to maintain a sorted array of top 5 occurrences
+     */
+    private _updateTopOccurrences(occurrences: number[], val: number): void {
+        if (occurrences.length < 5) {
+            occurrences.push(val);
+            occurrences.sort((a, b) => b - a);
+        } else if (val > occurrences[4]) {
+            occurrences[4] = val;
+            occurrences.sort((a, b) => b - a);
+        }
+    }
+
+    /**
      * Fetches the last N records and returns the top 5 slowest queries
      * @param scanDepth Number of records to scan (default 1000)
      */
@@ -141,7 +154,8 @@ export default class AdGuardService {
                 // Aggregate by domain
                 if (domainMap.has(e.question.name)) {
                     const existing = domainMap.get(e.question.name)!;
-                    existing.occurrences.push(val);
+                    this._updateTopOccurrences(existing.occurrences, val);
+
                     // Keep the max elapsed time and its details
                     if (val > existing.elapsedMs) {
                         existing.elapsedMs = val;
@@ -159,17 +173,18 @@ export default class AdGuardService {
                 }
             }
 
-            // Convert to array and sort by elapsedMs descending
-            const sortedList = Array.from(domainMap.values()).sort((a, b) => b.elapsedMs - a.elapsedMs);
+            // Single-pass selection of top 10 domains
+            const top10: { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }[] = [];
 
-            // Get top 10
-            const top10 = sortedList.slice(0, 10);
-
-            // Limit occurrences to top 5 for tooltip to ensure lightweight rendering
-            top10.forEach(item => {
-                // Keep only top 5 slowest occurrences per domain
-                item.occurrences = item.occurrences.sort((a, b) => b - a).slice(0, 5);
-            });
+            for (const item of domainMap.values()) {
+                if (top10.length < 10) {
+                    top10.push(item);
+                    top10.sort((a, b) => b.elapsedMs - a.elapsedMs);
+                } else if (item.elapsedMs > top10[9].elapsedMs) {
+                    top10[9] = item;
+                    top10.sort((a, b) => b.elapsedMs - a.elapsedMs);
+                }
+            }
 
             return top10;
         } catch (error) {
