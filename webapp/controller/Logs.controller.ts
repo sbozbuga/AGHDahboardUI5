@@ -33,6 +33,7 @@ interface ProcessedLogEntry extends Omit<LogEntry, "time" | "elapsedMs"> {
 interface RouteArguments {
 	"?query"?: {
 		status?: string;
+		search?: string;
 	};
 }
 
@@ -97,6 +98,7 @@ export default class Logs extends Controller {
 		const args = params.arguments;
 		const query = args["?query"];
 
+		// Handle Status Filter
 		if (query && query.status === "Blocked") {
 			model.setProperty(Constants.ModelProperties.FilterStatus, "filtered");
 			model.setProperty(Constants.ModelProperties.Offset, 0);
@@ -104,6 +106,23 @@ export default class Logs extends Controller {
 			model.setProperty(Constants.ModelProperties.FilterStatus, "");
 			model.setProperty(Constants.ModelProperties.Offset, 0);
 		}
+
+		// Handle Search Query
+		const searchField = view.byId("searchField") as SearchField;
+		if (query && query.search) {
+			this._sSearchQuery = query.search;
+			if (searchField) {
+				searchField.setValue(query.search);
+			}
+		} else {
+			this._sSearchQuery = "";
+			if (searchField) {
+				searchField.setValue("");
+			}
+		}
+
+		// Apply client-side filters
+		this._applyFilters();
 
 		void this.onRefreshLogs();
 	}
