@@ -19,24 +19,38 @@ export default class AdGuardService {
 
     private static readonly DEFAULT_SCAN_DEPTH = 1000;
     private static readonly TOP_LIST_LIMIT = 10;
+    private static readonly REQUEST_TIMEOUT = 10000;
 
     /**
      * Generic wrapper for API requests
      */
     private async _request<T>(url: string, options?: RequestInit): Promise<T> {
-        const response = await fetch(url, options);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), AdGuardService.REQUEST_TIMEOUT);
+        const config = { ...options, signal: controller.signal };
 
-        if (response.status === 401) {
-            throw new Error("Unauthorized");
+        try {
+            const response = await fetch(url, config);
+
+            if (response.status === 401) {
+                throw new Error("Unauthorized");
+            }
+
+            if (!response.ok) {
+                throw new Error(`Request failed: ${response.statusText}`);
+            }
+
+            // Handle empty bodies (e.g. login)
+            const text = await response.text();
+            return text ? (JSON.parse(text) as T) : ({} as T);
+        } catch (error) {
+            if ((error as Error).name === "AbortError") {
+                throw new Error("Request timed out");
+            }
+            throw error;
+        } finally {
+            clearTimeout(timeoutId);
         }
-
-        if (!response.ok) {
-            throw new Error(`Request failed: ${response.statusText}`);
-        }
-
-        // Handle empty bodies (e.g. login)
-        const text = await response.text();
-        return text ? (JSON.parse(text) as T) : ({} as T);
     }
 
     /**
