@@ -17,6 +17,18 @@ export default class Dashboard extends Controller {
     private static readonly REFRESH_INTERVAL = 15000;
     private static readonly SLOWEST_QUERY_INTERVAL = 60000; // 1 minute throttle for heavy queries
 
+    private areStatsEqual(a: StatsEntry[], b: StatsEntry[]): boolean {
+        if (a === b) return true;
+        if (!a || !b) return false;
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) {
+            if (a[i].name !== b[i].name || a[i].count !== b[i].count) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public onInit(): void {
         this.getView()?.setModel(new JSONModel());
         void this.onRefreshStats();
@@ -100,9 +112,9 @@ export default class Dashboard extends Controller {
                    currentData.num_blocked_filtering === stats.num_blocked_filtering &&
                    currentData.avg_processing_time === stats.avg_processing_time &&
                    currentData.block_percentage === stats.block_percentage &&
-                   JSON.stringify(currentData.top_queried_domains) === JSON.stringify(stats.top_queried_domains) &&
-                   JSON.stringify(currentData.top_blocked_domains) === JSON.stringify(stats.top_blocked_domains) &&
-                   JSON.stringify(currentData.top_clients) === JSON.stringify(stats.top_clients);
+                   this.areStatsEqual(currentData.top_queried_domains, stats.top_queried_domains) &&
+                   this.areStatsEqual(currentData.top_blocked_domains, stats.top_blocked_domains) &&
+                   this.areStatsEqual(currentData.top_clients, stats.top_clients);
 
                 if (statsUnchanged) {
                     if (!silent) {
