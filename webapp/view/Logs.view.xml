@@ -143,7 +143,9 @@
 								<core:Icon src="sap-icon://database" 
 									color="Positive" 
 									visible="{= ${reason}.indexOf('served from cache') > -1 || ${reason} === 'Rewrite' }" 
-									tooltip="{reason}" />
+									tooltip="{reason}"
+									decorative="false"
+									alt="{reason}" />
 								<Text text="{client}" />
 								<Text text="{question/name} ({question/type})" wrapping="true" maxLines="2" />
 								<ObjectStatus
