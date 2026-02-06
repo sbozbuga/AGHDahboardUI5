@@ -72,9 +72,9 @@ export default class GeminiService {
     private summarizeLogs(logs: LogEntry[]): LogSummary {
         const total = logs.length;
         let blockedCount = 0;
-        const clientCounts: Record<string, number> = {};
-        const domainCounts: Record<string, number> = {};
-        const upstreamCounts: Record<string, number> = {};
+        const clientCounts = new Map<string, number>();
+        const domainCounts = new Map<string, number>();
+        const upstreamCounts = new Map<string, number>();
 
         // Single pass aggregation
         for (const log of logs) {
@@ -85,15 +85,15 @@ export default class GeminiService {
 
             // Client counts
             const client = this.sanitizeInput(log.client || "Unknown");
-            clientCounts[client] = (clientCounts[client] || 0) + 1;
+            clientCounts.set(client, (clientCounts.get(client) || 0) + 1);
 
             // Domain counts
             const domain = this.sanitizeInput(log.question?.name || "Unknown");
-            domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+            domainCounts.set(domain, (domainCounts.get(domain) || 0) + 1);
 
             // Upstream counts
             const upstream = this.sanitizeInput(log.upstream || "Unknown");
-            upstreamCounts[upstream] = (upstreamCounts[upstream] || 0) + 1;
+            upstreamCounts.set(upstream, (upstreamCounts.get(upstream) || 0) + 1);
         }
 
         return {
@@ -106,14 +106,15 @@ export default class GeminiService {
         };
     }
 
-    private getTopK(counts: Record<string, number>, k: number): [string, number][] {
-        return Object.entries(counts)
+    private getTopK(counts: Map<string, number>, k: number): [string, number][] {
+        return Array.from(counts.entries())
             .sort((a, b) => b[1] - a[1]) // Sort by count descending
             .slice(0, k);
     }
 
     private buildPrompt(summary: LogSummary): string {
-        const context = SettingsService.getInstance().getSystemContext();
+        // Sanitize context to prevent prompt injection or control character issues
+        const context = this.sanitizeInput(SettingsService.getInstance().getSystemContext());
         let contextSection = "";
         if (context) {
             contextSection = `
