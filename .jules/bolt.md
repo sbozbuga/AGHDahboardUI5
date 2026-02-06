@@ -33,3 +33,7 @@
 ## 2026-02-04 - Single-Pass Top N Selection
 **Learning:** In `AdGuardService.ts`, `getSlowestQueries` was allocating an intermediate object for every log entry (1000 items) and sorting the entire array just to extract the top 10. This generated unnecessary garbage and CPU load.
 **Action:** Use a single-pass loop that maintains a small, sorted "Top N" array (bounded insertion sort). This eliminates intermediate allocations for the majority of items and reduces sorting complexity to O(N * K) where K is small.
+
+## 2026-02-05 - Avoid Serialization for Equality Checks
+**Learning:** In `Dashboard.controller.ts`, `JSON.stringify` was used to compare arrays of objects during polling intervals. This created redundant string allocations every 15 seconds.
+**Action:** Use a dedicated shallow equality helper method (looping over properties) instead of serializing entire objects to strings. This is O(N) but zero-allocation.
