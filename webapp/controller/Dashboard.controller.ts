@@ -207,6 +207,21 @@ export default class Dashboard extends Controller {
         });
     }
 
+    public onPressSlowestDomain(event: Event): void {
+        const item = event.getSource();
+        if (!(item instanceof ColumnListItem)) return;
+        const context = item.getBindingContext();
+        if (!context) return;
+        const entry = context.getObject() as { domain: string };
+
+        const router = UIComponent.getRouterFor(this);
+        router.navTo(Constants.Routes.Logs, {
+            query: {
+                search: entry.domain
+            }
+        });
+    }
+
     public onLogoutPress(): void {
         AdGuardService.getInstance().logout();
         UIComponent.getRouterFor(this).navTo(Constants.Routes.Login);
