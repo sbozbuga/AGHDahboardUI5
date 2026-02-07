@@ -12,7 +12,8 @@
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
 				header="Total Queries"
 				subheader="Last 24 hours"
-				press="onPressLogs">
+				press="onPressLogs"
+				tooltip="View query log">
 				<TileContent>
 					<NumericContent value="{/num_dns_queries}" icon="sap-icon://line-chart" />
 				</TileContent>
@@ -22,7 +23,8 @@
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
 				header="Blocked Queries"
 				subheader="Last 24 hours"
-				press="onPressBlockedLogs">
+				press="onPressBlockedLogs"
+				tooltip="View blocked query log">
 				<TileContent>
 					<NumericContent value="{/num_blocked_filtering}" icon="sap-icon://shield" valueColor="Error" />
 				</TileContent>
@@ -32,7 +34,9 @@
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
 				header="Processing Time"
 				subheader="Average"
-				frameType="OneByOne">
+				frameType="OneByOne"
+				press="onPressLogs"
+				tooltip="View query performance logs">
 				<TileContent>
 					<NumericContent value="{/avg_processing_time}" scale="ms" icon="sap-icon://performance" valueColor="Good" />
 				</TileContent>
@@ -42,7 +46,9 @@
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
 				header="Blocked %"
 				subheader="Efficiency"
-				frameType="OneByOne">
+				frameType="OneByOne"
+				press="onPressBlockedLogs"
+				tooltip="View blocked query logs">
 				<TileContent>
 					<NumericContent value="{/block_percentage}" scale="%" icon="sap-icon://pie-chart" valueColor="Critical" />
 				</TileContent>
@@ -150,6 +156,8 @@
                             </columns>
                             <items>
                                 <ColumnListItem
+                                    type="Navigation"
+                                    press=".onPressSlowestDomain"
                                     tooltip="{
                                         path: 'occurrences',
                                         formatter: '.formatter.slowestTooltip'
