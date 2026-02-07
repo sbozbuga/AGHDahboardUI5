@@ -46,6 +46,7 @@ QUnit.test("sanitizeInput removes control characters", function (assert) {
 interface TestContext {
     originalFetch: typeof window.fetch;
     originalGetApiKey: () => string;
+    originalDateNow: () => number;
 }
 
 QUnit.module("Gemini Service - API Security", {
@@ -97,5 +98,74 @@ QUnit.test("getAvailableModels uses header for API key (not URL)", async functio
         await service.getAvailableModels();
     } catch {
         // Ignore errors, we just want to check the fetch call
+    }
+});
+
+QUnit.module("Gemini Service - Rate Limiting", {
+    beforeEach: function (this: TestContext) {
+        this.originalDateNow = Date.now;
+        this.originalFetch = window.fetch;
+
+        // Mock SettingsService
+        const settings = SettingsService.getInstance();
+        this.originalGetApiKey = settings.getApiKey.bind(settings);
+        settings.getApiKey = () => "TEST_API_KEY";
+
+        // Reset GeminiService instance
+        // @ts-expect-error: Resetting singleton for testing
+        GeminiService.instance = null;
+
+        // Mock fetch to prevent actual network calls from SDK
+        // eslint-disable-next-line @typescript-eslint/require-await
+        window.fetch = async () => {
+             return {
+                 ok: true,
+                 text: () => Promise.resolve(""),
+                 json: () => Promise.resolve({})
+             } as Response;
+        };
+    },
+    afterEach: function (this: TestContext) {
+        Date.now = this.originalDateNow;
+        window.fetch = this.originalFetch;
+        SettingsService.getInstance().getApiKey = this.originalGetApiKey;
+        // @ts-expect-error: Resetting singleton for testing
+        GeminiService.instance = null;
+    }
+});
+
+QUnit.test("generateInsights enforces 10s rate limit", async function(assert) {
+    const service = GeminiService.getInstance();
+    let currentTime = 100000; // Start at some time
+
+    // Mock Date.now
+    Date.now = () => currentTime;
+
+    // 1. First call - should succeed (or fail with SDK error, but NOT rate limit)
+    try {
+        await service.generateInsights([]);
+        // Success is fine
+    } catch (e) {
+        const err = e as Error;
+        assert.notOk(err.message.includes("Please wait"), "First call should NOT be rate limited. Got: " + err.message);
+    }
+
+    // 2. Immediate second call - should fail with Rate Limit
+    currentTime += 100; // 100ms later
+    try {
+        await service.generateInsights([]);
+        assert.ok(false, "Should have thrown rate limit error");
+    } catch (e) {
+        const err = e as Error;
+        assert.ok(err.message.includes("Please wait"), "Second call (immediate) SHOULD be rate limited");
+    }
+
+    // 3. Call after 11 seconds - should succeed
+    currentTime += 11000; // 11s later
+    try {
+        await service.generateInsights([]);
+    } catch (e) {
+        const err = e as Error;
+        assert.notOk(err.message.includes("Please wait"), "Third call (after 11s) should NOT be rate limited");
     }
 });

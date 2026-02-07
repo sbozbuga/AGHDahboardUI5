@@ -26,6 +26,9 @@ export default class GeminiService {
     // eslint-disable-next-line no-control-regex
     private static readonly CONTROL_CHARS_REGEX = /[\x00-\x1F\x7F-\x9F]/g;
     private static readonly REQUEST_TIMEOUT = 30000;
+    private static readonly MIN_ANALYSIS_INTERVAL = 10000; // 10 seconds
+
+    private lastAnalysisTime = 0;
 
     public static getInstance(): GeminiService {
         if (!GeminiService.instance) {
@@ -44,6 +47,14 @@ export default class GeminiService {
         if (!apiKey) {
             throw new Error("API Key is missing. Please configure it in settings.");
         }
+
+        const now = Date.now();
+        if (now - this.lastAnalysisTime < GeminiService.MIN_ANALYSIS_INTERVAL) {
+            const waitSeconds = Math.ceil((GeminiService.MIN_ANALYSIS_INTERVAL - (now - this.lastAnalysisTime)) / 1000);
+            throw new Error(`Please wait ${waitSeconds} seconds before requesting new insights.`);
+        }
+
+        this.lastAnalysisTime = now;
 
         const summary = this.summarizeLogs(logs);
         const prompt = this.buildPrompt(summary);
