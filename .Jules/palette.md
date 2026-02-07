@@ -25,3 +25,7 @@
 ## 2026-02-05 - Password Visibility Toggle
 **Learning:** `sap.m.Input` with `type="Password"` does not provide a native visibility toggle.
 **Action:** Implement manual toggle using `showValueHelp="true"`, `valueHelpIconSrc="sap-icon://show"`, and handling `valueHelpRequest` to switch `type`.
+
+## 2026-02-06 - Dashboard Tile Interactivity
+**Learning:** Static dashboard tiles that look interactive (due to hover effects or layout) but don't navigate frustrate users. Linking all summary tiles to their detailed views, even without specific filters, significantly improves perceived responsiveness and utility.
+**Action:** Ensure all dashboard summary tiles have `press` events navigating to the relevant detail view, and provide descriptive tooltips.
