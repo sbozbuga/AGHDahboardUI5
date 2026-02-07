@@ -32,3 +32,8 @@
 **Vulnerability:** The Nginx configuration lacked standard security headers, exposing the application to Clickjacking, MIME sniffing, and information leakage.
 **Learning:** Even for static deployments of UI5 apps, the web server (Nginx) must be explicitly hardened. CSP must be carefully crafted to allow UI5's dynamic nature (`unsafe-eval`, `unsafe-inline`) while restricting external connections.
 **Prevention:** Include a hardened `nginx.conf` template in the repository to guide secure deployment.
+
+## 2026-02-07 - Client-Side Rate Limiting for AI
+**Vulnerability:** Expensive or quota-limited API endpoints (like Gemini AI) can be abused by rapid user actions or scripts, leading to denial of service (DoS) or cost overruns.
+**Learning:** While server-side rate limiting is ideal, client-side throttling provides an immediate first line of defense against accidental misuse and protects the user's own API quota in a BYOK (Bring Your Own Key) architecture.
+**Prevention:** Implement a minimum time interval (e.g., 10s) between calls to sensitive endpoints using a timestamp check, and provide clear user feedback when the limit is hit.
