@@ -145,8 +145,14 @@ export default class AdGuardService {
             occurrences.push(val);
             occurrences.sort((a, b) => b - a);
         } else if (val > occurrences[4]) {
-            occurrences[4] = val;
-            occurrences.sort((a, b) => b - a);
+            // Linear insertion: find position, insert, pop last.
+            // Occurrences is sorted descending.
+            let i = 0;
+            while (i < 4 && val <= occurrences[i]) {
+                i++;
+            }
+            occurrences.splice(i, 0, val);
+            occurrences.pop();
         }
     }
 
@@ -195,8 +201,13 @@ export default class AdGuardService {
                     top10.push(item);
                     top10.sort((a, b) => b.elapsedMs - a.elapsedMs);
                 } else if (item.elapsedMs > top10[9].elapsedMs) {
-                    top10[9] = item;
-                    top10.sort((a, b) => b.elapsedMs - a.elapsedMs);
+                    // Linear insertion for Top 10
+                    let i = 0;
+                    while (i < 9 && item.elapsedMs <= top10[i].elapsedMs) {
+                        i++;
+                    }
+                    top10.splice(i, 0, item);
+                    top10.pop();
                 }
             }
 
