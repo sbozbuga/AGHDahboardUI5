@@ -67,6 +67,9 @@ export default class Login extends Controller {
         if (!username) {
             usernameInput.setValueState(ValueState.Error);
             usernameInput.setValueStateText("Username is required");
+            if (!bValidationError) {
+                usernameInput.focus();
+            }
             bValidationError = true;
         } else {
             usernameInput.setValueState(ValueState.None);
@@ -75,6 +78,9 @@ export default class Login extends Controller {
         if (!password) {
             passwordInput.setValueState(ValueState.Error);
             passwordInput.setValueStateText("Password is required");
+            if (!bValidationError) {
+                passwordInput.focus();
+            }
             bValidationError = true;
         } else {
             passwordInput.setValueState(ValueState.None);

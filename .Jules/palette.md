@@ -29,3 +29,7 @@
 ## 2026-02-06 - Dashboard Tile Interactivity
 **Learning:** Static dashboard tiles that look interactive (due to hover effects or layout) but don't navigate frustrate users. Linking all summary tiles to their detailed views, even without specific filters, significantly improves perceived responsiveness and utility.
 **Action:** Ensure all dashboard summary tiles have `press` events navigating to the relevant detail view, and provide descriptive tooltips.
+
+## 2026-02-08 - Accessible Form Validation Focus
+**Learning:** While `ValueState.Error` provides visual feedback, standard validation logic often leaves focus on the submit button, forcing keyboard users to tab backwards. Programmatically focusing the first invalid input significantly improves error recovery flow.
+**Action:** Always implement focus management in form validation logic to target the first invalid field.
