@@ -34,8 +34,7 @@ export default {
         if (!occurrences || !Array.isArray(occurrences) || occurrences.length === 0) {
             return "";
         }
-        // Sort descending for the tooltip as well
-        const sorted = [...occurrences].sort((a, b) => b - a);
-        return sorted.map(t => `${t.toFixed(3)} ms`).join("\n");
+        // Occurrences are already sorted descending by AdGuardService.
+        return occurrences.map(t => `${t.toFixed(3)} ms`).join("\n");
     }
 };

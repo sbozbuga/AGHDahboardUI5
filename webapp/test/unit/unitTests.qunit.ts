@@ -6,3 +6,4 @@ import "unit/controller/Logs.qunit";
 import "unit/service/AdGuardService.qunit";
 import "unit/service/GeminiService.qunit";
 import "unit/controller/DashboardPerformance.qunit";
+import "unit/model/formatter.qunit";
