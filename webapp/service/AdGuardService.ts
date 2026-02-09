@@ -1,4 +1,4 @@
-import { AdGuardData, AdGuardStats, RawAdGuardStats, StatsEntry } from "../model/AdGuardTypes";
+import { AdGuardData, RawAdGuardData, AdGuardStats, RawAdGuardStats, StatsEntry, LogEntry } from "../model/AdGuardTypes";
 import { Constants } from "../model/Constants";
 import SettingsService from "./SettingsService";
 
@@ -102,9 +102,8 @@ export default class AdGuardService {
      * @param limit Number of items to fetch
      * @param offset Offset for pagination
      * @param filterStatus Optional status filter (e.g., "Blocked")
-     * @param skipEnrichment Optional flag to skip post-processing (e.g. for simple stats)
      */
-    public async getQueryLog(limit: number, offset: number, filterStatus?: string, skipEnrichment: boolean = false): Promise<AdGuardData> {
+    public async getQueryLog(limit: number, offset: number, filterStatus?: string): Promise<AdGuardData> {
         const params = new URLSearchParams({
             limit: limit.toString(),
             offset: offset.toString()
@@ -115,26 +114,21 @@ export default class AdGuardService {
         }
 
         const url = `${Constants.ApiEndpoints.QueryLog}?${params.toString()}`;
-        const data = await this._request<AdGuardData>(url);
+        const data = await this._request<RawAdGuardData>(url);
 
-        if (!skipEnrichment) {
-            // Post-process to add blocked status
-            data.data.forEach(entry => {
-                // Heuristic: If reason starts with "Filtered" (e.g. FilteredBlackList, FilteredSafeBrowsing), it is blocked.
-                // "NotFiltered..." reasons are obviously not blocked.
-                if (entry.reason && entry.reason.startsWith("Filtered")) {
-                    entry.blocked = true;
-                } else if (entry.reason && entry.reason === "SafeBrowsing") {
-                    // Some versions might just say SafeBrowsing? Rare but safe to add if needed.
-                    // Stick to Filtered for now as per screenshot.
-                    entry.blocked = true;
-                } else {
-                    entry.blocked = false;
-                }
-            });
-        }
+        const processedData: LogEntry[] = data.data.map(entry => {
+            const isBlocked = (entry.reason && entry.reason.startsWith("Filtered")) ||
+                (entry.reason === "SafeBrowsing");
 
-        return data;
+            return {
+                ...entry,
+                time: new Date(entry.time),
+                elapsedMs: parseFloat(entry.elapsedMs),
+                blocked: isBlocked
+            };
+        });
+
+        return { data: processedData };
     }
 
     /**
@@ -162,11 +156,11 @@ export default class AdGuardService {
      */
     public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[]; }[]> {
         try {
-            const data = await this.getQueryLog(scanDepth, 0, undefined, true);
+            const data = await this.getQueryLog(scanDepth, 0);
             const domainMap = new Map<string, { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }>();
 
             for (const e of data.data) {
-                const val = parseFloat(e.elapsedMs) || 0;
+                const val = e.elapsedMs || 0;
                 if (val <= 0) {
                     continue;
                 }
