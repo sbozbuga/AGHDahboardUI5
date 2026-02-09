@@ -45,7 +45,7 @@ export default class AdGuardService {
             return text ? (JSON.parse(text) as T) : ({} as T);
         } catch (error) {
             if ((error as Error).name === "AbortError") {
-                throw new Error("Request timed out");
+                throw new Error("Request timed out", { cause: error });
             }
             throw error;
         } finally {
