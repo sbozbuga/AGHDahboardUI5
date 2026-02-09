@@ -27,6 +27,7 @@ export default class GeminiService {
     private static readonly CONTROL_CHARS_REGEX = /[\x00-\x1F\x7F-\x9F]/g;
     private static readonly REQUEST_TIMEOUT = 30000;
     private static readonly MIN_ANALYSIS_INTERVAL = 10000; // 10 seconds
+    private static readonly MAX_INPUT_LENGTH = 255;
 
     private lastAnalysisTime = 0;
 
@@ -39,7 +40,11 @@ export default class GeminiService {
 
     public sanitizeInput(str: string): string {
         // Remove control characters (0-31, 127, and C1 128-159) to prevent prompt injection via newlines etc.
-        return str.replace(GeminiService.CONTROL_CHARS_REGEX, "").trim();
+        const cleaned = str.replace(GeminiService.CONTROL_CHARS_REGEX, "").trim();
+        // Truncate to prevent token exhaustion / DoS
+        return cleaned.length > GeminiService.MAX_INPUT_LENGTH
+            ? cleaned.substring(0, GeminiService.MAX_INPUT_LENGTH)
+            : cleaned;
     }
 
     public async generateInsights(logs: LogEntry[]): Promise<string> {
@@ -76,7 +81,7 @@ export default class GeminiService {
             // Safe redaction without Regex issues
             const safeMsg = apiKey ? msg.split(apiKey).join("[REDACTED]") : msg;
             console.error("Gemini API Error:", safeMsg);
-            throw new Error("Failed to generate insights. Check your API Key and network connection.");
+            throw new Error("Failed to generate insights. Check your API Key and network connection.", { cause: error });
         }
     }
 
