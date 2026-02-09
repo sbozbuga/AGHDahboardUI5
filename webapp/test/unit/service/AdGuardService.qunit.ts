@@ -1,6 +1,6 @@
 import AdGuardService from "ui5/aghd/service/AdGuardService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
-import { AdGuardData, RawAdGuardStats, LogEntry } from "ui5/aghd/model/AdGuardTypes";
+import { RawAdGuardData, RawAdGuardStats, RawLogEntry } from "ui5/aghd/model/AdGuardTypes";
 
 QUnit.module("AdGuardService");
 
@@ -46,7 +46,7 @@ QUnit.test("getStats limits the processing of top domains", async function (asse
 
 QUnit.test("getQueryLog constructs correct URL with parameters", async function (assert) {
     const service = AdGuardService.getInstance();
-    const mockResponse: AdGuardData = { data: [] };
+    const mockResponse: RawAdGuardData = { data: [] };
 
     const originalFetch = globalThis.fetch;
     let capturedUrl: string = "";
@@ -85,7 +85,7 @@ QUnit.test("getSlowestQueries returns top 10 sorted items", async function (asse
     const service = AdGuardService.getInstance();
 
     // Create 50 log entries with random elapsed times
-    const entries: LogEntry[] = Array.from({ length: 50 }, (_, i) => ({
+    const entries: RawLogEntry[] = Array.from({ length: 50 }, (_, i) => ({
         answer: [],
         original_answer: [],
         upstream: "1.1.1.1",
@@ -114,7 +114,7 @@ QUnit.test("getSlowestQueries returns top 10 sorted items", async function (asse
         entries[30+k].question.name = `high${k}.com`;
     }
 
-    const mockResponse: AdGuardData = { data: entries };
+    const mockResponse: RawAdGuardData = { data: entries };
 
     const originalFetch = globalThis.fetch;
     // @ts-expect-error: Mocking fetch for testing purposes
@@ -152,7 +152,7 @@ QUnit.test("getSlowestQueries strictly limits occurrences to top 5", async funct
     const service = AdGuardService.getInstance();
 
     // Create 50 log entries for the SAME domain with descending elapsed times
-    const entries: LogEntry[] = Array.from({ length: 50 }, (_, i) => ({
+    const entries: RawLogEntry[] = Array.from({ length: 50 }, (_, i) => ({
         answer: [],
         original_answer: [],
         upstream: "1.1.1.1",
@@ -183,10 +183,10 @@ QUnit.test("getSlowestQueries strictly limits occurrences to top 5", async funct
             reason: "NotFilteredNotFound",
             filterId: 0,
             rule: ""
-        } as LogEntry);
+        } as RawLogEntry);
     }
 
-    const mockResponse: AdGuardData = { data: entries };
+    const mockResponse: RawAdGuardData = { data: entries };
 
     const originalFetch = globalThis.fetch;
     // @ts-expect-error: Mocking fetch for testing purposes

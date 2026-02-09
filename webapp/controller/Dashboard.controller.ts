@@ -12,7 +12,7 @@ import ColumnListItem from "sap/m/ColumnListItem";
 export default class Dashboard extends Controller {
     public formatter = formatter;
     private _timer: ReturnType<typeof setInterval> | undefined;
-    private _lastLatestTime: string | undefined;
+    private _lastLatestTime: Date | undefined;
     private _lastSlowestQueryFetchTime: number | undefined;
     private static readonly REFRESH_INTERVAL = 15000;
     private static readonly SLOWEST_QUERY_INTERVAL = 60000; // 1 minute throttle for heavy queries
@@ -83,7 +83,7 @@ export default class Dashboard extends Controller {
             // We fetch stats (lightweight) and the latest log entry (lightweight)
             const [stats, latestLog] = await Promise.all([
                 AdGuardService.getInstance().getStats(),
-                AdGuardService.getInstance().getQueryLog(1, 0, undefined, true)
+                AdGuardService.getInstance().getQueryLog(1, 0)
             ]);
 
             const latestTime = latestLog.data.length > 0 ? latestLog.data[0].time : undefined;
@@ -95,7 +95,7 @@ export default class Dashboard extends Controller {
             // Only fetch heavy slowest queries if new data arrived (or first run)
             // AND enough time has passed since last fetch to avoid server load
             const now = Date.now();
-            const isDataNew = latestTime !== this._lastLatestTime || !this._lastLatestTime;
+            const isDataNew = (latestTime ? latestTime.getTime() : 0) !== (this._lastLatestTime ? this._lastLatestTime.getTime() : 0);
             const isTimeDue = !this._lastSlowestQueryFetchTime || (now - this._lastSlowestQueryFetchTime >= Dashboard.SLOWEST_QUERY_INTERVAL);
 
             if (isDataNew && isTimeDue) {
