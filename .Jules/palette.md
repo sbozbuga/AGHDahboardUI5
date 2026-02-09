@@ -33,3 +33,7 @@
 ## 2026-02-08 - Accessible Form Validation Focus
 **Learning:** While `ValueState.Error` provides visual feedback, standard validation logic often leaves focus on the submit button, forcing keyboard users to tab backwards. Programmatically focusing the first invalid input significantly improves error recovery flow.
 **Action:** Always implement focus management in form validation logic to target the first invalid field.
+
+## 2026-02-12 - Dynamic List Item Tooltips
+**Learning:** Navigation lists in dashboards often lack context for screen readers. Adding dynamic tooltips (e.g., 'View logs for {name}') to `ColumnListItem` provides explicit action descriptions without cluttering the UI.
+**Action:** Always add dynamic tooltips to interactive list items that perform navigation or detailed actions.
