@@ -5,7 +5,6 @@ const onTheAppPage = new AppPage();
 
 opaTest("Should see the initial page of the app", function () {
     // Arrangements
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     onTheAppPage.iStartMyUIComponent({
         componentConfig: {
             name: "ui5.aghd"
@@ -15,10 +14,8 @@ opaTest("Should see the initial page of the app", function () {
     // Actions
 
     // Assertions
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     onTheAppPage.iShouldSeeTheApp();
 
     // Cleanup
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     onTheAppPage.iTeardownMyApp();
 });

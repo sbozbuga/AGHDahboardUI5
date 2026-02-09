@@ -77,7 +77,7 @@
                                 <Column hAlign="End" width="30%"><Text text="Count" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem type="Navigation" press=".onPressClient">
+                                <ColumnListItem type="Navigation" press=".onPressClient" tooltip="View logs for {name}">
                                     <cells>
                                         <Text text="{name}" />
                                         <Text text="{count}" />
@@ -103,7 +103,7 @@
                                 <Column hAlign="End" width="30%"><Text text="Count" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem type="Navigation" press=".onPressDomain">
+                                <ColumnListItem type="Navigation" press=".onPressDomain" tooltip="View logs for {name}">
                                     <cells>
                                         <Text text="{name}" />
                                         <Text text="{count}" />
@@ -129,7 +129,7 @@
                                 <Column hAlign="End" width="30%"><Text text="Count" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem type="Navigation" press=".onPressBlockedDomain">
+                                <ColumnListItem type="Navigation" press=".onPressBlockedDomain" tooltip="View blocked logs for {name}">
                                     <cells>
                                         <Text text="{name}" />
                                         <Text text="{count}" />
