@@ -228,15 +228,35 @@ export default class AdGuardService {
             if (limit && list.length > limit) {
                 targetList = list.slice(0, limit);
             }
+
+            // Optimization: Cache discovered fallback key to avoid repeated searches
+            let fallbackKeyCache: string | null = null;
+
             return targetList.map((item: unknown) => {
                 const obj = item as Record<string, unknown>;
 
                 // Case 1: Standard Object (already has keys like ip, domain, or name)
                 if (obj.count !== undefined || obj[preferredKey] !== undefined || obj.name !== undefined) {
                     let nameVal = obj[preferredKey] || obj.name || obj.ip || obj.domain;
+
+                    // Try cached fallback key if specific keys are missing
+                    if (!nameVal && fallbackKeyCache && typeof obj[fallbackKeyCache] === 'string') {
+                        nameVal = obj[fallbackKeyCache];
+                    }
+
                     if (!nameVal) {
-                        const fallbackKey = Object.keys(obj).find(k => k !== 'count' && k !== 'source' && typeof obj[k] === 'string');
-                        nameVal = fallbackKey ? obj[fallbackKey] : "Unknown";
+                        // Optimization: Use for...in loop instead of Object.keys().find()
+                        // to avoid array allocation and allow early exit.
+                        for (const key in obj) {
+                            if (key !== 'count' && key !== 'source' && typeof obj[key] === 'string') {
+                                nameVal = obj[key];
+                                fallbackKeyCache = key; // Cache for subsequent items
+                                break;
+                            }
+                        }
+                        if (!nameVal) {
+                            nameVal = "Unknown";
+                        }
                     }
                     return {
                         name: String(nameVal),
