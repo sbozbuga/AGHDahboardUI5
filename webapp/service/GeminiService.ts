@@ -142,7 +142,9 @@ export default class GeminiService {
                 topK.pop();
             }
         }
-        return topK;
+
+        // Security: Sanitize keys to prevent prompt injection or control char issues in JSON
+        return topK.map(([key, val]) => [this.sanitizeInput(key), val]);
     }
 
     private buildPrompt(summary: LogSummary): string {
