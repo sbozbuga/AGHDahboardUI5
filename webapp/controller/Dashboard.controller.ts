@@ -1,16 +1,16 @@
-import Controller from "sap/ui/core/mvc/Controller";
+import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import UIComponent from "sap/ui/core/UIComponent";
 import AdGuardService from "../service/AdGuardService";
-import formatter from "../model/formatter";
+// formatter imported in BaseController
 import MessageBox from "sap/m/MessageBox";
 import { Constants } from "../model/Constants";
 import { AdGuardStats, StatsEntry } from "../model/AdGuardTypes";
 import Event from "sap/ui/base/Event";
 import ColumnListItem from "sap/m/ColumnListItem";
 
-export default class Dashboard extends Controller {
-    public formatter = formatter;
+export default class Dashboard extends BaseController {
+    // formatter = formatter; -> Inherited
     private _timer: ReturnType<typeof setInterval> | undefined;
     private _lastLatestTime: Date | undefined;
     private _lastSlowestQueryFetchTime: number | undefined;

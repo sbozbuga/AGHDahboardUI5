@@ -30,10 +30,33 @@ export default class AdGuardService {
     private async _request<T>(url: string, options?: RequestInit): Promise<T> {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), AdGuardService.REQUEST_TIMEOUT);
-        const config = { ...options, signal: controller.signal };
+
+        // Construct full URL with Base URL if configured
+        const baseUrl = SettingsService.getInstance().getBaseUrl();
+        // If baseUrl is set, it might include a path. If set, we treat the input 'url' as relative to it.
+        // However, 'url' from Constants usually starts with '/'.
+        // We need to ensure correct concatenation.
+
+        let targetUrl = url;
+        if (baseUrl) {
+            // Remove leading slash from endpoint if base url has no trailing slash (guaranteed by setter)
+            // But actually, Constants endpoints are like "/control/stats".
+            // If BaseUrl is "http://host/agh", we want "http://host/agh/control/stats".
+            targetUrl = `${baseUrl}${url}`;
+        }
+
+        const config: RequestInit = {
+            ...options,
+            signal: controller.signal
+        };
+
+        // If using a custom Base URL (likely Cross-Origin), we must include credentials
+        if (baseUrl) {
+            config.credentials = "include";
+        }
 
         try {
-            const response = await fetch(url, config);
+            const response = await fetch(targetUrl, config);
 
             if (response.status === 401) {
                 this._handleSessionExpiration();
@@ -81,8 +104,20 @@ export default class AdGuardService {
         const left = (window.screen.width - width) / 2;
         const top = (window.screen.height - height) / 2;
 
+        const baseUrl = SettingsService.getInstance().getBaseUrl();
+        // If baseUrl is set, open that (it's the root of AGH).
+        // If not set, we default to "/" because we are serving from the same host (Proxy), 
+        // and usually AGH is at root or we are conducting a relative nav.
+        // Actually, if we are at /dashboard/index.html, opening "/" goes to root.
+        // If user wants specific login path, they can put it in Base URL? 
+        // No, Base URL is for API. Login is usually at root or /login.html.
+        // Let's assume opening the Base URL is the safest bet to get to the dashboard/login page.
+        // If empty, we try "/".
+
+        const targetUrl = baseUrl || "/";
+
         const popup = window.open(
-            "/agh/",
+            targetUrl,
             "agh_login",
             `width=${width},height=${height},top=${top},left=${left},resizable,scrollbars`
         );
