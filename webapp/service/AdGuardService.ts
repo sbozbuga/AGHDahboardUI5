@@ -1,6 +1,8 @@
 import { AdGuardData, RawAdGuardData, AdGuardStats, RawAdGuardStats, StatsEntry, LogEntry } from "../model/AdGuardTypes";
 import { Constants } from "../model/Constants";
 import SettingsService from "./SettingsService";
+import MessageBox from "sap/m/MessageBox";
+import MessageToast from "sap/m/MessageToast";
 
 /**
  * Service for interacting with AdGuard Home API
@@ -9,6 +11,7 @@ import SettingsService from "./SettingsService";
 export default class AdGuardService {
 
     private static instance: AdGuardService;
+    private _isLoginDialogOpen = false;
 
     public static getInstance(): AdGuardService {
         if (!AdGuardService.instance) {
@@ -33,10 +36,8 @@ export default class AdGuardService {
             const response = await fetch(url, config);
 
             if (response.status === 401) {
-                // Redirect to AGH login using relative path.
-                // This respects the current protocol, hostname, and port.
-                window.location.href = "/agh/";
-                throw new Error("Unauthorized - Redirecting to AGH Login");
+                this._handleSessionExpiration();
+                throw new Error("Unauthorized");
             }
 
             if (!response.ok) {
@@ -54,6 +55,64 @@ export default class AdGuardService {
         } finally {
             clearTimeout(timeoutId);
         }
+    }
+
+    private _handleSessionExpiration(): void {
+        if (this._isLoginDialogOpen) {
+            return;
+        }
+        this._isLoginDialogOpen = true;
+
+        MessageBox.warning("Session expired. Please log in to AdGuard Home.", {
+            actions: ["Log In", MessageBox.Action.CANCEL],
+            onClose: (sAction: string | null) => {
+                if (sAction === "Log In") {
+                    this._openLoginPopup();
+                } else {
+                    this._isLoginDialogOpen = false;
+                }
+            }
+        });
+    }
+
+    private _openLoginPopup(): void {
+        const width = 1000;
+        const height = 700;
+        const left = (window.screen.width - width) / 2;
+        const top = (window.screen.height - height) / 2;
+
+        const popup = window.open(
+            "/agh/",
+            "agh_login",
+            `width=${width},height=${height},top=${top},left=${left},resizable,scrollbars`
+        );
+
+        if (!popup) {
+            MessageBox.error("Popup blocked. Please allow popups for this site.");
+            this._isLoginDialogOpen = false;
+            return;
+        }
+
+        const pollInterval = setInterval(async () => {
+            if (popup.closed) {
+                clearInterval(pollInterval);
+                this._isLoginDialogOpen = false;
+                return;
+            }
+
+            try {
+                // Try to fetch stats (lightweight check if session is active)
+                await this.getStats();
+
+                // If we reach here, login was successful
+                clearInterval(pollInterval);
+                popup.close();
+                this._isLoginDialogOpen = false;
+                MessageToast.show("Login successful.");
+            } catch (error) {
+                // Still unauthorized, continue polling
+            }
+        }, 2000);
     }
 
     /**
