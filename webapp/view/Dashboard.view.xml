@@ -176,7 +176,10 @@
 												path: 'elapsedMs',
 												formatter: '.formatter.formatElapsed'
 											}"
-											state="Warning" 
+											state="{
+												path: 'elapsedMs',
+												formatter: '.formatter.formatElapsedState'
+											}"
                                              />
                                     </cells>
                                 </ColumnListItem>
