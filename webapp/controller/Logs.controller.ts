@@ -143,19 +143,31 @@ export default class Logs extends Controller {
 		try {
 			const data = await AdGuardService.getInstance().getQueryLog(limit, offset, filterStatus);
 
-			const processedData = data.data;
+			// Optimization: Mutate in-place to avoid allocation of intermediate objects
+			const processedData = data.data as unknown as ProcessedLogEntry[];
+			const len = processedData.length;
+			for (let i = 0; i < len; i++) {
+				const item = processedData[i];
+				// Type cast needed as we are mutating the object from string to Date/Number
+				// but TypeScript thinks it is already the target type due to the earlier cast.
+				item.time = new Date(item.time);
+				item.elapsedMs = parseFloat(item.elapsedMs as unknown as string);
+			}
 
 			if (bAppend) {
-				const currentData = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
-				currentData.push(...processedData);
+				const currentData = model.getProperty(Constants.ModelProperties.Data) as ProcessedLogEntry[];
+				// Optimization: Push in loop to avoid stack limit issues with spread operator (...) and reduce memory pressure
+				for (let i = 0; i < len; i++) {
+					currentData.push(processedData[i]);
+				}
 				model.refresh(true);
 			} else {
 				model.setProperty(Constants.ModelProperties.Data, processedData);
 			}
 
 			// Increment offset for next fetch
-			if (processedData.length > 0) {
-				model.setProperty(Constants.ModelProperties.Offset, offset + processedData.length);
+			if (len > 0) {
+				model.setProperty(Constants.ModelProperties.Offset, offset + len);
 			}
 
 		} catch (error) {
