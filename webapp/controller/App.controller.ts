@@ -1,7 +1,12 @@
-import Controller from "sap/ui/core/mvc/Controller";
+import BaseController from "./BaseController";
+import UIComponent from "sap/ui/core/UIComponent";
 
-export default class App extends Controller {
+/**
+ * @namespace ui5.aghd.controller
+ */
+export default class App extends BaseController {
     public onInit(): void {
-
+        const eventBus = this.getOwnerComponent()?.getEventBus();
+        eventBus?.subscribe("ui5.aghd", "openSettings", this.onOpenSettings, this);
     }
 }

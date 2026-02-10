@@ -84,6 +84,30 @@ export default class AdGuardService {
         if (this._isLoginDialogOpen) {
             return;
         }
+
+        const baseUrl = SettingsService.getInstance().getBaseUrl();
+
+        // Check if we likely need configuration (empty URL and unauthorized)
+        // If baseUrl is empty, we are in Proxy mode. If that fails with 401, it usually means 
+        // the proxy isn't authenticated or we really aren't logged in. 
+        // But user asked: "if base url empty and auth is failing then open up the settings popup"
+
+        if (!baseUrl) {
+            this._isLoginDialogOpen = true;
+            MessageBox.warning("Connection failed. Please configure the AdGuard Home Base URL.", {
+                actions: ["Open Settings", MessageBox.Action.CANCEL],
+                onClose: (sAction: string | null) => {
+                    this._isLoginDialogOpen = false;
+                    if (sAction === "Open Settings") {
+                        // Publish event to open settings
+                        const bus = sap.ui.getCore().getEventBus();
+                        bus.publish("ui5.aghd", "openSettings");
+                    }
+                }
+            });
+            return;
+        }
+
         this._isLoginDialogOpen = true;
 
         MessageBox.warning("Session expired. Please log in to AdGuard Home.", {
