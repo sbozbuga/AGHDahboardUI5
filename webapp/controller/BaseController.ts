@@ -116,7 +116,11 @@ export default class BaseController extends Controller {
         SettingsService.getInstance().setBaseUrl(baseUrl);
 
         (view.byId("settingsDialog") as Dialog).close();
-        MessageBox.success("Settings saved successfully.");
+        MessageBox.success("Settings saved successfully. The application will now reload.", {
+            onClose: () => {
+                window.location.reload();
+            }
+        });
     }
 
     public onCancelSettings(): void {
