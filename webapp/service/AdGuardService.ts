@@ -33,7 +33,10 @@ export default class AdGuardService {
             const response = await fetch(url, config);
 
             if (response.status === 401) {
-                throw new Error("Unauthorized");
+                // Redirect to AGH login using relative path.
+                // This respects the current protocol, hostname, and port.
+                window.location.href = "/agh/";
+                throw new Error("Unauthorized - Redirecting to AGH Login");
             }
 
             if (!response.ok) {
