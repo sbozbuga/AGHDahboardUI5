@@ -108,13 +108,13 @@ export default class Dashboard extends Controller {
             // Optimization: Skip model update if data hasn't changed
             if (!slowestChanged && currentData && currentData.num_dns_queries !== undefined) {
                 const statsUnchanged =
-                   currentData.num_dns_queries === stats.num_dns_queries &&
-                   currentData.num_blocked_filtering === stats.num_blocked_filtering &&
-                   currentData.avg_processing_time === stats.avg_processing_time &&
-                   currentData.block_percentage === stats.block_percentage &&
-                   this.areStatsEqual(currentData.top_queried_domains, stats.top_queried_domains) &&
-                   this.areStatsEqual(currentData.top_blocked_domains, stats.top_blocked_domains) &&
-                   this.areStatsEqual(currentData.top_clients, stats.top_clients);
+                    currentData.num_dns_queries === stats.num_dns_queries &&
+                    currentData.num_blocked_filtering === stats.num_blocked_filtering &&
+                    currentData.avg_processing_time === stats.avg_processing_time &&
+                    currentData.block_percentage === stats.block_percentage &&
+                    this.areStatsEqual(currentData.top_queried_domains, stats.top_queried_domains) &&
+                    this.areStatsEqual(currentData.top_blocked_domains, stats.top_blocked_domains) &&
+                    this.areStatsEqual(currentData.top_clients, stats.top_clients);
 
                 if (statsUnchanged) {
                     if (!silent) {
@@ -130,9 +130,9 @@ export default class Dashboard extends Controller {
             });
         } catch (error) {
             if ((error as Error).message === "Unauthorized") {
-                // Stop timer on auth error to prevent endless loops
+                // Stop timer on auth error to prevent endless loops.
+                // Service handles the UI (Popup).
                 if (this._timer) clearInterval(this._timer);
-                UIComponent.getRouterFor(this).navTo(Constants.Routes.Login);
                 return;
             }
             // Suppress errors during silent refresh to avoid popup span

@@ -108,7 +108,9 @@ export default class AdGuardService {
                 clearInterval(pollInterval);
                 popup.close();
                 this._isLoginDialogOpen = false;
-                MessageToast.show("Login successful.");
+                MessageToast.show("Login successful. Reloading...");
+                // Reload the page to restart timers and data fetching
+                setTimeout(() => window.location.reload(), 1000);
             } catch (error) {
                 // Still unauthorized, continue polling
             }
