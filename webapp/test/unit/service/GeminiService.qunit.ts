@@ -174,3 +174,36 @@ QUnit.test("generateInsights enforces 10s rate limit", async function(assert) {
         assert.notOk(err.message.includes("Please wait"), "Third call (after 11s) should NOT be rate limited");
     }
 });
+
+QUnit.module("Gemini Service - Data Sanitization");
+
+QUnit.test("summarizeLogs sanitizes log data", function (assert) {
+    const service = GeminiService.getInstance();
+
+    // Create mock logs with malicious strings
+    const logs = [
+        {
+            client: "Client\nBad",
+            question: { name: "Domain\tBad" },
+            upstream: "Upstream\rBad",
+            status: "OK"
+        }
+    ];
+
+    // Call private method
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+    const summary = (service as any).summarizeLogs(logs);
+
+    // Assert keys are sanitized
+    // Client\nBad -> ClientBad
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    assert.strictEqual(summary.top_clients[0][0], "ClientBad", "Client name sanitized");
+
+    // Domain\tBad -> DomainBad
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    assert.strictEqual(summary.top_domains[0][0], "DomainBad", "Domain name sanitized");
+
+    // Upstream\rBad -> UpstreamBad
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    assert.strictEqual(summary.top_upstreams[0][0], "UpstreamBad", "Upstream name sanitized");
+});
