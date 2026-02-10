@@ -7,7 +7,15 @@
 		contentWidth="400px">
 		<content>
 			<VBox class="sapUiSmallMargin">
-				<Label text="Gemini API Key" labelFor="apiKeyInput" />
+				<Label text="AdGuard Home Base URL" labelFor="baseUrlInput" />
+				<Input
+					id="baseUrlInput"
+					value="{/baseUrl}"
+					placeholder="e.g. http://192.168.1.50 or http://192.168.1.50/agh"
+					width="100%" />
+				<Text text="Leave empty to use relative path (Proxy Mode)." class="sapUiTinyMarginBottom" />
+
+				<Label text="Gemini API Key" labelFor="apiKeyInput" class="sapUiSmallMarginTop"/>
 				<Input
 					id="apiKeyInput"
 					value="{/apiKey}"
