@@ -43,6 +43,12 @@ interface ViewSettingsEventParams {
  */
 import BaseController from "./BaseController";
 
+
+// Local Interface for processed logs
+interface ProcessedLogEntry extends LogEntry {
+	time: Date;
+}
+
 /**
  * @namespace ui5.aghd.controller
  */
