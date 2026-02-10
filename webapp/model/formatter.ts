@@ -36,5 +36,25 @@ export default {
         }
         // Occurrences are already sorted descending by AdGuardService.
         return occurrences.map(t => `${t.toFixed(3)} ms`).join("\n");
+    },
+
+    /**
+     * Formats the value state based on elapsed time.
+     * @param ms Elapsed time in milliseconds
+     * @returns "Error" | "Warning" | "None"
+     */
+    formatElapsedState: function (ms: number | string | null | undefined): string {
+        if (ms === null || ms === undefined) {
+            return "None";
+        }
+        const val = typeof ms === 'string' ? parseFloat(ms) : ms;
+
+        if (val > 500) {
+            return "Error";
+        } else if (val > 200) {
+            return "Warning";
+        } else {
+            return "None";
+        }
     }
 };
