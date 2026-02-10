@@ -13,7 +13,7 @@ import Event from "sap/ui/base/Event";
 import formatter from "../model/formatter";
 
 /**
- * Base Controller with shared logic (Settings, Dialogs, etc.)
+ * @namespace ui5.aghd.controller
  */
 export default class BaseController extends Controller {
     public formatter = formatter;

@@ -9,6 +9,9 @@ import { AdGuardStats, StatsEntry } from "../model/AdGuardTypes";
 import Event from "sap/ui/base/Event";
 import ColumnListItem from "sap/m/ColumnListItem";
 
+/**
+ * @namespace ui5.aghd.controller
+ */
 export default class Dashboard extends BaseController {
     // formatter = formatter; -> Inherited
     private _timer: ReturnType<typeof setInterval> | undefined;
@@ -224,7 +227,10 @@ export default class Dashboard extends BaseController {
 
     public onLogoutPress(): void {
         AdGuardService.getInstance().logout();
-        UIComponent.getRouterFor(this).navTo(Constants.Routes.Login);
-        MessageBox.success("Logged out successfully.");
+        MessageBox.success("Logged out successfully.", {
+            onClose: () => {
+                window.location.reload();
+            }
+        });
     }
 }
