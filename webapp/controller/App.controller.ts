@@ -16,4 +16,8 @@ export default class App extends BaseController {
         eventBus.unsubscribe("ui5.aghd", "openSettings", this.onOpenSettings, this);
         super.onExit();
     }
+
+    private _handleOpenSettings(): void {
+        void this.onOpenSettings();
+    }
 }
