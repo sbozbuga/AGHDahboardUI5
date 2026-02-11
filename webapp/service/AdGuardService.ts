@@ -140,6 +140,13 @@ export default class AdGuardService {
 
         const targetUrl = baseUrl || "/";
 
+        // Security: Defense in Depth - Ensure targetUrl is safe before opening
+        if (targetUrl !== "/" && !targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+            MessageBox.error("Blocked unsafe Base URL configuration.");
+            this._isLoginDialogOpen = false;
+            return;
+        }
+
         const popup = window.open(
             targetUrl,
             "agh_login",
