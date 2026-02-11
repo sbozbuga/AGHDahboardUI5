@@ -90,6 +90,12 @@ export default class SettingsService {
         if (url.endsWith("/")) {
             url = url.slice(0, -1);
         }
+
+        // Security: Validate URL format to prevent XSS (javascript:) and ensure protocol
+        if (url && !url.startsWith("http://") && !url.startsWith("https://")) {
+            throw new Error("Invalid Base URL. Must start with http:// or https://");
+        }
+
         this._baseUrl = url;
         this.storage.put(this.STORAGE_KEY_BASE_URL, url);
     }
