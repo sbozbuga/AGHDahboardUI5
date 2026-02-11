@@ -120,6 +120,9 @@ export default class Dashboard extends BaseController {
                     this.areStatsEqual(currentData.top_clients, stats.top_clients);
 
                 if (statsUnchanged) {
+                    // Even if stats are unchanged, update the "Last Updated" timestamp to show we checked
+                    model.setProperty("/lastUpdated", new Date());
+
                     if (!silent) {
                         this.getView()?.setBusy(false);
                     }
@@ -129,7 +132,8 @@ export default class Dashboard extends BaseController {
 
             model.setData({
                 ...stats,
-                slowest_queries: slowest
+                slowest_queries: slowest,
+                lastUpdated: new Date()
             });
         } catch (error) {
             if ((error as Error).message === "Unauthorized") {
