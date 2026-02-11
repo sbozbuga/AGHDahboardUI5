@@ -170,7 +170,7 @@ export default class AdGuardService {
                 MessageToast.show("Login successful. Reloading...");
                 // Reload the page to restart timers and data fetching
                 setTimeout(() => window.location.reload(), 1000);
-            } catch (error) {
+            } catch {
                 // Still unauthorized, continue polling
             }
         }, 2000);
@@ -227,17 +227,7 @@ export default class AdGuardService {
      * @param filterStatus Optional status filter (e.g., "Blocked")
      */
     public async getQueryLog(limit: number, offset: number, filterStatus?: string): Promise<AdGuardData> {
-        const params = new URLSearchParams({
-            limit: limit.toString(),
-            offset: offset.toString()
-        });
-
-        if (filterStatus) {
-            params.append("response_status", filterStatus);
-        }
-
-        const url = `${Constants.ApiEndpoints.QueryLog}?${params.toString()}`;
-        const data = await this._request<RawAdGuardData>(url);
+        const data = await this._fetchRawQueryLog(limit, offset, filterStatus);
 
         const processedData: LogEntry[] = data.data.map(entry => {
             const isBlocked = (entry.reason && entry.reason.startsWith("Filtered")) ||
@@ -252,6 +242,20 @@ export default class AdGuardService {
         });
 
         return { data: processedData };
+    }
+
+    private async _fetchRawQueryLog(limit: number, offset: number, filterStatus?: string): Promise<RawAdGuardData> {
+        const params = new URLSearchParams({
+            limit: limit.toString(),
+            offset: offset.toString()
+        });
+
+        if (filterStatus) {
+            params.append("response_status", filterStatus);
+        }
+
+        const url = `${Constants.ApiEndpoints.QueryLog}?${params.toString()}`;
+        return this._request<RawAdGuardData>(url);
     }
 
     /**
@@ -279,11 +283,13 @@ export default class AdGuardService {
      */
     public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[]; }[]> {
         try {
-            const data = await this.getQueryLog(scanDepth, 0);
+            // Optimization: Fetch raw data directly to avoid unnecessary object creation (Date, etc.) in getQueryLog
+            const data = await this._fetchRawQueryLog(scanDepth, 0);
+
             const domainMap = new Map<string, { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }>();
 
             for (const e of data.data) {
-                const val = e.elapsedMs || 0;
+                const val = parseFloat(e.elapsedMs) || 0;
                 if (val <= 0) {
                     continue;
                 }
@@ -382,9 +388,8 @@ export default class AdGuardService {
                 }
 
                 // Case 2: Single-Key Object { "192.168.1.1": 123 }
-                const keys = Object.keys(obj);
-                if (keys.length > 0) {
-                    const key = keys[0];
+                // Optimization: Use for...in loop instead of Object.keys() to avoid array allocation
+                for (const key in obj) {
                     return {
                         name: key,
                         count: Number(obj[key])
