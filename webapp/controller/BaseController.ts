@@ -105,22 +105,26 @@ export default class BaseController extends Controller {
         const selectedModel = model.getProperty("/selectedModel") as string;
         const baseUrl = model.getProperty("/baseUrl") as string;
 
-        SettingsService.getInstance().setApiKey(apiKey);
-        const systemContext = model.getProperty("/systemContext") as string;
-        SettingsService.getInstance().setSystemContext(systemContext);
+        try {
+            SettingsService.getInstance().setApiKey(apiKey);
+            const systemContext = model.getProperty("/systemContext") as string;
+            SettingsService.getInstance().setSystemContext(systemContext);
 
-        if (selectedModel) {
-            SettingsService.getInstance().setModel(selectedModel);
-        }
-
-        SettingsService.getInstance().setBaseUrl(baseUrl);
-
-        (view.byId("settingsDialog") as Dialog).close();
-        MessageBox.success("Settings saved successfully. The application will now reload.", {
-            onClose: () => {
-                window.location.reload();
+            if (selectedModel) {
+                SettingsService.getInstance().setModel(selectedModel);
             }
-        });
+
+            SettingsService.getInstance().setBaseUrl(baseUrl);
+
+            (view.byId("settingsDialog") as Dialog).close();
+            MessageBox.success("Settings saved successfully. The application will now reload.", {
+                onClose: () => {
+                    window.location.reload();
+                }
+            });
+        } catch (error) {
+            MessageBox.error((error as Error).message);
+        }
     }
 
     public onCancelSettings(): void {
