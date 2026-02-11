@@ -170,7 +170,7 @@ export default class AdGuardService {
                 MessageToast.show("Login successful. Reloading...");
                 // Reload the page to restart timers and data fetching
                 setTimeout(() => window.location.reload(), 1000);
-            } catch (error) {
+            } catch {
                 // Still unauthorized, continue polling
             }
         }, 2000);
