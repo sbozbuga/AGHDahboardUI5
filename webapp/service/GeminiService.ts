@@ -81,7 +81,9 @@ export default class GeminiService {
             // Safe redaction without Regex issues
             const safeMsg = apiKey ? msg.split(apiKey).join("[REDACTED]") : msg;
             console.error("Gemini API Error:", safeMsg);
-            throw new Error("Failed to generate insights. Check your API Key and network connection.", { cause: error });
+            // Security: Do not pass the raw error object as 'cause' to prevent potential API key leakage via internal properties
+            // eslint-disable-next-line preserve-caught-error
+            throw new Error("Failed to generate insights. Check your API Key and network connection.", { cause: { message: safeMsg } });
         }
     }
 
