@@ -117,9 +117,13 @@ export default class AdGuardService {
         const url = `${Constants.ApiEndpoints.QueryLog}?${params.toString()}`;
         const data = await this._request<AdGuardData>(url);
 
-        if (!skipEnrichment) {
-            // Post-process to add blocked status
-            data.data.forEach(entry => {
+        data.data.forEach(entry => {
+            // Normalize elapsedMs from string to number
+            // We cast to any because the raw API response has string, but our interface says number
+            entry.elapsedMs = parseFloat(entry.elapsedMs as any) || 0;
+
+            if (!skipEnrichment) {
+                // Post-process to add blocked status
                 // Heuristic: If reason starts with "Filtered" (e.g. FilteredBlackList, FilteredSafeBrowsing), it is blocked.
                 // "NotFiltered..." reasons are obviously not blocked.
                 if (entry.reason && entry.reason.startsWith("Filtered")) {
@@ -131,8 +135,8 @@ export default class AdGuardService {
                 } else {
                     entry.blocked = false;
                 }
-            });
-        }
+            }
+        });
 
         return data;
     }
@@ -166,7 +170,7 @@ export default class AdGuardService {
             const domainMap = new Map<string, { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }>();
 
             for (const e of data.data) {
-                const val = parseFloat(e.elapsedMs) || 0;
+                const val = e.elapsedMs;
                 if (val <= 0) {
                     continue;
                 }
