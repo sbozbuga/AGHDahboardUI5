@@ -269,18 +269,19 @@ export default class AdGuardService {
      * Helper to maintain a sorted array of top 5 occurrences
      */
     private _updateTopOccurrences(occurrences: number[], val: number): void {
-        if (occurrences.length < 5) {
-            occurrences.push(val);
-            occurrences.sort((a, b) => b - a);
-        } else if (val > occurrences[4]) {
-            // Linear insertion: find position, insert, pop last.
-            // Occurrences is sorted descending.
-            let i = 0;
-            while (i < 4 && val <= occurrences[i]) {
-                i++;
-            }
+        const limit = 5;
+        let i = 0;
+        // Find insertion point (descending order)
+        // Optimization: Linear scan is faster than sort() for small fixed-size arrays (N=5)
+        while (i < occurrences.length && val <= occurrences[i]) {
+            i++;
+        }
+
+        if (i < limit) {
             occurrences.splice(i, 0, val);
-            occurrences.pop();
+            if (occurrences.length > limit) {
+                occurrences.pop();
+            }
         }
     }
 
@@ -325,19 +326,21 @@ export default class AdGuardService {
 
             // Single-pass selection of top 10 domains
             const top10: { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }[] = [];
+            const limit = 10;
 
             for (const item of domainMap.values()) {
-                if (top10.length < 10) {
-                    top10.push(item);
-                    top10.sort((a, b) => b.elapsedMs - a.elapsedMs);
-                } else if (item.elapsedMs > top10[9].elapsedMs) {
-                    // Linear insertion for Top 10
-                    let i = 0;
-                    while (i < 9 && item.elapsedMs <= top10[i].elapsedMs) {
-                        i++;
-                    }
+                let i = 0;
+                // Find insertion point (descending order)
+                // Optimization: Linear scan is faster than sort() for small fixed-size arrays (N=10)
+                while (i < top10.length && item.elapsedMs <= top10[i].elapsedMs) {
+                    i++;
+                }
+
+                if (i < limit) {
                     top10.splice(i, 0, item);
-                    top10.pop();
+                    if (top10.length > limit) {
+                        top10.pop();
+                    }
                 }
             }
 
