@@ -56,5 +56,25 @@ export default {
         } else {
             return "None";
         }
+    },
+
+    /**
+     * Formats the value color for NumericContent based on elapsed time.
+     * @param ms Elapsed time in milliseconds
+     * @returns "Good" | "Critical" | "Error" | "Neutral"
+     */
+    formatElapsedColor: function (ms: number | string | null | undefined): string {
+        if (ms === null || ms === undefined) {
+            return "Neutral";
+        }
+        const val = typeof ms === 'string' ? parseFloat(ms) : ms;
+
+        if (val > 500) {
+            return "Error";
+        } else if (val > 200) {
+            return "Critical";
+        } else {
+            return "Good";
+        }
     }
 };
