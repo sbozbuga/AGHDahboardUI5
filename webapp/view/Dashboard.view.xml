@@ -38,7 +38,7 @@
 				press="onPressLogs"
 				tooltip="View query performance logs">
 				<TileContent>
-					<NumericContent value="{/avg_processing_time}" scale="ms" icon="sap-icon://performance" valueColor="Good" />
+					<NumericContent value="{/avg_processing_time}" scale="ms" icon="sap-icon://performance" valueColor="{path: '/avg_processing_time', formatter: '.formatter.formatElapsedColor'}" />
 				</TileContent>
 			</GenericTile>
 
