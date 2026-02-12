@@ -69,7 +69,12 @@ export default class AdGuardService {
 
             // Handle empty bodies (e.g. login)
             const text = await response.text();
-            return text ? (JSON.parse(text) as T) : ({} as T);
+            try {
+                return text ? (JSON.parse(text) as T) : ({} as T);
+            } catch (error) {
+                // If parsing fails (e.g., HTML error page), throw a generic error to avoid leaking implementation details
+                throw new Error("Invalid response format from AdGuard Home API", { cause: error });
+            }
         } catch (error) {
             if ((error as Error).name === "AbortError") {
                 throw new Error("Request timed out", { cause: error });
