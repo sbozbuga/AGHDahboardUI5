@@ -18,7 +18,7 @@ export interface LogEntry {
     };
     client: string;
     time: string;
-    elapsedMs: string;
+    elapsedMs: number;
     reason: string;
     filterId: number;
     rule: string;

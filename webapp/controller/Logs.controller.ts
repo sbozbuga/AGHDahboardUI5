@@ -25,9 +25,8 @@ import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import encodeXML from "sap/base/security/encodeXML";
 import { Constants } from "../model/Constants";
 
-interface ProcessedLogEntry extends Omit<LogEntry, "time" | "elapsedMs"> {
+interface ProcessedLogEntry extends Omit<LogEntry, "time"> {
 	time: Date;
-	elapsedMs: number;
 }
 
 interface RouteArguments {
@@ -151,8 +150,7 @@ export default class Logs extends Controller {
 			// Transform ISO date strings to JS Date objects
 			const processedData = data.data.map(item => ({
 				...item,
-				time: new Date(item.time),
-				elapsedMs: parseFloat(item.elapsedMs)
+				time: new Date(item.time)
 			})) as ProcessedLogEntry[];
 
 			if (bAppend) {
