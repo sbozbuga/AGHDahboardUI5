@@ -21,6 +21,10 @@ import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import encodeXML from "sap/base/security/encodeXML";
 import { Constants } from "../model/Constants";
 
+interface ProcessedLogEntry extends Omit<LogEntry, "time"> {
+	time: Date;
+}
+
 interface RouteArguments {
 	"?query"?: {
 		status?: string;
@@ -148,16 +152,11 @@ export default class Logs extends BaseController {
 		try {
 			const data = await AdGuardService.getInstance().getQueryLog(limit, offset, filterStatus);
 
-			// Optimization: Mutate in-place to avoid allocation of intermediate objects
-			const processedData = data.data as unknown as ProcessedLogEntry[];
-			const len = processedData.length;
-			for (let i = 0; i < len; i++) {
-				const item = processedData[i];
-				// Type cast needed as we are mutating the object from string to Date/Number
-				// but TypeScript thinks it is already the target type due to the earlier cast.
-				item.time = new Date(item.time);
-				item.elapsedMs = parseFloat(item.elapsedMs as unknown as string);
-			}
+			// Transform ISO date strings to JS Date objects
+			const processedData = data.data.map(item => ({
+				...item,
+				time: new Date(item.time)
+			})) as ProcessedLogEntry[];
 
 			if (bAppend) {
 				const currentData = model.getProperty(Constants.ModelProperties.Data) as ProcessedLogEntry[];
