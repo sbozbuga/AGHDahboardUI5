@@ -42,8 +42,8 @@ QUnit.module("Logs Controller Performance Optimization", {
         ctx.mockService = {
             getQueryLog: () => Promise.resolve({
                 data: [
-                    { time: "2023-01-01T12:00:00Z", elapsedMs: "10.5", question: { name: "test1.com" } },
-                    { time: "2023-01-01T12:00:01Z", elapsedMs: "20.0", question: { name: "test2.com" } }
+                    { time: new Date("2023-01-01T12:00:00Z"), elapsedMs: 10.5, question: { name: "test1.com" } },
+                    { time: new Date("2023-01-01T12:00:01Z"), elapsedMs: 20.0, question: { name: "test2.com" } }
                 ]
             })
         };
@@ -73,9 +73,9 @@ QUnit.test("onRefreshLogs (Initial Load): Transforms data correctly without allo
     assert.strictEqual(data.length, 2, "Data length should match API response");
 
     // Check transformation
-    assert.ok(data[0].time instanceof Date, "Time string converted to Date object");
+    assert.ok(data[0].time instanceof Date, "Time is a Date object");
     assert.strictEqual(data[0].time.toISOString(), "2023-01-01T12:00:00.000Z", "Date value is correct");
-    assert.strictEqual(typeof data[0].elapsedMs, "number", "ElapsedMs string converted to number");
+    assert.strictEqual(typeof data[0].elapsedMs, "number", "ElapsedMs is a number");
     assert.strictEqual(data[0].elapsedMs, 10.5, "ElapsedMs value is correct");
 
     // Check second item
@@ -101,9 +101,9 @@ QUnit.test("onRefreshLogs (Append): Appends data correctly using optimized push"
     assert.strictEqual(data[0].id, "existing", "Existing data preserved at start");
 
     // Check appended data
-    assert.ok(data[1].time instanceof Date, "Appended item 1 transformed");
+    assert.ok(data[1].time instanceof Date, "Appended item 1 is Date");
     assert.strictEqual(data[1].question.name, "test1.com", "Appended item 1 correct");
 
-    assert.ok(data[2].time instanceof Date, "Appended item 2 transformed");
+    assert.ok(data[2].time instanceof Date, "Appended item 2 is Date");
     assert.strictEqual(data[2].question.name, "test2.com", "Appended item 2 correct");
 });
