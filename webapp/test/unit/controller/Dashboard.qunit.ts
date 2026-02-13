@@ -36,14 +36,17 @@ QUnit.module("Dashboard Polling Logic", {
         ctx.controller = new Dashboard("dashboard");
 
         // Mock getView
+        const model = new JSONModel();
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ctx.controller.getView = (() => ({
             setModel: () => {},
-            getModel: () => new JSONModel(),
+            getModel: () => model,
             setBusy: () => {}
         })) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+        ctx.model = model;
 
-        // Mock onRefreshStats to avoid side effects
+        // Mock onRefreshStats to avoid side effects (will be restored/mocked differently in tests)
+        // Actually, we want to test onRefreshStats logic in some tests, but here we test polling.
         ctx.controller.onRefreshStats = () => Promise.resolve();
 
         // Spy on setInterval/clearInterval
@@ -53,14 +56,6 @@ QUnit.module("Dashboard Polling Logic", {
         ctx.clearCalls = 0;
         ctx.lastIntervalId = 123;
 
-        window.setInterval = (() => {
-            ctx.intervalCalls++;
-            return ctx.lastIntervalId;
-        }) as unknown as typeof window.setInterval;
-
-        window.clearInterval = (() => {
-            ctx.clearCalls++;
-        }) as unknown as typeof window.clearInterval;
         window.setInterval = ((() => {
             ctx.intervalCalls++;
             return ctx.lastIntervalId;
@@ -172,7 +167,7 @@ QUnit.module("Dashboard Data Fetching", {
 
         ctx.mockService = {
             getStats: () => Promise.resolve({ num_dns_queries: 100 }),
-            getQueryLog: () => Promise.resolve({ data: [{ time: "2023-01-01T12:00:00" }] }),
+            getQueryLog: () => Promise.resolve({ data: [{ time: new Date("2023-01-01T12:00:00") }] }), // Date object
             getSlowestQueries: () => Promise.resolve([{ domain: "slow.com", elapsedMs: 500 }])
         };
 
@@ -234,7 +229,7 @@ QUnit.test("onRefreshStats fetches slowest queries if logs changed", async funct
 
         // Change log time
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        ctx.mockService.getQueryLog = () => Promise.resolve({ data: [{ time: "2023-01-01T12:00:01" }] });
+        ctx.mockService.getQueryLog = () => Promise.resolve({ data: [{ time: new Date("2023-01-01T12:00:01") }] });
 
         // Spy
         let called = false;
@@ -253,4 +248,17 @@ QUnit.test("onRefreshStats fetches slowest queries if logs changed", async funct
     } finally {
         Date.now = originalDateNow;
     }
+});
+
+QUnit.test("onRefreshStats updates lastUpdated property", async function(this: TestContext, assert: Assert) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const ctx = this;
+    const model = ctx.model; // Use the mocked model directly
+
+    // Initial state
+    assert.notOk(model.getProperty("/lastUpdated"), "lastUpdated is initially undefined");
+
+    await ctx.controller.onRefreshStats(true);
+
+    assert.ok(model.getProperty("/lastUpdated") instanceof Date, "lastUpdated is set to a Date object");
 });

@@ -38,7 +38,7 @@
 				press="onPressLogs"
 				tooltip="View query performance logs">
 				<TileContent>
-					<NumericContent value="{/avg_processing_time}" scale="ms" icon="sap-icon://performance" valueColor="Good" />
+					<NumericContent value="{/avg_processing_time}" scale="ms" icon="sap-icon://performance" valueColor="{path: '/avg_processing_time', formatter: '.formatter.formatElapsedColor'}" />
 				</TileContent>
 			</GenericTile>
 
@@ -176,7 +176,10 @@
 												path: 'elapsedMs',
 												formatter: '.formatter.formatElapsed'
 											}"
-											state="Warning" 
+											state="{
+												path: 'elapsedMs',
+												formatter: '.formatter.formatElapsedState'
+											}"
                                              />
                                     </cells>
                                 </ColumnListItem>
@@ -188,8 +191,10 @@
 		</content>
 		<footer>
 			<OverflowToolbar>
+				<Text text="Updated: {path: '/lastUpdated', type: 'sap.ui.model.type.DateTime', formatOptions: { style: 'medium' }}" visible="{= !!${/lastUpdated} }" class="sapUiTinyMarginBegin" />
 				<ToolbarSpacer />
 				<Button text="View Logs" press="onPressLogs" type="Emphasized" />
+				<Button icon="sap-icon://action-settings" tooltip="Settings" press="onOpenSettings" />
                 <Button icon="sap-icon://log" tooltip="Logout" press="onLogoutPress" />
 			</OverflowToolbar>
 		</footer>

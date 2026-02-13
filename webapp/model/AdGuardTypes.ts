@@ -1,4 +1,4 @@
-export interface LogEntry {
+export interface RawLogEntry {
     answer: {
         type: string;
         value: string;
@@ -23,6 +23,15 @@ export interface LogEntry {
     filterId: number;
     rule: string;
     blocked?: boolean;
+}
+
+export interface LogEntry extends Omit<RawLogEntry, "time" | "elapsedMs"> {
+    time: Date;
+    elapsedMs: number;
+}
+
+export interface RawAdGuardData {
+    data: RawLogEntry[];
 }
 
 export interface AdGuardData {

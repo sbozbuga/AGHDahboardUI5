@@ -157,7 +157,10 @@
 										path: 'elapsedMs',
 										formatter: '.formatter.formatElapsed'
 									}"
-									state="None" />
+									state="{
+										path: 'elapsedMs',
+										formatter: '.formatter.formatElapsedState'
+									}" />
 								<Text text="{upstream}" wrapping="true" maxLines="2" />
 								<Text text="{reason}" wrapping="true" maxLines="2" />
 								<Text text="{filterId}" />
