@@ -248,7 +248,7 @@ export default class AdGuardService {
             return {
                 ...entry,
                 time: new Date(entry.time),
-                elapsedMs: parseFloat(entry.elapsedMs),
+                elapsedMs: entry.elapsedMs,
                 blocked: isBlocked
             };
         });
@@ -256,7 +256,7 @@ export default class AdGuardService {
         return { data: processedData };
     }
 
-    private async _fetchRawQueryLog(limit: number, offset: number, filterStatus?: string): Promise<RawAdGuardData> {
+    private async _fetchRawQueryLog(limit: number, offset: number, filterStatus?: string, skipEnrichment: boolean = false): Promise<RawAdGuardData> {
         const params = new URLSearchParams({
             limit: limit.toString(),
             offset: offset.toString()
@@ -267,12 +267,12 @@ export default class AdGuardService {
         }
 
         const url = `${Constants.ApiEndpoints.QueryLog}?${params.toString()}`;
-        const data = await this._request<AdGuardData>(url);
+        const data = await this._request<RawAdGuardData>(url);
 
         data.data.forEach(entry => {
             // Normalize elapsedMs from string to number
-            // We cast to any because the raw API response has string, but our interface says number
-            entry.elapsedMs = parseFloat(entry.elapsedMs as any) || 0;
+            // We cast to unknown then string because the raw API response has string, but our interface says number
+            entry.elapsedMs = parseFloat(entry.elapsedMs as unknown as string) || 0;
 
             if (!skipEnrichment) {
                 // Post-process to add blocked status
