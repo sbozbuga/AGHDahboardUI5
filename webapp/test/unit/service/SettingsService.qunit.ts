@@ -47,5 +47,10 @@ QUnit.test("setBaseUrl throws on invalid URLs", function(assert) {
     // Invalid Text
     assert.throws(() => {
         service.setBaseUrl("randomtext");
-    }, /Invalid Base URL/, "Throws on plain text");
+    }, /Invalid URL format/, "Throws on plain text");
+
+    // Security: Credentials
+    assert.throws(() => {
+        service.setBaseUrl("http://user:pass@example.com");
+    }, /Base URL must not contain credentials/, "Throws on embedded credentials");
 });
