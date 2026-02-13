@@ -152,11 +152,9 @@ export default class Logs extends BaseController {
 		try {
 			const data = await AdGuardService.getInstance().getQueryLog(limit, offset, filterStatus);
 
-			// Transform ISO date strings to JS Date objects
-			const processedData = data.data.map(item => ({
-				...item,
-				time: new Date(item.time)
-			})) as ProcessedLogEntry[];
+			// Use processed data directly from service
+			const processedData = data.data as unknown as ProcessedLogEntry[];
+			const len = processedData.length;
 
 			if (bAppend) {
 				const currentData = model.getProperty(Constants.ModelProperties.Data) as ProcessedLogEntry[];
