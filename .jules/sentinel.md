@@ -37,3 +37,8 @@
 **Vulnerability:** Expensive or quota-limited API endpoints (like Gemini AI) can be abused by rapid user actions or scripts, leading to denial of service (DoS) or cost overruns.
 **Learning:** While server-side rate limiting is ideal, client-side throttling provides an immediate first line of defense against accidental misuse and protects the user's own API quota in a BYOK (Bring Your Own Key) architecture.
 **Prevention:** Implement a minimum time interval (e.g., 10s) between calls to sensitive endpoints using a timestamp check, and provide clear user feedback when the limit is hit.
+
+## 2026-02-13 - Base URL Credential Injection
+**Vulnerability:** Allowing user-configurable Base URLs to contain embedded credentials (e.g., `http://user:pass@host`) can lead to accidental exposure of sensitive authentication details in application logs or error messages when network requests fail.
+**Learning:** Even when input is seemingly benign configuration (a URL), standard libraries (like `fetch` or `URL`) often preserve sensitive components. Simple string validation is insufficient to detect semantic security risks.
+**Prevention:** Use a robust URL parser (like `new URL()`) to strictly validate protocol and explicitly reject the presence of `username` or `password` components before storing or using the URL.
