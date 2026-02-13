@@ -192,6 +192,7 @@
 		<footer>
 			<OverflowToolbar>
 				<Text text="Updated: {path: '/lastUpdated', type: 'sap.ui.model.type.DateTime', formatOptions: { style: 'medium' }}" visible="{= !!${/lastUpdated} }" class="sapUiTinyMarginBegin" />
+				<Button icon="sap-icon://refresh" type="Transparent" press=".onManualRefresh" tooltip="Refresh Data" class="sapUiTinyMarginBegin" />
 				<ToolbarSpacer />
 				<Button text="View Logs" press="onPressLogs" type="Emphasized" />
 				<Button icon="sap-icon://action-settings" tooltip="Settings" press="onOpenSettings" />

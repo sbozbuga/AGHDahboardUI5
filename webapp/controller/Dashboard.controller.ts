@@ -73,6 +73,10 @@ export default class Dashboard extends BaseController {
         }
     }
 
+    public onManualRefresh(): void {
+        void this.onRefreshStats(false);
+    }
+
     public async onRefreshStats(silent: boolean = false): Promise<void> {
         const model = this.getView()?.getModel() as JSONModel;
         if (!model) return;
