@@ -87,17 +87,37 @@ export default class SettingsService {
     }
 
     public setBaseUrl(url: string): void {
-        if (url.endsWith("/")) {
-            url = url.slice(0, -1);
+        let cleanUrl = url.trim();
+        if (cleanUrl.endsWith("/")) {
+            cleanUrl = cleanUrl.slice(0, -1);
+        }
+
+        if (!cleanUrl) {
+            this._baseUrl = "";
+            this.storage.put(this.STORAGE_KEY_BASE_URL, "");
+            return;
         }
 
         // Security: Validate URL format to prevent XSS (javascript:) and ensure protocol
-        if (url && !url.startsWith("http://") && !url.startsWith("https://")) {
-            throw new Error("Invalid Base URL. Must start with http:// or https://");
+        // Also forbid embedded credentials to prevent leakage in logs
+        try {
+            const parsedUrl = new URL(cleanUrl);
+            if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+                throw new Error("Invalid Base URL. Must start with http:// or https://");
+            }
+            if (parsedUrl.username || parsedUrl.password) {
+                throw new Error("Base URL must not contain credentials.");
+            }
+        } catch (error) {
+            // Map URL constructor errors to friendly message if needed, or rethrow custom ones
+            if (error instanceof Error && (error.message.includes("Invalid Base URL") || error.message.includes("credentials"))) {
+                throw error;
+            }
+            throw new Error("Invalid URL format.");
         }
 
-        this._baseUrl = url;
-        this.storage.put(this.STORAGE_KEY_BASE_URL, url);
+        this._baseUrl = cleanUrl;
+        this.storage.put(this.STORAGE_KEY_BASE_URL, cleanUrl);
     }
 
     public clearCredentials(): void {
