@@ -21,6 +21,10 @@ import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import encodeXML from "sap/base/security/encodeXML";
 import { Constants } from "../model/Constants";
 
+interface ProcessedLogEntry extends Omit<LogEntry, "time"> {
+	time: Date;
+}
+
 interface RouteArguments {
 	"?query"?: {
 		status?: string;
