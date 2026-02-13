@@ -93,7 +93,7 @@ QUnit.test("getSlowestQueries returns top 10 sorted items", async function (asse
         question: { type: "A", name: `domain${i}.com`, class: "IN" },
         client: "192.168.1.100",
         time: "2023-01-01T12:00:00Z",
-        elapsedMs: String((i % 10) * 100 + (Math.random() * 100)), // Mixed values
+        elapsedMs: String((i % 10) * 100 + (Math.random() * 100)) as unknown as number, // Mixed values
         reason: "NotFilteredNotFound",
         filterId: 0,
         rule: ""
@@ -101,16 +101,16 @@ QUnit.test("getSlowestQueries returns top 10 sorted items", async function (asse
 
     // Explicitly set top values to verify sorting
     // Top 1: 5000ms
-    entries[10].elapsedMs = "5000";
+    entries[10].elapsedMs = "5000" as unknown as number;
     entries[10].question.name = "slowest.com";
 
     // Top 2: 4000ms
-    entries[20].elapsedMs = "4000";
+    entries[20].elapsedMs = "4000" as unknown as number;
     entries[20].question.name = "second.com";
 
     // Top 3..12: 3000..2100ms (10 items total needed, so we need 8 more high ones)
     for(let k=0; k<8; k++) {
-        entries[30+k].elapsedMs = String(3000 - k*100); // 3000, 2900, ..., 2300
+        entries[30+k].elapsedMs = String(3000 - k*100) as unknown as number; // 3000, 2900, ..., 2300
         entries[30+k].question.name = `high${k}.com`;
     }
 
@@ -160,7 +160,7 @@ QUnit.test("getSlowestQueries strictly limits occurrences to top 5", async funct
         question: { type: "A", name: "repeated.com", class: "IN" },
         client: "192.168.1.100",
         time: "2023-01-01T12:00:00Z",
-        elapsedMs: String(5000 - i * 10), // 5000, 4990, 4980...
+        elapsedMs: String(5000 - i * 10) as unknown as number, // 5000, 4990, 4980...
         reason: "NotFilteredNotFound",
         filterId: 0,
         rule: ""
@@ -179,7 +179,7 @@ QUnit.test("getSlowestQueries strictly limits occurrences to top 5", async funct
             question: { type: "A", name: `other${k}.com`, class: "IN" },
             client: "192.168.1.100",
             time: "2023-01-01T12:00:00Z",
-            elapsedMs: "100", // Fast
+            elapsedMs: "100" as unknown as number, // Fast
             reason: "NotFilteredNotFound",
             filterId: 0,
             rule: ""
