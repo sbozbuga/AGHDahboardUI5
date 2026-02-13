@@ -23,8 +23,7 @@ export const Constants = {
     },
     Routes: {
         Dashboard: "dashboard",
-        Logs: "logs",
-        Login: "login"
+        Logs: "logs"
     },
     ApiEndpoints: {
         Login: "/control/login",

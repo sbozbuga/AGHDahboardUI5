@@ -36,3 +36,29 @@ QUnit.test("Should handle empty or invalid input", function (assert) {
     assert.strictEqual(formatter.slowestTooltip(undefined), "", "Returns empty string for undefined");
     assert.strictEqual(formatter.slowestTooltip([]), "", "Returns empty string for empty array");
 });
+
+QUnit.module("formatter - formatElapsedState");
+
+QUnit.test("Should format elapsed time to value state", function (assert) {
+    assert.strictEqual(formatter.formatElapsedState(600), "Error", "> 500ms should be Error");
+    assert.strictEqual(formatter.formatElapsedState(500), "Warning", "500ms should be Warning (edge case)");
+    assert.strictEqual(formatter.formatElapsedState(201), "Warning", "> 200ms should be Warning");
+    assert.strictEqual(formatter.formatElapsedState(200), "None", "200ms should be None (edge case)");
+    assert.strictEqual(formatter.formatElapsedState(50), "None", "< 200ms should be None");
+    assert.strictEqual(formatter.formatElapsedState(undefined), "None", "undefined should be None");
+    assert.strictEqual(formatter.formatElapsedState(null), "None", "null should be None");
+    assert.strictEqual(formatter.formatElapsedState("600"), "Error", "String '600' should be Error");
+});
+
+QUnit.module("formatter - formatElapsedColor");
+
+QUnit.test("Should format elapsed time to value color", function (assert) {
+    assert.strictEqual(formatter.formatElapsedColor(600), "Error", "> 500ms should be Error");
+    assert.strictEqual(formatter.formatElapsedColor(500), "Critical", "500ms should be Critical (edge case)");
+    assert.strictEqual(formatter.formatElapsedColor(201), "Critical", "> 200ms should be Critical");
+    assert.strictEqual(formatter.formatElapsedColor(200), "Good", "200ms should be Good (edge case)");
+    assert.strictEqual(formatter.formatElapsedColor(50), "Good", "< 200ms should be Good");
+    assert.strictEqual(formatter.formatElapsedColor(undefined), "Neutral", "undefined should be Neutral");
+    assert.strictEqual(formatter.formatElapsedColor(null), "Neutral", "null should be Neutral");
+    assert.strictEqual(formatter.formatElapsedColor("600"), "Error", "String '600' should be Error");
+});
