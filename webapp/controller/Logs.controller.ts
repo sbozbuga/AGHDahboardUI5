@@ -148,16 +148,9 @@ export default class Logs extends BaseController {
 		try {
 			const data = await AdGuardService.getInstance().getQueryLog(limit, offset, filterStatus);
 
-			// Optimization: Mutate in-place to avoid allocation of intermediate objects
+			// Use processed data directly from service
 			const processedData = data.data as unknown as ProcessedLogEntry[];
 			const len = processedData.length;
-			for (let i = 0; i < len; i++) {
-				const item = processedData[i];
-				// Type cast needed as we are mutating the object from string to Date/Number
-				// but TypeScript thinks it is already the target type due to the earlier cast.
-				item.time = new Date(item.time);
-				item.elapsedMs = parseFloat(item.elapsedMs as unknown as string);
-			}
 
 			if (bAppend) {
 				const currentData = model.getProperty(Constants.ModelProperties.Data) as ProcessedLogEntry[];
