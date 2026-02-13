@@ -248,7 +248,7 @@ export default class AdGuardService {
             return {
                 ...entry,
                 time: new Date(entry.time),
-                elapsedMs: entry.elapsedMs,
+                elapsedMs: entry.elapsedMs, // Already parsed in _fetchRawQueryLog
                 blocked: isBlocked
             };
         });
@@ -271,7 +271,7 @@ export default class AdGuardService {
 
         data.data.forEach(entry => {
             // Normalize elapsedMs from string to number
-            // We cast to unknown then string because the raw API response has string, but our interface says number
+            // We cast to any because the raw API response has string, but our interface says number
             entry.elapsedMs = parseFloat(entry.elapsedMs as unknown as string) || 0;
 
             if (!skipEnrichment) {
@@ -320,7 +320,7 @@ export default class AdGuardService {
     public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[]; }[]> {
         try {
             // Optimization: Fetch raw data directly to avoid unnecessary object creation (Date, etc.) in getQueryLog
-            const data = await this._fetchRawQueryLog(scanDepth, 0);
+            const data = await this._fetchRawQueryLog(scanDepth, 0, undefined, true);
 
             const domainMap = new Map<string, { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }>();
 
