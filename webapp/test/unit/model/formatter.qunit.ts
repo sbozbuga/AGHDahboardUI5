@@ -1,6 +1,20 @@
 import formatter from "ui5/aghd/model/formatter";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 
+QUnit.module("formatter - formatElapsed");
+
+QUnit.test("Should format elapsed time correctly", function (assert) {
+    assert.strictEqual(formatter.formatElapsed(123.456), "123.456", "Formats 123.456 correctly");
+    assert.strictEqual(formatter.formatElapsed(0.1234), "0.123", "Formats 0.1234 correctly (rounded)");
+    assert.strictEqual(formatter.formatElapsed(10), "10.000", "Formats 10 correctly");
+    assert.strictEqual(formatter.formatElapsed(0), "0.000", "Formats 0 correctly");
+});
+
+QUnit.test("Should handle null or undefined", function (assert) {
+    assert.strictEqual(formatter.formatElapsed(null), "0.000", "Returns 0.000 for null");
+    assert.strictEqual(formatter.formatElapsed(undefined), "0.000", "Returns 0.000 for undefined");
+});
+
 QUnit.module("formatter - slowestTooltip");
 
 QUnit.test("Should format sorted array correctly without re-sorting", function (assert) {
