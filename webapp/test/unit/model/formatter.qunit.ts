@@ -50,6 +50,19 @@ QUnit.test("Should format elapsed time to value state", function (assert) {
     assert.strictEqual(formatter.formatElapsedState("600"), "Error", "String '600' should be Error");
 });
 
+QUnit.module("formatter - formatElapsedStateText");
+
+QUnit.test("Should format elapsed time to state text", function (assert) {
+    assert.strictEqual(formatter.formatElapsedStateText(600), "Critical (> 500ms)", "> 500ms should be Critical (> 500ms)");
+    assert.strictEqual(formatter.formatElapsedStateText(500), "Warning (> 200ms)", "500ms should be Warning (> 200ms) (edge case)");
+    assert.strictEqual(formatter.formatElapsedStateText(201), "Warning (> 200ms)", "> 200ms should be Warning (> 200ms)");
+    assert.strictEqual(formatter.formatElapsedStateText(200), "Good (< 200ms)", "200ms should be Good (< 200ms) (edge case)");
+    assert.strictEqual(formatter.formatElapsedStateText(50), "Good (< 200ms)", "< 200ms should be Good (< 200ms)");
+    assert.strictEqual(formatter.formatElapsedStateText(undefined), "None", "undefined should be None");
+    assert.strictEqual(formatter.formatElapsedStateText(null), "None", "null should be None");
+    assert.strictEqual(formatter.formatElapsedStateText("600"), "Critical (> 500ms)", "String '600' should be Critical (> 500ms)");
+});
+
 QUnit.module("formatter - formatElapsedColor");
 
 QUnit.test("Should format elapsed time to value color", function (assert) {

@@ -160,6 +160,10 @@
 									state="{
 										path: 'elapsedMs',
 										formatter: '.formatter.formatElapsedState'
+									}"
+									tooltip="{
+										path: 'elapsedMs',
+										formatter: '.formatter.formatElapsedStateText'
 									}" />
 								<Text text="{upstream}" wrapping="true" maxLines="2" />
 								<Text text="{reason}" wrapping="true" maxLines="2" />
