@@ -180,6 +180,10 @@
 												path: 'elapsedMs',
 												formatter: '.formatter.formatElapsedState'
 											}"
+											tooltip="{
+												path: 'elapsedMs',
+												formatter: '.formatter.formatElapsedStateText'
+											}"
                                              />
                                     </cells>
                                 </ColumnListItem>
