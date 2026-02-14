@@ -113,7 +113,7 @@ export default class SettingsService {
             if (error instanceof Error && (error.message.includes("Invalid Base URL") || error.message.includes("credentials"))) {
                 throw error;
             }
-            throw new Error("Invalid URL format.");
+            throw new Error("Invalid URL format.", { cause: error });
         }
 
         this._baseUrl = cleanUrl;
