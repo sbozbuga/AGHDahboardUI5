@@ -1,64 +1,121 @@
-# AdGuard Home Dashboard (UI5 + Gemini AI)
+# 🚀 Pi 5 Lab-Monitor & Network Gateway
 
-A generic, modern Dashboard for AdGuard Home, built with **SAP UI5** (TypeScript) and integrated with **Google Gemini AI** for intelligent log analysis.
+This repository manages a high-performance network gateway, DNS security stack, and system monitoring hub running on a Raspberry Pi 5. The system is optimized for an external SSK 512GB SSD and uses a centralized Docker/Git-based infrastructure.
 
-## Features
+| Component | Responsibility | Technology |
+| :--- | :--- | :--- |
+| **OS** | Raspberry Pi OS (64-bit) | Linux Kernel 6.12+ |
+| **Primary Storage** | 512GB External SSD | `/dev/sda` (USB 3.0, SAT protocol) |
+| **Gateway** | Nginx Reverse Proxy | Port 80/443 (The "Lab-Gateway") |
+| **DNS Stack** | AdGuard Home + Unbound | Recursive DNS with Cache Warmup |
+| **Monitoring** | Grafana + Prometheus | Node-Exporter & Unbound-Exporter |
+| **Management UI** | Custom Toolbox Dashboard | Flask-based UI (Port 5005) |
 
-- **📊 Dashboard Stats**: Real-time overview of DNS queries, blocked domains, and client activity.
-- **🤖 Smart Analysis**: Uses **Gemini** (Flash/Pro) to analyze your query logs and provide actionable security and privacy insights.
-- **📝 Query Logs**: Advanced log viewer with filtering, pagination, and multi-column sorting.
-- **🔐 Native Login**: Direct authentication with your AdGuard Home instance.
-- **⚙️ Configurable**: Set your API Key, choose your preferred AI model, and provide custom network context for better insights.
+## 📂 Directory Structure (`~/lab-mon`)
 
-## Tech Stack
+The system follows a strict centralized structure for easy backup and portability:
 
-- **Frontend**: SAP UI5 (OpenUI5) with TypeScript
-- **AI**: Google Gemini API via `@google/generative-ai`
-- **Build**: UI5 Tooling + `ui5-tooling-modules` for bundling NPM packages
+```plaintext
+~/lab-mon/
+├── dashboard/          # Custom Flask Dashboard source code
+├── docker/             # Docker Compose stacks
+│   ├── adguardhome/    # DNS Blocking & Filtering
+│   ├── grafana-stack/  # Monitoring (Grafana, Prometheus, Exporters)
+│   └── nginx/          # Lab-Gateway configuration
+├── scripts/            # Automation tools (ub-warmup, ssd-health,..)
+│   └── dns/            # Unbound warmup & static lists
+├── lib/                # Shared Python libraries for the dashboard
+└── README.md           # This documentation
+```
 
-## Setup
+## 🛠️ Critical Services & Ports
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/sbozbuga/AGHDahboardUI5.git
-    cd AGHDahboardUI5
-    ```
+### 1. Networking & DNS
+- **AdGuard Home**: 53/udp (DNS), 3000/tcp (Admin UI)
+- **Unbound**: 5351/udp (Recursive Upstream for AGH)
+- **Nginx**: 80/443 (Global entry point for all web UIs)
 
-2.  **Install Dependencies**:
-    ```bash
-    npm install
-    ```
+### 2. Monitoring (Grafana Stack)
+- **Grafana**: 3000/tcp (Accessible via `/grafana`)
+- **Prometheus**: 9090/tcp (Data scraping & storage)
+- **Unbound Exporter**: 9168/tcp (Custom built image with `wget` support)
 
-3.  **Run Locally (Dev Mode)**:
-    ```bash
-    npm start
-    ```
-    Acces at `http://localhost:8080`.
-    *Note: You may need to configure a proxy or CORS in `ui5.yaml` if connecting to a remote AdGuard instance.*
+### 3. Management
+- **Toolbox UI**: 5005/tcp (Systemd service: `aghd-dashboard.service`)
+  - Bound to `0.0.0.0` for network accessibility.
 
-## Deployment to AdGuard Home
+## 🌐 URL Paths & Nginx Proxy Rules
 
-To deploy this dashboard directly to your AdGuard Home server (e.g., Raspberry Pi):
+The Nginx gateway (`80/443`) serves as the single entry point for all web interfaces.
 
-1.  **Build the project**:
-    ```bash
-    npm run build
-    ```
+| Service | URL Path | Backend Target |
+| :--- | :--- | :--- |
+| **Grafana** | `/grafana/` | `http://127.0.0.1:3000/` |
+| **Toolbox** | `/toolbox/` | `http://127.0.0.1:5005/` |
+| **AdGuard Home** | `/` | `http://127.0.0.1:3000/` |
 
-2.  **Upload `dist` folder**:
-    Copy the contents of the `dist/` folder to your web server hosting the dashboard.
-    ```bash
-    scp -r dist/* user@your-adguard-server:/var/www/adguard-dashboard/
-    ```
+### Configuration Examples
 
-## AI Configuration
+```nginx
+# Grafana (Monitoring)
+# Note: Ensure Grafana `root_url` is set to serve from /grafana/
+location /grafana/ {
+    proxy_pass http://127.0.0.1:3000/;
+    rewrite  ^/grafana/(.*)  /$1 break;
+    proxy_set_header Host $http_host;
+}
 
-1.  Go to the **Logs** tab.
-2.  Open **Settings** (⚙️).
-3.  Enter your **Gemini API Key** (Get one at [aistudio.google.com](https://aistudio.google.com/)).
-4.  Select a Model (e.g., `gemini-1.5-flash`).
-5.  (Optional) Enter **System Context** to describe your network for better AI accuracy.
+# Toolbox (Management UI)
+location /toolbox/ {
+    proxy_pass http://127.0.0.1:5005/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
 
-## License
+# AdGuard Home (DNS Admin)
+location / {
+    proxy_pass http://127.0.0.1:3000/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
 
-Apache-2.0
+## ⚙️ Hardware Specs (Pi 5 SSD)
+
+Important hardware identifiers for troubleshooting:
+- **SSD Device Path**: `/dev/sda`
+- **Smartctl Protocol**: `-d sat` (Required for USB-to-SATA bridge communication).
+- **Thermal Profile**: Idle ~27°C. Critical threshold set at 55°C.
+
+## 🔄 Maintenance & Syncing
+
+The entire `~/lab-mon` folder is a Git repository. A global sync alias is used to push all local changes (configs, scripts, dashboard updates) to the remote backup.
+
+### DNS Cache Warmup (`ub-warmup`)
+Automated nightly at 04:00. This script:
+1. Analyzes AdGuard Home query logs.
+2. Identifies the top 500 most-queried domains.
+3. Pre-loads (warms) the Unbound cache to ensure sub-1ms response times for high-traffic sites.
+
+## 🚦 Troubleshooting Cheat Sheet
+
+```bash
+# View Priority Errors Only
+sudo journalctl -p 3 -f
+
+# Restart the Dashboard Service
+sudo systemctl restart aghd-dashboard.service
+
+# Check Docker Container Health
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Test SSD Health Manually
+sudo smartctl -d sat -H /dev/sda
+
+# Force Cache Warmup
+sudo ~/lab-mon/scripts/ub-warmup skip
+```
+
+---
+**Last Updated:** February 13, 2026
+**Reference:** Use this file as the primary context when starting a new AI session.
