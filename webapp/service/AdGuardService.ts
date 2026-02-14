@@ -240,20 +240,9 @@ export default class AdGuardService {
      */
     public async getQueryLog(limit: number, offset: number, filterStatus?: string): Promise<AdGuardData> {
         const data = await this._fetchRawQueryLog(limit, offset, filterStatus);
-
-        const processedData: LogEntry[] = data.data.map(entry => {
-            const isBlocked = (entry.reason && entry.reason.startsWith("Filtered")) ||
-                (entry.reason === "SafeBrowsing");
-
-            return {
-                ...entry,
-                time: new Date(entry.time),
-                elapsedMs: entry.elapsedMs as number, // Already parsed in _fetchRawQueryLog
-                blocked: isBlocked
-            };
-        });
-
-        return { data: processedData };
+        // Optimization: data.data elements are mutated in-place by _fetchRawQueryLog to be LogEntry-compatible
+        // (time converted to Date, elapsedMs to number)
+        return data as unknown as AdGuardData;
     }
 
     private async _fetchRawQueryLog(limit: number, offset: number, filterStatus?: string, skipEnrichment: boolean = false): Promise<RawAdGuardData> {
@@ -274,6 +263,10 @@ export default class AdGuardService {
                 // Normalize elapsedMs from string to number
                 // We cast to any because the raw API response has string, but our interface says number
                 entry.elapsedMs = parseFloat(entry.elapsedMs as unknown as string) || 0;
+
+                // Optimization: Convert time to Date in-place to avoid O(N) object allocation in getQueryLog
+                // We cast to any/unknown because we are changing the type of the property from string to Date
+                (entry as unknown as LogEntry).time = new Date(entry.time);
 
                 // Post-process to add blocked status
                 // Heuristic: If reason starts with "Filtered" (e.g. FilteredBlackList, FilteredSafeBrowsing), it is blocked.
