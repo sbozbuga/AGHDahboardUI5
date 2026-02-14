@@ -55,6 +55,26 @@ export default {
     },
 
     /**
+     * Formats the value state text based on elapsed time.
+     * @param ms Elapsed time in milliseconds
+     * @returns "Critical (> 500ms)" | "Warning (> 200ms)" | "Good (< 200ms)"
+     */
+    formatElapsedStateText: function (ms: number | string | null | undefined): string {
+        if (ms === null || ms === undefined) {
+            return "None";
+        }
+        const val = typeof ms === 'string' ? parseFloat(ms) : ms;
+
+        if (val > 500) {
+            return "Critical (> 500ms)";
+        } else if (val > 200) {
+            return "Warning (> 200ms)";
+        } else {
+            return "Good (< 200ms)";
+        }
+    },
+
+    /**
      * Formats the value color for NumericContent based on elapsed time.
      * @param ms Elapsed time in milliseconds
      * @returns "Good" | "Critical" | "Error" | "Neutral"
