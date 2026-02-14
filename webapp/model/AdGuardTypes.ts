@@ -18,7 +18,7 @@ export interface RawLogEntry {
     };
     client: string;
     time: string;
-    elapsedMs: number;
+    elapsedMs: number | string;
     reason: string;
     filterId: number;
     rule: string;

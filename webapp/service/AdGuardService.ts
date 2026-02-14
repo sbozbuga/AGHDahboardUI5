@@ -248,7 +248,7 @@ export default class AdGuardService {
             return {
                 ...entry,
                 time: new Date(entry.time),
-                elapsedMs: entry.elapsedMs, // Already parsed in _fetchRawQueryLog
+                elapsedMs: entry.elapsedMs as number, // Already parsed in _fetchRawQueryLog
                 blocked: isBlocked
             };
         });
@@ -269,12 +269,12 @@ export default class AdGuardService {
         const url = `${Constants.ApiEndpoints.QueryLog}?${params.toString()}`;
         const data = await this._request<RawAdGuardData>(url);
 
-        data.data.forEach(entry => {
-            // Normalize elapsedMs from string to number
-            // We cast to any because the raw API response has string, but our interface says number
-            entry.elapsedMs = parseFloat(entry.elapsedMs as unknown as string) || 0;
+        if (!skipEnrichment) {
+            data.data.forEach(entry => {
+                // Normalize elapsedMs from string to number
+                // We cast to any because the raw API response has string, but our interface says number
+                entry.elapsedMs = parseFloat(entry.elapsedMs as unknown as string) || 0;
 
-            if (!skipEnrichment) {
                 // Post-process to add blocked status
                 // Heuristic: If reason starts with "Filtered" (e.g. FilteredBlackList, FilteredSafeBrowsing), it is blocked.
                 // "NotFiltered..." reasons are obviously not blocked.
@@ -287,8 +287,8 @@ export default class AdGuardService {
                 } else {
                     entry.blocked = false;
                 }
-            }
-        });
+            });
+        }
 
         return data;
     }
@@ -325,7 +325,8 @@ export default class AdGuardService {
             const domainMap = new Map<string, { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }>();
 
             for (const e of data.data) {
-                const val = e.elapsedMs;
+                // Optimization: Parse on the fly as we skipped pre-processing in _fetchRawQueryLog
+                const val = parseFloat(e.elapsedMs as unknown as string) || 0;
                 if (val <= 0) {
                     continue;
                 }
