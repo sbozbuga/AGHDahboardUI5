@@ -242,13 +242,17 @@ export default class AdGuardService {
         const data = await this._fetchRawQueryLog(limit, offset, filterStatus);
 
         const processedData: LogEntry[] = data.data.map(entry => {
+            // Optimization: Parse on the fly to avoid double iteration (O(2N) -> O(N))
+            const elapsedMs = parseFloat(entry.elapsedMs as unknown as string) || 0;
+
+            // Calculate blocked status
             const isBlocked = (entry.reason && entry.reason.startsWith("Filtered")) ||
-                (entry.reason === "SafeBrowsing");
+                             (entry.reason === "SafeBrowsing");
 
             return {
                 ...entry,
                 time: new Date(entry.time),
-                elapsedMs: entry.elapsedMs as number, // Already parsed in _fetchRawQueryLog
+                elapsedMs: elapsedMs,
                 blocked: isBlocked
             };
         });
@@ -256,7 +260,7 @@ export default class AdGuardService {
         return { data: processedData };
     }
 
-    private async _fetchRawQueryLog(limit: number, offset: number, filterStatus?: string, skipEnrichment: boolean = false): Promise<RawAdGuardData> {
+    private async _fetchRawQueryLog(limit: number, offset: number, filterStatus?: string): Promise<RawAdGuardData> {
         const params = new URLSearchParams({
             limit: limit.toString(),
             offset: offset.toString()
@@ -267,30 +271,7 @@ export default class AdGuardService {
         }
 
         const url = `${Constants.ApiEndpoints.QueryLog}?${params.toString()}`;
-        const data = await this._request<RawAdGuardData>(url);
-
-        if (!skipEnrichment) {
-            data.data.forEach(entry => {
-                // Normalize elapsedMs from string to number
-                // We cast to any because the raw API response has string, but our interface says number
-                entry.elapsedMs = parseFloat(entry.elapsedMs as unknown as string) || 0;
-
-                // Post-process to add blocked status
-                // Heuristic: If reason starts with "Filtered" (e.g. FilteredBlackList, FilteredSafeBrowsing), it is blocked.
-                // "NotFiltered..." reasons are obviously not blocked.
-                if (entry.reason && entry.reason.startsWith("Filtered")) {
-                    entry.blocked = true;
-                } else if (entry.reason && entry.reason === "SafeBrowsing") {
-                    // Some versions might just say SafeBrowsing? Rare but safe to add if needed.
-                    // Stick to Filtered for now as per screenshot.
-                    entry.blocked = true;
-                } else {
-                    entry.blocked = false;
-                }
-            });
-        }
-
-        return data;
+        return await this._request<RawAdGuardData>(url);
     }
 
     /**
@@ -320,7 +301,7 @@ export default class AdGuardService {
     public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[]; }[]> {
         try {
             // Optimization: Fetch raw data directly to avoid unnecessary object creation (Date, etc.) in getQueryLog
-            const data = await this._fetchRawQueryLog(scanDepth, 0, undefined, true);
+            const data = await this._fetchRawQueryLog(scanDepth, 0);
 
             const domainMap = new Map<string, { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }>();
 
