@@ -6,14 +6,14 @@
 	xmlns:card="sap.f.cards"
 	displayBlock="true">
 
-	<Page title="AdGuard Home Dashboard">
+	<Page title="{i18n>appTitle}">
 		<content>
 			<GenericTile
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
-				header="Total Queries"
-				subheader="Last 24 hours"
+				header="{i18n>totalQueries}"
+				subheader="{i18n>last24Hours}"
 				press="onPressLogs"
-				tooltip="View query log">
+				tooltip="{i18n>viewQueryLog}">
 				<TileContent>
 					<NumericContent value="{/num_dns_queries}" icon="sap-icon://line-chart" />
 				</TileContent>
@@ -21,10 +21,10 @@
 
 			<GenericTile
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
-				header="Blocked Queries"
-				subheader="Last 24 hours"
+				header="{i18n>blockedQueries}"
+				subheader="{i18n>last24Hours}"
 				press="onPressBlockedLogs"
-				tooltip="View blocked query log">
+				tooltip="{i18n>viewBlockedQueryLog}">
 				<TileContent>
 					<NumericContent value="{/num_blocked_filtering}" icon="sap-icon://shield" valueColor="Error" />
 				</TileContent>
@@ -32,11 +32,11 @@
 
 			<GenericTile
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
-				header="Processing Time"
-				subheader="Average"
+				header="{i18n>processingTime}"
+				subheader="{i18n>average}"
 				frameType="OneByOne"
 				press="onPressLogs"
-				tooltip="View query performance logs">
+				tooltip="{i18n>viewQueryPerformanceLogs}">
 				<TileContent>
 					<NumericContent value="{/avg_processing_time}" scale="ms" icon="sap-icon://performance" valueColor="{path: '/avg_processing_time', formatter: '.formatter.formatElapsedColor'}" />
 				</TileContent>
@@ -44,11 +44,11 @@
 
 			<GenericTile
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
-				header="Blocked %"
-				subheader="Efficiency"
+				header="{i18n>blockedPercentage}"
+				subheader="{i18n>efficiency}"
 				frameType="OneByOne"
 				press="onPressBlockedLogs"
-				tooltip="View blocked query logs">
+				tooltip="{i18n>viewBlockedQueryLogs}">
 				<TileContent>
 					<NumericContent value="{/block_percentage}" scale="%" icon="sap-icon://pie-chart" valueColor="Critical" />
 				</TileContent>
@@ -68,16 +68,16 @@
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
                     <f:header>
-                        <card:Header title="Top Clients" iconSrc="sap-icon://group" />
+                        <card:Header title="{i18n>topClients}" iconSrc="sap-icon://group" />
                     </f:header>
                     <f:content>
-                        <Table items="{/top_clients}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="No active clients found">
+                        <Table items="{/top_clients}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noActiveClients}">
                             <columns>
-                                <Column><Text text="Client" /></Column>
-                                <Column hAlign="End" width="30%"><Text text="Count" /></Column>
+                                <Column><Text text="{i18n>client}" /></Column>
+                                <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem type="Navigation" press=".onPressClient" tooltip="View logs for {name}">
+                                <ColumnListItem type="Navigation" press=".onPressClient" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: 'sap.base.strings.formatMessage'}">
                                     <cells>
                                         <Text text="{name}" />
                                         <Text text="{count}" />
@@ -94,16 +94,16 @@
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
                     <f:header>
-                        <card:Header title="Top Queried Domains" iconSrc="sap-icon://world" />
+                        <card:Header title="{i18n>topDomains}" iconSrc="sap-icon://world" />
                     </f:header>
                      <f:content>
-                        <Table items="{/top_queried_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="No queries recorded yet">
+                        <Table items="{/top_queried_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noQueriesRecorded}">
                              <columns>
-                                <Column><Text text="Domain" /></Column>
-                                <Column hAlign="End" width="30%"><Text text="Count" /></Column>
+                                <Column><Text text="{i18n>domain}" /></Column>
+                                <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem type="Navigation" press=".onPressDomain" tooltip="View logs for {name}">
+                                <ColumnListItem type="Navigation" press=".onPressDomain" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: 'sap.base.strings.formatMessage'}">
                                     <cells>
                                         <Text text="{name}" />
                                         <Text text="{count}" />
@@ -120,16 +120,16 @@
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
                     <f:header>
-                        <card:Header title="Top Blocked Domains" iconSrc="sap-icon://decline" />
+                        <card:Header title="{i18n>topBlockedDomains}" iconSrc="sap-icon://decline" />
                     </f:header>
                      <f:content>
-                        <Table items="{/top_blocked_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="No blocked domains found">
+                        <Table items="{/top_blocked_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noBlockedDomains}">
                              <columns>
-                                <Column><Text text="Domain" /></Column>
-                                <Column hAlign="End" width="30%"><Text text="Count" /></Column>
+                                <Column><Text text="{i18n>domain}" /></Column>
+                                <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem type="Navigation" press=".onPressBlockedDomain" tooltip="View blocked logs for {name}">
+                                <ColumnListItem type="Navigation" press=".onPressBlockedDomain" tooltip="{parts:[{path:'i18n>viewBlockedLogsFor'}, {path:'name'}], formatter: 'sap.base.strings.formatMessage'}">
                                     <cells>
                                         <Text text="{name}" />
                                         <Text text="{count}" />
@@ -146,13 +146,13 @@
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
                     <f:header>
-                        <card:Header title="Slowest Queries (Last 1000)" iconSrc="sap-icon://time-account" />
+                        <card:Header title="{i18n>slowestQueries}" iconSrc="sap-icon://time-account" />
                     </f:header>
                      <f:content>
-                        <Table items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="No query performance data available">
+                        <Table items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noPerformanceData}">
                              <columns>
-                                <Column><Text text="Domain" /></Column>
-                                <Column hAlign="End" width="30%"><Text text="Elapsed (ms)" /></Column>
+                                <Column><Text text="{i18n>domain}" /></Column>
+                                <Column hAlign="End" width="30%"><Text text="{i18n>elapsedMs}" /></Column>
                             </columns>
                             <items>
                                 <ColumnListItem
@@ -195,12 +195,12 @@
 		</content>
 		<footer>
 			<OverflowToolbar>
-				<Text text="Updated: {path: '/lastUpdated', type: 'sap.ui.model.type.DateTime', formatOptions: { style: 'medium' }}" visible="{= !!${/lastUpdated} }" class="sapUiTinyMarginBegin" />
-				<Button icon="sap-icon://refresh" type="Transparent" press=".onManualRefresh" tooltip="Refresh Data" class="sapUiTinyMarginBegin" />
+				<Text text="{i18n>lastUpdated} {path: '/lastUpdated', type: 'sap.ui.model.type.DateTime', formatOptions: { style: 'medium' }}" visible="{= !!${/lastUpdated} }" class="sapUiTinyMarginBegin" />
+				<Button icon="sap-icon://refresh" type="Transparent" press=".onManualRefresh" tooltip="{i18n>refreshData}" class="sapUiTinyMarginBegin" />
 				<ToolbarSpacer />
-				<Button text="View Logs" press="onPressLogs" type="Emphasized" />
-				<Button icon="sap-icon://action-settings" tooltip="Settings" press="onOpenSettings" />
-                <Button icon="sap-icon://log" tooltip="Logout" press="onLogoutPress" />
+				<Button text="{i18n>viewLogs}" press="onPressLogs" type="Emphasized" />
+				<Button icon="sap-icon://action-settings" tooltip="{i18n>settings}" press="onOpenSettings" />
+                <Button icon="sap-icon://log" tooltip="{i18n>logout}" press="onLogoutPress" />
 			</OverflowToolbar>
 		</footer>
 	</Page>

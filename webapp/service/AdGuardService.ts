@@ -164,27 +164,29 @@ export default class AdGuardService {
             return;
         }
 
-        const pollInterval = setInterval(async () => {
-            if (popup.closed) {
-                clearInterval(pollInterval);
-                this._isLoginDialogOpen = false;
-                return;
-            }
+        const pollInterval = setInterval(() => {
+            void (async () => {
+                if (popup.closed) {
+                    clearInterval(pollInterval);
+                    this._isLoginDialogOpen = false;
+                    return;
+                }
 
-            try {
-                // Try to fetch stats (lightweight check if session is active)
-                await this.getStats();
+                try {
+                    // Try to fetch stats (lightweight check if session is active)
+                    await this.getStats();
 
-                // If we reach here, login was successful
-                clearInterval(pollInterval);
-                popup.close();
-                this._isLoginDialogOpen = false;
-                MessageToast.show("Login successful. Reloading...");
-                // Reload the page to restart timers and data fetching
-                setTimeout(() => window.location.reload(), 1000);
-            } catch {
-                // Still unauthorized, continue polling
-            }
+                    // If we reach here, login was successful
+                    clearInterval(pollInterval);
+                    popup.close();
+                    this._isLoginDialogOpen = false;
+                    MessageToast.show("Login successful. Reloading...");
+                    // Reload the page to restart timers and data fetching
+                    setTimeout(() => window.location.reload(), 1000);
+                } catch {
+                    // Still unauthorized, continue polling
+                }
+            })();
         }, 2000);
     }
 
@@ -240,9 +242,6 @@ export default class AdGuardService {
      */
     public async getQueryLog(limit: number, offset: number, filterStatus?: string): Promise<AdGuardData> {
         const data = await this._fetchRawQueryLog(limit, offset, filterStatus);
-        // Optimization: data.data elements are mutated in-place by _fetchRawQueryLog to be LogEntry-compatible
-        // (time converted to Date, elapsedMs to number)
-        return data as unknown as AdGuardData;
 
         const processedData: LogEntry[] = data.data.map(entry => {
             // Optimization: Parse on the fly to avoid double iteration (O(2N) -> O(N))
@@ -274,34 +273,6 @@ export default class AdGuardService {
         }
 
         const url = `${Constants.ApiEndpoints.QueryLog}?${params.toString()}`;
-        const data = await this._request<RawAdGuardData>(url);
-
-        if (!skipEnrichment) {
-            data.data.forEach(entry => {
-                // Normalize elapsedMs from string to number
-                // We cast to any because the raw API response has string, but our interface says number
-                entry.elapsedMs = parseFloat(entry.elapsedMs as unknown as string) || 0;
-
-                // Optimization: Convert time to Date in-place to avoid O(N) object allocation in getQueryLog
-                // We cast to any/unknown because we are changing the type of the property from string to Date
-                (entry as unknown as LogEntry).time = new Date(entry.time);
-
-                // Post-process to add blocked status
-                // Heuristic: If reason starts with "Filtered" (e.g. FilteredBlackList, FilteredSafeBrowsing), it is blocked.
-                // "NotFiltered..." reasons are obviously not blocked.
-                if (entry.reason && entry.reason.startsWith("Filtered")) {
-                    entry.blocked = true;
-                } else if (entry.reason && entry.reason === "SafeBrowsing") {
-                    // Some versions might just say SafeBrowsing? Rare but safe to add if needed.
-                    // Stick to Filtered for now as per screenshot.
-                    entry.blocked = true;
-                } else {
-                    entry.blocked = false;
-                }
-            });
-        }
-
-        return data;
         return await this._request<RawAdGuardData>(url);
     }
 
@@ -440,6 +411,18 @@ export default class AdGuardService {
 
                 // Case 2: Single-Key Object { "192.168.1.1": 123 }
                 // Optimization: Use for...in loop instead of Object.keys() to avoid array allocation
+                for (const key in obj) {
+                    const val = obj[key];
+                    // robustly find the key that maps to a number (count)
+                    if (typeof val === 'number' || (typeof val === 'string' && !isNaN(Number(val)))) {
+                        return {
+                            name: key,
+                            count: Number(val)
+                        };
+                    }
+                }
+
+                // Fallback for truly single-key objects where value might not look numeric or we just take the first one
                 for (const key in obj) {
                     return {
                         name: key,
