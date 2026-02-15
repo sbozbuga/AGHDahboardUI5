@@ -2,6 +2,7 @@ import Dashboard from "ui5/aghd/controller/Dashboard.controller";
 import AdGuardService from "ui5/aghd/service/AdGuardService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import JSONModel from "sap/ui/model/json/JSONModel";
+import MessageBox from "sap/m/MessageBox";
 
 interface TestContext {
     controller: Dashboard;
@@ -261,4 +262,70 @@ QUnit.test("onRefreshStats updates lastUpdated property", async function(this: T
     await ctx.controller.onRefreshStats(true);
 
     assert.ok(model.getProperty("/lastUpdated") instanceof Date, "lastUpdated is set to a Date object");
+});
+
+QUnit.module("Dashboard Logout Logic", {
+    beforeEach: function (this: TestContext) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const ctx = this;
+        ctx.controller = new Dashboard("dashboard");
+
+        // Mock AdGuardService
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        ctx.originalGetInstance = AdGuardService.getInstance;
+
+        ctx.mockService = {
+            logout: () => {}
+        };
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        AdGuardService.getInstance = () => ctx.mockService;
+    },
+    afterEach: function (this: TestContext) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const ctx = this;
+        ctx.controller.destroy();
+        AdGuardService.getInstance = ctx.originalGetInstance;
+    }
+});
+
+QUnit.test("onLogoutPress asks for confirmation", function (this: TestContext, assert: Assert) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const ctx = this;
+
+    // Spy on MessageBox.confirm
+    let confirmCalled = false;
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const originalConfirm = MessageBox.confirm;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MessageBox.confirm = (message: string, options: any) => {
+        confirmCalled = true;
+        assert.ok(message.includes("Are you sure"), "Confirmation message shown");
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        assert.ok(options.actions.includes(MessageBox.Action.OK), "OK action available");
+
+        // Simulate clicking OK
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (options.onClose) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+            options.onClose(MessageBox.Action.OK);
+        }
+    };
+
+    // Spy on service logout
+    let logoutCalled = false;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    ctx.mockService.logout = () => {
+        logoutCalled = true;
+    };
+
+    try {
+        ctx.controller.onLogoutPress();
+        assert.ok(confirmCalled, "MessageBox.confirm was called");
+        assert.ok(logoutCalled, "AdGuardService.logout was called after confirmation");
+    } finally {
+        // Restore
+        MessageBox.confirm = originalConfirm;
+    }
 });
