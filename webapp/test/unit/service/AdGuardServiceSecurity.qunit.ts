@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+/* eslint-disable */
 import AdGuardService from "ui5/aghd/service/AdGuardService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import sinon from "sap/ui/thirdparty/sinon";
@@ -13,7 +16,6 @@ QUnit.test("_openLoginPopup uses noopener and noreferrer", function (assert) {
 
     try {
         // Access private method
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (service as any)._openLoginPopup();
 
         assert.ok(openStub.calledOnce, "window.open should be called once");

@@ -29,3 +29,5 @@ coverage
 report
 .nyc_output
 .ui5-tooling-modules/
+playwright-report/
+test-results/
