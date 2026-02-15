@@ -135,27 +135,11 @@ export default class GeminiService {
     }
 
     private getTopK(counts: Map<string, number>, k: number): [string, number][] {
-        // Optimization: Linear scan (O(N)) instead of sorting the whole array (O(N log N))
-        // This is significantly faster for large datasets where K is small
-        const topK: [string, number][] = [];
-
-        for (const [key, value] of counts) {
-            if (topK.length < k) {
-                topK.push([key, value]);
-                topK.sort((a, b) => b[1] - a[1]);
-            } else if (value > topK[k - 1][1]) {
-                // Find insertion point
-                let i = 0;
-                while (i < k && value <= topK[i][1]) {
-                    i++;
-                }
-                topK.splice(i, 0, [key, value]);
-                topK.pop();
-            }
-        }
-
-        // Security: Sanitize keys to prevent prompt injection or control char issues in JSON
-        return topK.map(([key, val]) => [this.sanitizeInput(key), val]);
+        // Standard sort is cleaner and sufficient for typical log sizes
+        return Array.from(counts.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, k)
+            .map(([key, val]) => [this.sanitizeInput(key), val]);
     }
 
     private buildPrompt(summary: LogSummary): string {

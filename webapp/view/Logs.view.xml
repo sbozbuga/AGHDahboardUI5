@@ -10,7 +10,7 @@
 
 	<App id="app">
 		<Page
-			title="AdGuard Home Logs"
+			title="{i18n>logsTitle}"
 			id="page">
 				<Table
 					id="logsTable"
@@ -21,26 +21,26 @@
 					growingScrollToLoad="true"
 					sticky="ColumnHeaders,HeaderToolbar"
 					alternateRowColors="true"
-					noDataText="No logs found. Try adjusting your filters or search."
+					noDataText="{i18n>noLogsFound}"
 					updateFinished=".onUpdateFinished">
 					<headerToolbar>
 						<OverflowToolbar>
-							<Button icon="sap-icon://nav-back" press=".onNavBack" tooltip="Back" />
-							<Title text="AdGuard Home Query Log" level="H2"/>
+							<Button icon="sap-icon://nav-back" press=".onNavBack" tooltip="{i18n>back}" />
+							<Title text="{i18n>logsHeader}" level="H2"/>
 							<ToolbarSpacer/>
-							<SearchField id="searchField" width="20%" search=".onSearch" placeholder="Search Domain/Client" maxLength="200" />
-							<Button icon="sap-icon://sort" press=".onOpenViewSettings" tooltip="Sort/Group/Filter"/>
-							<Button icon="sap-icon://refresh" press=".onRefreshLogs" tooltip="Refresh"/>
+							<SearchField id="searchField" width="20%" search=".onSearch" placeholder="{i18n>searchPlaceholder}" maxLength="200" />
+							<Button icon="sap-icon://sort" press=".onOpenViewSettings" tooltip="{i18n>sortFilter}"/>
+							<Button icon="sap-icon://refresh" press=".onRefreshLogs" tooltip="{i18n>refresh}"/>
                             <ToolbarSeparator />
-                            <Button text="Smart Analysis" icon="sap-icon://lightbulb" press=".onAnalyzeLogs" type="Emphasized" tooltip="Generate AI Insights" />
-                            <Button icon="sap-icon://filter" press=".onOpenAdvancedFilter" tooltip="Advanced Filter" type="{= ${/advancedFilters}.length > 0 ? 'Emphasized' : 'Default' }" />
-                            <Button icon="sap-icon://action-settings" press=".onOpenSettings" tooltip="Settings" />
+                            <Button text="{i18n>smartAnalysis}" icon="sap-icon://lightbulb" press=".onAnalyzeLogs" type="Emphasized" tooltip="{i18n>generateAIInsights}" />
+                            <Button icon="sap-icon://filter" press=".onOpenAdvancedFilter" tooltip="{i18n>advancedFilter}" type="{= ${/advancedFilters}.length > 0 ? 'Emphasized' : 'Default' }" />
+                            <Button icon="sap-icon://action-settings" press=".onOpenSettings" tooltip="{i18n>settings}" />
 						</OverflowToolbar>
 					</headerToolbar>
 					<columns>
 						<Column width="11rem" id="colTime">
 							<header>
-								<Button text="Time" press=".onSort" type="Transparent">
+								<Button text="{i18n>time}" press=".onSort" type="Transparent">
 									<customData>
 										<core:CustomData key="key" value="time" />
 									</customData>
@@ -49,12 +49,12 @@
 						</Column>
 						<Column width="4rem" hAlign="Center" id="colSource">
 							<header>
-								<Text text="Src" />
+								<Text text="{i18n>src}" />
 							</header>
 						</Column>
 						<Column width="16rem" demandPopin="true" minScreenWidth="Tablet" id="colClient">
 							<header>
-								<Button text="Client" press=".onSort" type="Transparent">
+								<Button text="{i18n>client}" press=".onSort" type="Transparent">
 									<customData>
 										<core:CustomData key="key" value="client" />
 									</customData>
@@ -63,7 +63,7 @@
 						</Column>
 						<Column id="colQuestion">
 							<header>
-								<Button text="Question" press=".onSort" type="Transparent">
+								<Button text="{i18n>question}" press=".onSort" type="Transparent">
 									<customData>
 										<core:CustomData key="key" value="question/name" />
 									</customData>
@@ -72,7 +72,7 @@
 						</Column>
 						<Column width="6rem" demandPopin="true" minScreenWidth="Tablet" id="colStatus">
 							<header>
-								<Button text="Status" press=".onSort" type="Transparent">
+								<Button text="{i18n>status}" press=".onSort" type="Transparent">
 									<customData>
 										<core:CustomData key="key" value="status" />
 									</customData>
@@ -81,12 +81,12 @@
 						</Column>
 						<Column width="5rem" demandPopin="true" minScreenWidth="Tablet" id="colBlocked" hAlign="Center">
 							<header>
-								<Text text="Blocked" />
+								<Text text="{i18n>blocked}" />
 							</header>
 						</Column>
 						<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" hAlign="End" id="colElapsed">
 							<header>
-								<Button text="Elapsed (ms)" press=".onSort" type="Transparent">
+								<Button text="{i18n>elapsedMs}" press=".onSort" type="Transparent">
 									<customData>
 										<core:CustomData key="key" value="elapsedMs" />
 									</customData>
@@ -95,7 +95,7 @@
 						</Column>
 						<Column width="22rem" demandPopin="true" minScreenWidth="Desktop" id="colUpstream">
 							<header>
-								<Button text="Upstream" press=".onSort" type="Transparent">
+								<Button text="{i18n>upstream}" press=".onSort" type="Transparent">
 									<customData>
 										<core:CustomData key="key" value="upstream" />
 									</customData>
@@ -104,7 +104,7 @@
 						</Column>
 						<Column width="10rem" demandPopin="true" minScreenWidth="Desktop" id="colReason">
 							<header>
-								<Button text="Reason" press=".onSort" type="Transparent">
+								<Button text="{i18n>reason}" press=".onSort" type="Transparent">
 									<customData>
 										<core:CustomData key="key" value="reason" />
 									</customData>
@@ -113,7 +113,7 @@
 						</Column>
 						<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" id="colFilterId">
 							<header>
-								<Button text="Filter ID" press=".onSort" type="Transparent">
+								<Button text="{i18n>filterId}" press=".onSort" type="Transparent">
 									<customData>
 										<core:CustomData key="key" value="filterId" />
 									</customData>
@@ -122,7 +122,7 @@
 						</Column>
 						<Column demandPopin="true" minScreenWidth="Desktop" id="colRule">
 							<header>
-								<Button text="Rule" press=".onSort" type="Transparent">
+								<Button text="{i18n>rule}" press=".onSort" type="Transparent">
 									<customData>
 										<core:CustomData key="key" value="rule" />
 									</customData>
@@ -151,7 +151,7 @@
 								<ObjectStatus
 									text="{status}"
 									state="{= ${status} === 'OK' ? 'Success' : 'Error'}" />
-								<core:Icon src="sap-icon://decline" color="Negative" visible="{= ${blocked} === true }" tooltip="Request Blocked" alt="Request Blocked" decorative="false" />
+								<core:Icon src="sap-icon://decline" color="Negative" visible="{= ${blocked} === true }" tooltip="{i18n>requestBlocked}" alt="{i18n>requestBlocked}" decorative="false" />
 								<ObjectNumber
 									number="{
 										path: 'elapsedMs',
