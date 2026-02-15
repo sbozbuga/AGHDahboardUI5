@@ -81,6 +81,81 @@ QUnit.test("getQueryLog constructs correct URL with parameters", async function 
     }
 });
 
+QUnit.test("getQueryLog returns correctly processed LogEntry objects", async function (assert) {
+    const service = AdGuardService.getInstance();
+
+    const mockResponse: RawAdGuardData = {
+        data: [
+            {
+                answer: [],
+                original_answer: [],
+                upstream: "1.1.1.1",
+                status: "OK",
+                question: { type: "A", name: "blocked.com", class: "IN" },
+                client: "192.168.1.100",
+                time: "2023-01-01T12:00:00Z",
+                elapsedMs: "123.45" as unknown as number, // String in API
+                reason: "FilteredBlackList",
+                filterId: 0,
+                rule: ""
+            },
+            {
+                answer: [],
+                original_answer: [],
+                upstream: "1.1.1.1",
+                status: "OK",
+                question: { type: "A", name: "safe.com", class: "IN" },
+                client: "192.168.1.100",
+                time: "2023-01-02T12:00:00Z",
+                elapsedMs: "50" as unknown as number,
+                reason: "NotFilteredNotFound",
+                filterId: 0,
+                rule: ""
+            }
+        ]
+    };
+
+    const originalFetch = globalThis.fetch;
+    // @ts-expect-error: Mocking fetch for testing purposes
+    globalThis.fetch = async () => {
+        // Return a DEEP COPY to simulate fresh network response,
+        // because AdGuardService mutates the response in place.
+        // We need to ensure we don't mutate the mock object reused in potential future tests (though here it's local).
+        const copy = JSON.parse(JSON.stringify(mockResponse)) as RawAdGuardData;
+
+        return Promise.resolve({
+            ok: true,
+            status: 200,
+            text: async () => Promise.resolve(JSON.stringify(copy)),
+            json: async () => Promise.resolve(copy)
+        });
+    };
+
+    try {
+        const logs = await service.getQueryLog(10, 0);
+
+        assert.strictEqual(logs.data.length, 2, "Should return 2 items");
+
+        // Check first item (Blocked)
+        const item1 = logs.data[0];
+        assert.ok(item1.time instanceof Date, "Time should be converted to Date object");
+        assert.strictEqual(item1.time.toISOString(), "2023-01-01T12:00:00.000Z", "Time value correct");
+        assert.strictEqual(typeof item1.elapsedMs, "number", "elapsedMs should be number");
+        assert.strictEqual(item1.elapsedMs, 123.45, "elapsedMs value correct");
+        assert.strictEqual(item1.blocked, true, "Should be identified as blocked");
+
+        // Check second item (Safe)
+        const item2 = logs.data[1];
+        assert.ok(item2.time instanceof Date, "Time should be converted to Date object");
+        assert.strictEqual(item2.time.toISOString(), "2023-01-02T12:00:00.000Z", "Time value correct");
+        assert.strictEqual(item2.elapsedMs, 50, "elapsedMs value correct");
+        assert.strictEqual(item2.blocked, false, "Should not be blocked");
+
+    } finally {
+        globalThis.fetch = originalFetch;
+    }
+});
+
 QUnit.test("getSlowestQueries returns top 10 sorted items", async function (assert) {
     const service = AdGuardService.getInstance();
 
