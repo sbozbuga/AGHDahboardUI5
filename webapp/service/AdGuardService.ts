@@ -155,7 +155,7 @@ export default class AdGuardService {
         const popup = window.open(
             targetUrl,
             "agh_login",
-            `width=${width},height=${height},top=${top},left=${left},resizable,scrollbars`
+            `width=${width},height=${height},top=${top},left=${left},resizable,scrollbars,noopener,noreferrer`
         );
 
         if (!popup) {
@@ -243,9 +243,27 @@ export default class AdGuardService {
         // Optimization: data.data elements are mutated in-place by _fetchRawQueryLog to be LogEntry-compatible
         // (time converted to Date, elapsedMs to number)
         return data as unknown as AdGuardData;
+
+        const processedData: LogEntry[] = data.data.map(entry => {
+            // Optimization: Parse on the fly to avoid double iteration (O(2N) -> O(N))
+            const elapsedMs = parseFloat(entry.elapsedMs as unknown as string) || 0;
+
+            // Calculate blocked status
+            const isBlocked = (entry.reason && entry.reason.startsWith("Filtered")) ||
+                             (entry.reason === "SafeBrowsing");
+
+            return {
+                ...entry,
+                time: new Date(entry.time),
+                elapsedMs: elapsedMs,
+                blocked: isBlocked
+            };
+        });
+
+        return { data: processedData };
     }
 
-    private async _fetchRawQueryLog(limit: number, offset: number, filterStatus?: string, skipEnrichment: boolean = false): Promise<RawAdGuardData> {
+    private async _fetchRawQueryLog(limit: number, offset: number, filterStatus?: string): Promise<RawAdGuardData> {
         const params = new URLSearchParams({
             limit: limit.toString(),
             offset: offset.toString()
@@ -284,6 +302,7 @@ export default class AdGuardService {
         }
 
         return data;
+        return await this._request<RawAdGuardData>(url);
     }
 
     /**
@@ -313,7 +332,7 @@ export default class AdGuardService {
     public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[]; }[]> {
         try {
             // Optimization: Fetch raw data directly to avoid unnecessary object creation (Date, etc.) in getQueryLog
-            const data = await this._fetchRawQueryLog(scanDepth, 0, undefined, true);
+            const data = await this._fetchRawQueryLog(scanDepth, 0);
 
             const domainMap = new Map<string, { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }>();
 
