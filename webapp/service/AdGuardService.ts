@@ -240,6 +240,9 @@ export default class AdGuardService {
      */
     public async getQueryLog(limit: number, offset: number, filterStatus?: string): Promise<AdGuardData> {
         const data = await this._fetchRawQueryLog(limit, offset, filterStatus);
+        // Optimization: data.data elements are mutated in-place by _fetchRawQueryLog to be LogEntry-compatible
+        // (time converted to Date, elapsedMs to number)
+        return data as unknown as AdGuardData;
 
         const processedData: LogEntry[] = data.data.map(entry => {
             // Optimization: Parse on the fly to avoid double iteration (O(2N) -> O(N))
@@ -271,6 +274,34 @@ export default class AdGuardService {
         }
 
         const url = `${Constants.ApiEndpoints.QueryLog}?${params.toString()}`;
+        const data = await this._request<RawAdGuardData>(url);
+
+        if (!skipEnrichment) {
+            data.data.forEach(entry => {
+                // Normalize elapsedMs from string to number
+                // We cast to any because the raw API response has string, but our interface says number
+                entry.elapsedMs = parseFloat(entry.elapsedMs as unknown as string) || 0;
+
+                // Optimization: Convert time to Date in-place to avoid O(N) object allocation in getQueryLog
+                // We cast to any/unknown because we are changing the type of the property from string to Date
+                (entry as unknown as LogEntry).time = new Date(entry.time);
+
+                // Post-process to add blocked status
+                // Heuristic: If reason starts with "Filtered" (e.g. FilteredBlackList, FilteredSafeBrowsing), it is blocked.
+                // "NotFiltered..." reasons are obviously not blocked.
+                if (entry.reason && entry.reason.startsWith("Filtered")) {
+                    entry.blocked = true;
+                } else if (entry.reason && entry.reason === "SafeBrowsing") {
+                    // Some versions might just say SafeBrowsing? Rare but safe to add if needed.
+                    // Stick to Filtered for now as per screenshot.
+                    entry.blocked = true;
+                } else {
+                    entry.blocked = false;
+                }
+            });
+        }
+
+        return data;
         return await this._request<RawAdGuardData>(url);
     }
 
