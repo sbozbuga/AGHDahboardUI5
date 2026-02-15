@@ -155,7 +155,7 @@ export default class AdGuardService {
         const popup = window.open(
             targetUrl,
             "agh_login",
-            `width=${width},height=${height},top=${top},left=${left},resizable,scrollbars`
+            `width=${width},height=${height},top=${top},left=${left},resizable,scrollbars,noopener,noreferrer`
         );
 
         if (!popup) {
