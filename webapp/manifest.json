@@ -40,7 +40,14 @@
 			"compact": true,
 			"cozy": true
 		},
-		"models": {},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "ui5.aghd.i18n.i18n"
+				}
+			}
+		},
 		"resourceRoots": {
 			"@google": "./thirdparty/@google"
 		},

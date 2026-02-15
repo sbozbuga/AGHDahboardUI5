@@ -16,6 +16,7 @@
     "test-runner-coverage": "ui5-test-runner --url http://localhost:8080/test/testsuite.qunit.html --coverage -ccb 60 -ccf 100 -ccl 80 -ccs 80",
     "test-ui5": "ui5-test-runner --start start-coverage --url http://localhost:8080/test/testsuite.qunit.html --coverage -ccb 60 -ccf 100 -ccl 80 -ccs 80",
     "test": "npm run lint && npm run test-ui5",
+    "test:e2e": "playwright test",
     "ui5lint": "ui5lint"
   },
   "repository": {
@@ -24,12 +25,14 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.58.2",
     "@types/openui5": "1.144.0",
     "@ui5/cli": "^4.0.43",
     "@ui5/linter": "^1.5.0",
     "babel-plugin-istanbul": "^7.0.0",
     "eslint": "^10.0.0",
     "globals": "^17.2.0",
+    "playwright": "^1.58.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.18.1",
     "ui5-middleware-livereload": "^3",
