@@ -234,10 +234,18 @@ export default class Dashboard extends BaseController {
     }
 
     public onLogoutPress(): void {
-        AdGuardService.getInstance().logout();
-        MessageBox.success("Logged out successfully.", {
-            onClose: () => {
-                window.location.reload();
+        MessageBox.confirm("Are you sure you want to log out?", {
+            title: "Logout",
+            actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+            onClose: (action: string | null) => {
+                if (action === MessageBox.Action.OK) {
+                    AdGuardService.getInstance().logout();
+                    MessageBox.success("Logged out successfully.", {
+                        onClose: () => {
+                            window.location.reload();
+                        }
+                    });
+                }
             }
         });
     }
