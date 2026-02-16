@@ -39,8 +39,16 @@ export default class GeminiService {
     }
 
     public sanitizeInput(str: string): string {
+        let cleaned = str;
+
+        // Optimization: Truncate massively long strings BEFORE regex to prevent ReDoS/performance issues
+        // Use a safe buffer (4x max length) to account for characters that might be removed by regex/trim
+        if (cleaned.length > GeminiService.MAX_INPUT_LENGTH * 4) {
+            cleaned = cleaned.substring(0, GeminiService.MAX_INPUT_LENGTH * 4);
+        }
+
         // Remove control characters (0-31, 127, and C1 128-159) to prevent prompt injection via newlines etc.
-        let cleaned = str.replace(GeminiService.CONTROL_CHARS_REGEX, "").trim();
+        cleaned = cleaned.replace(GeminiService.CONTROL_CHARS_REGEX, "").trim();
 
         // Truncate first to prevent token exhaustion / DoS (max 255 chars)
         if (cleaned.length > GeminiService.MAX_INPUT_LENGTH) {

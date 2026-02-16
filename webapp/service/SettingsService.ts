@@ -9,6 +9,9 @@ export default class SettingsService {
     private readonly STORAGE_KEY_BASE_URL = "aghd_base_url";
     private readonly DEFAULT_MODEL = "gemini-1.5-flash";
 
+    private readonly MAX_API_KEY_LENGTH = 255;
+    private readonly MAX_CONTEXT_LENGTH = 1000;
+
     // In-memory cache to avoid synchronous storage access
     private _apiKey: string | null = null;
     private _model: string | null = null;
@@ -35,6 +38,9 @@ export default class SettingsService {
     }
 
     public setApiKey(key: string): void {
+        if (key && key.length > this.MAX_API_KEY_LENGTH) {
+            throw new Error(`API Key is too long (Max ${this.MAX_API_KEY_LENGTH} characters).`);
+        }
         this._apiKey = key;
         this.storage.put(this.STORAGE_KEY_API_KEY, key);
     }
@@ -65,6 +71,9 @@ export default class SettingsService {
     }
 
     public setSystemContext(context: string): void {
+        if (context && context.length > this.MAX_CONTEXT_LENGTH) {
+            throw new Error(`System Context is too long (Max ${this.MAX_CONTEXT_LENGTH} characters).`);
+        }
         this._context = context;
         this.storage.put(this.STORAGE_KEY_CONTEXT, context);
     }
