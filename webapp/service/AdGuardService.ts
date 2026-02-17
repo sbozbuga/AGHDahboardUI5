@@ -243,23 +243,27 @@ export default class AdGuardService {
     public async getQueryLog(limit: number, offset: number, filterStatus?: string): Promise<AdGuardData> {
         const data = await this._fetchRawQueryLog(limit, offset, filterStatus);
 
-        const processedData: LogEntry[] = data.data.map(entry => {
-            // Optimization: Parse on the fly to avoid double iteration (O(2N) -> O(N))
-            const elapsedMs = parseFloat(entry.elapsedMs as unknown as string) || 0;
+        // Optimization: In-place mutation to avoid object allocation overhead of spread operator
+        // data.data is fresh from JSON.parse so mutation is safe.
+        const processedList = data.data as unknown as LogEntry[];
 
-            // Calculate blocked status
+        for (const entry of processedList) {
+            // Access raw properties via safe casting
+            // We know at runtime these are strings before we overwrite them
+            const rawTime = (entry as unknown as { time: string }).time;
+            const rawElapsed = (entry as unknown as { elapsedMs: string }).elapsedMs;
+
+            const elapsedMs = parseFloat(rawElapsed) || 0;
             const isBlocked = (entry.reason && entry.reason.startsWith("Filtered")) ||
-                             (entry.reason === "SafeBrowsing");
+                (entry.reason === "SafeBrowsing");
 
-            return {
-                ...entry,
-                time: new Date(entry.time),
-                elapsedMs: elapsedMs,
-                blocked: isBlocked
-            };
-        });
+            // Mutate in place
+            entry.time = new Date(rawTime);
+            entry.elapsedMs = elapsedMs;
+            entry.blocked = isBlocked;
+        }
 
-        return { data: processedData };
+        return { data: processedList };
     }
 
     private async _fetchRawQueryLog(limit: number, offset: number, filterStatus?: string): Promise<RawAdGuardData> {
