@@ -147,7 +147,10 @@
 									decorative="false"
 									alt="{reason}" />
 								<Text text="{client}" />
-								<Text text="{question/name} ({question/type})" wrapping="true" maxLines="2" />
+								<HBox alignItems="Center" wrap="Wrap">
+									<Text text="{question/name} ({question/type})" wrapping="true" maxLines="2" class="sapUiTinyMarginEnd" />
+									<Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" />
+								</HBox>
 								<ObjectStatus
 									text="{status}"
 									state="{= ${status} === 'OK' ? 'Success' : 'Error'}" />
