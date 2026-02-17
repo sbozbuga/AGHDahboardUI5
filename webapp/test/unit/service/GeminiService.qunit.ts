@@ -51,6 +51,16 @@ QUnit.test("sanitizeInput removes control characters", function (assert) {
     input = "<script>alert('XSS')</script>";
     expected = "&lt;script&gt;alert(&apos;XSS&apos;)&lt;/script&gt;";
     assert.strictEqual(service.sanitizeInput(input), expected, "XML characters are escaped");
+
+    // 10. Massive Input (ReDoS Prevention)
+    // Create a 5MB string
+    const massiveInput = "A".repeat(5 * 1024 * 1024);
+    const start = Date.now();
+    const result = service.sanitizeInput(massiveInput);
+    const duration = Date.now() - start;
+
+    assert.strictEqual(result.length, 255, "Massive input is truncated to max length");
+    assert.ok(duration < 100, `Massive input processed quickly (${duration}ms) due to pre-truncation`);
 });
 
 QUnit.test("buildPrompt wraps content in XML tags", function(assert) {
