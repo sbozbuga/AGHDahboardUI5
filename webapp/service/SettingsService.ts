@@ -38,8 +38,8 @@ export default class SettingsService {
     }
 
     public setApiKey(key: string): void {
-        if (key && key.length > this.MAX_API_KEY_LENGTH) {
-            throw new Error(`API Key is too long (Max ${this.MAX_API_KEY_LENGTH} characters).`);
+        if (key.length > 255) {
+            throw new Error("API Key too long (max 255 chars).");
         }
         this._apiKey = key;
         this.storage.put(this.STORAGE_KEY_API_KEY, key);
@@ -71,8 +71,8 @@ export default class SettingsService {
     }
 
     public setSystemContext(context: string): void {
-        if (context && context.length > this.MAX_CONTEXT_LENGTH) {
-            throw new Error(`System Context is too long (Max ${this.MAX_CONTEXT_LENGTH} characters).`);
+        if (context.length > 1000) {
+            throw new Error("Context too long (max 1000 chars).");
         }
         this._context = context;
         this.storage.put(this.STORAGE_KEY_CONTEXT, context);
