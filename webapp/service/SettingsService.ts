@@ -9,6 +9,9 @@ export default class SettingsService {
     private readonly STORAGE_KEY_BASE_URL = "aghd_base_url";
     private readonly DEFAULT_MODEL = "gemini-1.5-flash";
 
+    private readonly MAX_API_KEY_LENGTH = 255;
+    private readonly MAX_CONTEXT_LENGTH = 1000;
+
     // In-memory cache to avoid synchronous storage access
     private _apiKey: string | null = null;
     private _model: string | null = null;

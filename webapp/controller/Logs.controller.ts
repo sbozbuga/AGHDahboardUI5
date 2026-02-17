@@ -454,4 +454,31 @@ export default class Logs extends BaseController {
 		(view.byId("advancedFilterDialog") as Dialog).close();
 
 	}
+
+	public onCopyDomain(event: Event): void {
+		const source = event.getSource();
+		if (!(source instanceof Button)) return;
+
+		const context = source.getBindingContext();
+		if (!context) return;
+
+		// Access the 'question' object from the model
+		const question = context.getProperty("question") as { name: string };
+		const domain = question ? question.name : "";
+
+		if (domain) {
+			navigator.clipboard.writeText(domain).then(() => {
+				/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unnecessary-type-assertion */
+				const view = this.getView();
+				const i18nModel = view?.getModel("i18n") as any;
+				const bundle = i18nModel?.getResourceBundle() as any;
+				const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
+				MessageToast.show(msg);
+				/* eslint-enable */
+			}).catch((err) => {
+				console.error("Failed to copy domain: ", err);
+				MessageToast.show("Failed to copy domain");
+			});
+		}
+	}
 }
