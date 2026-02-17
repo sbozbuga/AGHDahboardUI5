@@ -28,7 +28,22 @@
 							<Button icon="sap-icon://nav-back" press=".onNavBack" tooltip="{i18n>back}" />
 							<Title text="{i18n>logsHeader}" level="H2"/>
 							<ToolbarSpacer/>
-							<SearchField id="searchField" width="20%" search=".onSearch" placeholder="{i18n>searchPlaceholder}" maxLength="200" />
+							<SearchField
+								id="searchField"
+								width="auto"
+								search=".onSearch"
+								liveChange=".onSearch"
+								placeholder="{i18n>searchPlaceholder}"
+								tooltip="{i18n>searchPlaceholder}"
+								maxLength="200">
+								<layoutData>
+									<OverflowToolbarLayoutData
+										minWidth="200px"
+										maxWidth="300px"
+										shrinkable="true"
+										priority="NeverOverflow" />
+								</layoutData>
+							</SearchField>
 							<Button icon="sap-icon://sort" press=".onOpenViewSettings" tooltip="{i18n>sortFilter}"/>
 							<Button icon="sap-icon://refresh" press=".onRefreshLogs" tooltip="{i18n>refresh}"/>
                             <ToolbarSeparator />
