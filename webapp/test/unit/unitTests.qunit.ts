@@ -8,5 +8,6 @@ import "unit/service/AdGuardService.qunit";
 import "unit/service/AdGuardServiceSecurity.qunit";
 import "unit/service/GeminiService.qunit";
 import "unit/service/SettingsService.qunit";
+import "unit/service/SettingsServiceSecurity.qunit";
 import "unit/controller/DashboardPerformance.qunit";
 import "unit/model/formatter.qunit";
