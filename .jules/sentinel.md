@@ -42,3 +42,8 @@
 **Vulnerability:** Allowing user-configurable Base URLs to contain embedded credentials (e.g., `http://user:pass@host`) can lead to accidental exposure of sensitive authentication details in application logs or error messages when network requests fail.
 **Learning:** Even when input is seemingly benign configuration (a URL), standard libraries (like `fetch` or `URL`) often preserve sensitive components. Simple string validation is insufficient to detect semantic security risks.
 **Prevention:** Use a robust URL parser (like `new URL()`) to strictly validate protocol and explicitly reject the presence of `username` or `password` components before storing or using the URL.
+
+## 2026-02-18 - Caching for Quota Protection
+**Vulnerability:** Frequent fetching of static configuration data (like AI models) from external APIs can exhaust quotas and lead to denial of service, especially when triggered by UI events (e.g. opening a dialog).
+**Learning:** Rate limiting alone is insufficient for user experience if valid data is available. Caching provides both performance and security benefits (Availability) by reducing the attack surface on the external API quota.
+**Prevention:** Implement time-based caching (TTL) alongside rate limiting for all external API calls that return relatively static data.
