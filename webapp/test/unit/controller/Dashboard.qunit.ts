@@ -6,11 +6,11 @@ import MessageBox from "sap/m/MessageBox";
 
 interface TestContext {
     controller: Dashboard;
-    originalSetInterval: typeof window.setInterval;
-    originalClearInterval: typeof window.clearInterval;
-    intervalCalls: number;
-    clearCalls: number;
-    lastIntervalId: number;
+    originalSetTimeout: typeof window.setTimeout;
+    originalClearTimeout: typeof window.clearTimeout;
+    timeoutCalls: number;
+    clearTimeoutCalls: number;
+    lastTimeoutId: number;
     originalAddEventListener: typeof document.addEventListener;
     originalRemoveEventListener: typeof document.removeEventListener;
     eventListeners: Record<string, EventListenerOrEventListenerObject>;
@@ -50,21 +50,21 @@ QUnit.module("Dashboard Polling Logic", {
         // Actually, we want to test onRefreshStats logic in some tests, but here we test polling.
         ctx.controller.onRefreshStats = () => Promise.resolve();
 
-        // Spy on setInterval/clearInterval
-        ctx.originalSetInterval = window.setInterval;
-        ctx.originalClearInterval = window.clearInterval;
-        ctx.intervalCalls = 0;
-        ctx.clearCalls = 0;
-        ctx.lastIntervalId = 123;
+        // Spy on setTimeout/clearTimeout
+        ctx.originalSetTimeout = window.setTimeout;
+        ctx.originalClearTimeout = window.clearTimeout;
+        ctx.timeoutCalls = 0;
+        ctx.clearTimeoutCalls = 0;
+        ctx.lastTimeoutId = 123;
 
-        window.setInterval = ((() => {
-            ctx.intervalCalls++;
-            return ctx.lastIntervalId;
-        }) as unknown as typeof window.setInterval);
+        window.setTimeout = ((() => {
+            ctx.timeoutCalls++;
+            return ctx.lastTimeoutId;
+        }) as unknown as typeof window.setTimeout);
 
-        window.clearInterval = ((() => {
-            ctx.clearCalls++;
-        }) as unknown as typeof window.clearInterval);
+        window.clearTimeout = ((() => {
+            ctx.clearTimeoutCalls++;
+        }) as unknown as typeof window.clearTimeout);
 
         // Spy on document.addEventListener
         ctx.originalAddEventListener = document.addEventListener.bind(document);
@@ -86,8 +86,8 @@ QUnit.module("Dashboard Polling Logic", {
     afterEach: function() {
         const ctx = this as unknown as TestContext;
         ctx.controller.destroy();
-        window.setInterval = ctx.originalSetInterval;
-        window.clearInterval = ctx.originalClearInterval;
+        window.setTimeout = ctx.originalSetTimeout;
+        window.clearTimeout = ctx.originalClearTimeout;
         document.addEventListener = ctx.originalAddEventListener;
         document.removeEventListener = ctx.originalRemoveEventListener;
 
@@ -103,7 +103,7 @@ QUnit.test("onInit starts polling and registers visibility listener", function(t
     const ctx = this;
     ctx.controller.onInit();
 
-    assert.strictEqual(ctx.intervalCalls, 1, "Polling started (setInterval called)");
+    assert.strictEqual(ctx.timeoutCalls, 1, "Polling started (setTimeout called)");
     assert.ok(ctx.eventListeners["visibilitychange"], "Visibility listener registered");
 });
 
@@ -112,12 +112,12 @@ QUnit.test("onExit stops polling and removes visibility listener", function(this
     const ctx = this;
     ctx.controller.onInit();
     // Reset counters
-    ctx.intervalCalls = 0;
-    ctx.clearCalls = 0;
+    ctx.timeoutCalls = 0;
+    ctx.clearTimeoutCalls = 0;
 
     ctx.controller.onExit();
 
-    assert.strictEqual(ctx.clearCalls, 1, "Polling stopped (clearInterval called)");
+    assert.strictEqual(ctx.clearTimeoutCalls, 1, "Polling stopped (clearTimeout called)");
     assert.notOk(ctx.eventListeners["visibilitychange"], "Visibility listener removed");
 });
 
@@ -125,8 +125,8 @@ QUnit.test("onVisibilityChange pauses polling when hidden", function(this: TestC
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
     ctx.controller.onInit();
-    ctx.clearCalls = 0;
-    ctx.intervalCalls = 0;
+    ctx.clearTimeoutCalls = 0;
+    ctx.timeoutCalls = 0;
 
     // Simulate hidden
     Object.defineProperty(Document.prototype, 'hidden', { configurable: true, get: () => true });
@@ -135,7 +135,7 @@ QUnit.test("onVisibilityChange pauses polling when hidden", function(this: TestC
     // @ts-expect-error: Accessing private member for testing
     ctx.controller.onVisibilityChange();
 
-    assert.strictEqual(ctx.clearCalls, 1, "Polling stopped when hidden");
+    assert.strictEqual(ctx.clearTimeoutCalls, 1, "Polling stopped when hidden");
 
     // Simulate visible
     Object.defineProperty(Document.prototype, 'hidden', { configurable: true, get: () => false });
@@ -144,7 +144,7 @@ QUnit.test("onVisibilityChange pauses polling when hidden", function(this: TestC
     // @ts-expect-error: Accessing private member for testing
     ctx.controller.onVisibilityChange();
 
-    assert.strictEqual(ctx.intervalCalls, 1, "Polling restarted when visible");
+    assert.strictEqual(ctx.timeoutCalls, 1, "Polling restarted when visible");
 });
 
 QUnit.module("Dashboard Data Fetching", {
