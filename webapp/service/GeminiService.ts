@@ -28,8 +28,13 @@ export default class GeminiService {
     private static readonly REQUEST_TIMEOUT = 30000;
     private static readonly MIN_ANALYSIS_INTERVAL = 10000; // 10 seconds
     private static readonly MAX_INPUT_LENGTH = 255;
+    private static readonly MODELS_CACHE_TTL = 3600000; // 1 hour
+    private static readonly MIN_MODELS_FETCH_INTERVAL = 10000; // 10 seconds
 
     private lastAnalysisTime = 0;
+    private _cachedModels: { key: string, text: string }[] | null = null;
+    private _cachedModelsApiKey: string | null = null;
+    private _lastModelsFetchTime = 0;
 
     public static getInstance(): GeminiService {
         if (!GeminiService.instance) {
@@ -201,6 +206,26 @@ export default class GeminiService {
         const apiKey = SettingsService.getInstance().getApiKey();
         if (!apiKey) return [];
 
+        const now = Date.now();
+
+        // 1. Return valid cache
+        if (this._cachedModels &&
+            this._cachedModelsApiKey === apiKey &&
+            (now - this._lastModelsFetchTime < GeminiService.MODELS_CACHE_TTL)) {
+            return this._cachedModels;
+        }
+
+        // 2. Rate limit if too frequent (and no cache or cache invalid)
+        if (now - this._lastModelsFetchTime < GeminiService.MIN_MODELS_FETCH_INTERVAL) {
+            if (this._cachedModels && this._cachedModelsApiKey === apiKey) {
+                return this._cachedModels;
+            }
+            console.warn("GeminiService: getAvailableModels rate limited.");
+            return [];
+        }
+
+        this._lastModelsFetchTime = now;
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), GeminiService.REQUEST_TIMEOUT);
 
@@ -219,12 +244,19 @@ export default class GeminiService {
             const models = (data.models || []);
 
             // Filter for models that support 'generateContent'
-            return models
+            const result = models
                 .filter((m) => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
                 .map((m) => ({
                     key: m.name.replace("models/", ""), // remove prefix for cleaner ID
                     text: m.displayName || m.name
                 }));
+
+            // Update cache
+            this._cachedModels = result;
+            this._cachedModelsApiKey = apiKey;
+            this._lastModelsFetchTime = now;
+
+            return result;
         } catch (error) {
             const msg = error instanceof Error ? error.message : String(error);
             // Safe redaction without Regex issues

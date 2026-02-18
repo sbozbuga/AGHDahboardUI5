@@ -256,3 +256,85 @@ QUnit.test("summarizeLogs sanitizes log data", function (assert) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     assert.strictEqual(summary.top_upstreams[0][0], "UpstreamBad", "Upstream name sanitized");
 });
+
+QUnit.module("Gemini Service - Model Caching", {
+    beforeEach: function (this: TestContext) {
+        this.originalDateNow = Date.now;
+        this.originalFetch = window.fetch;
+
+        const settings = SettingsService.getInstance();
+        this.originalGetApiKey = settings.getApiKey.bind(settings);
+        settings.getApiKey = () => "TEST_API_KEY";
+
+        // Reset GeminiService instance
+        // @ts-expect-error: Resetting singleton for testing
+        GeminiService.instance = null;
+    },
+    afterEach: function (this: TestContext) {
+        Date.now = this.originalDateNow;
+        window.fetch = this.originalFetch;
+        SettingsService.getInstance().getApiKey = this.originalGetApiKey;
+        // @ts-expect-error: Resetting singleton for testing
+        GeminiService.instance = null;
+    }
+});
+
+QUnit.test("getAvailableModels caches results and respects rate limit", async function(assert) {
+    const service = GeminiService.getInstance();
+    let fetchCount = 0;
+    let currentTime = 100000;
+
+    Date.now = () => currentTime;
+
+    // Mock fetch
+    // eslint-disable-next-line @typescript-eslint/require-await
+    window.fetch = async () => {
+        fetchCount++;
+        return {
+            ok: true,
+            // eslint-disable-next-line @typescript-eslint/require-await
+            json: async () => ({
+                models: [
+                    { name: "models/gemini-1.5-flash", displayName: "Flash", supportedGenerationMethods: ["generateContent"] },
+                    { name: "models/gemini-pro", displayName: "Pro", supportedGenerationMethods: ["generateContent"] }
+                ]
+            })
+        } as Response;
+    };
+
+    // 1. First call - fetches from API
+    const models1 = await service.getAvailableModels();
+    assert.strictEqual(fetchCount, 1, "First call should trigger fetch");
+    assert.strictEqual(models1.length, 2, "Should return 2 models");
+
+    // 2. Second call immediately - should return CACHED result (fetch count stays 1)
+    currentTime += 100; // 100ms later
+    const models2 = await service.getAvailableModels();
+    assert.strictEqual(fetchCount, 1, "Second call (immediate) should use cache");
+    assert.deepEqual(models2, models1, "Cached result should match original");
+
+    // 3. Rate Limit Test:
+    // If cache is missing (e.g. API key changed), but we are within rate limit window.
+    // Update API Key to force cache mismatch
+    const settings = SettingsService.getInstance();
+    settings.getApiKey = () => "NEW_API_KEY";
+
+    // Call immediately - should be rate limited because interval (10s) hasn't passed since last fetch
+    const models3 = await service.getAvailableModels();
+    assert.strictEqual(fetchCount, 1, "Should NOT fetch again due to rate limit");
+    assert.strictEqual(models3.length, 0, "Should return empty array when rate limited and no valid cache");
+
+    // 4. Expiry Test:
+    // Move time forward past TTL (1 hour + 1s)
+    // Reset API key to match first cache just to prove TTL expires it?
+    // actually we are at step 3 with NEW_API_KEY.
+    // Let's set API Key back to TEST_API_KEY.
+    settings.getApiKey = () => "TEST_API_KEY";
+
+    // Now we match the cached key. But verify TTL.
+    currentTime += 3600000 + 1000; // > 1 hour later
+
+    const models4 = await service.getAvailableModels();
+    assert.strictEqual(fetchCount, 2, "Should fetch again after TTL expires");
+    assert.strictEqual(models4.length, 2, "Should return fresh models");
+});
