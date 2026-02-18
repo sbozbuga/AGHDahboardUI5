@@ -161,7 +161,10 @@
 									tooltip="{reason}"
 									decorative="false"
 									alt="{reason}" />
-								<Text text="{client}" />
+								<HBox alignItems="Center" wrap="Wrap">
+									<Text text="{client}" class="sapUiTinyMarginEnd" />
+									<Button icon="sap-icon://copy" type="Transparent" press=".onCopyClient" tooltip="{i18n>copyClient}" />
+								</HBox>
 								<HBox alignItems="Center" wrap="Wrap">
 									<Text text="{question/name} ({question/type})" wrapping="true" maxLines="2" class="sapUiTinyMarginEnd" />
 									<Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" />
