@@ -51,6 +51,15 @@ info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resou
 ──────┴─────────────────────
 00:05 >> ...ces/ui5/aghd/testsuite.qunit&test=integration/opaTests [AuLs7sNHqOI]
 00:05 >> ...resources/ui5/aghd/testsuite.qunit&test=unit/unitTests [fJvQ1qbgEB8]
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/integration/opaTests.qunit.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/unitTests.qunit.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/integration/NavigationJourney.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/controller/App.qunit.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/controller/Dashboard.qunit.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/controller/Login.qunit.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/controller/Logs.qunit.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/controller/LogsPerformance.qunit.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/integration/pages/AppPage.ts
 info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/unitTests.qunit.ts
 info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/controller/App.qunit.ts
 info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/controller/Login.qunit.ts
@@ -64,6 +73,23 @@ info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resou
 info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/service/SettingsServiceSecurity.qunit.ts
 info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/controller/DashboardPerformance.qunit.ts
 info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /test/unit/model/formatter.qunit.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /controller/App.controller.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /controller/Login.controller.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /controller/Logs.controller.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /controller/Dashboard.controller.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /service/AdGuardService.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /model/Constants.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /service/SettingsService.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /service/GeminiService.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /model/formatter.ts
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /controller/BaseController.ts
+warn builder:processors:manifestEnhancer /manifest.json: Generated supported locales ('') for bundle 'i18n/i18n.properties' do not contain default fallback locale 'en'. Either provide a properties file for 'en' or configure another available fallbackLocale
+warn builder:processors:manifestEnhancer /manifest.json: Generated supported locales ('') for bundle 'i18n/i18n.properties' do not contain default fallback locale 'en'. Either provide a properties file for 'en' or configure another available fallbackLocale
+info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /Component.ts
+00:23 << ...ghd/testsuite.qunit&test=integration/opaTests  (00:11) [AuLs7sNHqOI]
+00:24 << .../ui5/aghd/testsuite.qunit&test=unit/unitTests  (00:05) [fJvQ1qbgEB8]
+
+00:24 │ Generating coverage report
 info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /controller/Login.controller.ts
 info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /controller/App.controller.ts
 info server:custom-middleware:ui5-tooling-transpile-middleware Transpiling resource /controller/Dashboard.controller.ts
@@ -133,6 +159,12 @@ Page execution folder name : fJvQ1qbgEB8
 SettingsService ▶ Input Validation: Length Limits
 Throws when System Context exceeds limit
 Throws when API Key exceeds limit
+
+Logs Controller ▶ formatInsights sanitizes HTML and applies Markdown
+Markdown Bold works
+HTML is escaped
+Mixed Markdown and HTML works
+Newlines are converted
 
 Dashboard Controller Performance Optimization ▶ Optimization: getSlowestQueries is throttled to 60s
 First run calls getSlowestQueries
