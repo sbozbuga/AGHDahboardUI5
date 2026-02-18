@@ -481,4 +481,29 @@ export default class Logs extends BaseController {
 			});
 		}
 	}
+
+	public onCopyClient(event: Event): void {
+		const source = event.getSource();
+		if (!(source instanceof Button)) return;
+
+		const context = source.getBindingContext();
+		if (!context) return;
+
+		const client = context.getProperty("client") as string;
+
+		if (client) {
+			navigator.clipboard.writeText(client).then(() => {
+				/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unnecessary-type-assertion */
+				const view = this.getView();
+				const i18nModel = view?.getModel("i18n") as any;
+				const bundle = i18nModel?.getResourceBundle() as any;
+				const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
+				MessageToast.show(msg);
+				/* eslint-enable */
+			}).catch((err) => {
+				console.error("Failed to copy client IP: ", err);
+				MessageToast.show("Failed to copy client IP");
+			});
+		}
+	}
 }

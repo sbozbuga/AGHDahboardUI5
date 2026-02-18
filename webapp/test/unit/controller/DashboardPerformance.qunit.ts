@@ -32,7 +32,7 @@ QUnit.module("Dashboard Controller Performance Optimization", {
 
         ctx.mockService = {
             getStats: () => Promise.resolve({ num_dns_queries: 100 }),
-            getQueryLog: () => Promise.resolve({ data: [{ time: "2023-01-01T12:00:00" }] }),
+            getQueryLog: () => Promise.resolve({ data: [{ time: new Date("2023-01-01T12:00:00") }] }),
             getSlowestQueries: () => Promise.resolve([{ domain: "slow.com", elapsedMs: 500 }])
         };
 
@@ -72,21 +72,21 @@ QUnit.test("Optimization: getSlowestQueries is throttled to 60s", async function
         // 2. Second run (T=15s) with new data -> Should Skip (Throttled)
         currentTime += 15000;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        ctx.mockService.getQueryLog = () => Promise.resolve({ data: [{ time: "2023-01-01T12:00:15" }] });
+        ctx.mockService.getQueryLog = () => Promise.resolve({ data: [{ time: new Date("2023-01-01T12:00:15") }] });
         await ctx.controller.onRefreshStats(true);
         assert.strictEqual(callCount, 1, "Second run (15s elapsed) skips getSlowestQueries due to throttling");
 
         // 3. Third run (T=30s) with new data -> Should Skip
         currentTime += 15000;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        ctx.mockService.getQueryLog = () => Promise.resolve({ data: [{ time: "2023-01-01T12:00:30" }] });
+        ctx.mockService.getQueryLog = () => Promise.resolve({ data: [{ time: new Date("2023-01-01T12:00:30") }] });
         await ctx.controller.onRefreshStats(true);
         assert.strictEqual(callCount, 1, "Third run (30s elapsed) skips getSlowestQueries");
 
         // 4. Fourth run (T=65s) -> Should Fetch
         currentTime += 35000; // Total +65s from start
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        ctx.mockService.getQueryLog = () => Promise.resolve({ data: [{ time: "2023-01-01T12:01:05" }] });
+        ctx.mockService.getQueryLog = () => Promise.resolve({ data: [{ time: new Date("2023-01-01T12:01:05") }] });
         await ctx.controller.onRefreshStats(true);
         assert.strictEqual(callCount, 2, "Fourth run (65s elapsed) calls getSlowestQueries");
 
