@@ -14,7 +14,8 @@ import ColumnListItem from "sap/m/ColumnListItem";
  */
 export default class Dashboard extends BaseController {
     // formatter = formatter; -> Inherited
-    private _timer: ReturnType<typeof setInterval> | undefined;
+    private _timer: ReturnType<typeof setTimeout> | undefined;
+    private _isPolling = false;
     private _lastLatestTime: Date | undefined;
     private _lastSlowestQueryFetchTime: number | undefined;
     private static readonly REFRESH_INTERVAL = 15000;
@@ -59,22 +60,43 @@ export default class Dashboard extends BaseController {
     };
 
     private startPolling(): void {
-        if (!this._timer) {
-            this._timer = setInterval(() => {
-                void this.onRefreshStats(true); // true = silent refresh
-            }, Dashboard.REFRESH_INTERVAL);
-        }
+        if (this._isPolling) return;
+        this._isPolling = true;
+        this.scheduleNextPoll();
     }
 
     private stopPolling(): void {
+        this._isPolling = false;
         if (this._timer) {
-            clearInterval(this._timer);
+            clearTimeout(this._timer);
             this._timer = undefined;
         }
     }
 
-    public onManualRefresh(): void {
-        void this.onRefreshStats(false);
+    private scheduleNextPoll(): void {
+        if (this._timer) clearTimeout(this._timer);
+        this._timer = setTimeout(() => {
+            void this.pollStats();
+        }, Dashboard.REFRESH_INTERVAL);
+    }
+
+    private async pollStats(): Promise<void> {
+        if (!this._isPolling) return;
+        try {
+            await this.onRefreshStats(true);
+        } finally {
+            // Schedule next one only after this one completes, if still polling
+            if (this._isPolling) {
+                this.scheduleNextPoll();
+            }
+        }
+    }
+
+    public async onManualRefresh(): Promise<void> {
+        // Reset polling timer to avoid double fetch
+        this.stopPolling();
+        await this.onRefreshStats(false);
+        this.startPolling();
     }
 
     public async onRefreshStats(silent: boolean = false): Promise<void> {
@@ -143,7 +165,7 @@ export default class Dashboard extends BaseController {
             if ((error as Error).message === "Unauthorized") {
                 // Stop timer on auth error to prevent endless loops.
                 // Service handles the UI (Popup).
-                if (this._timer) clearInterval(this._timer);
+                this.stopPolling();
                 return;
             }
             // Suppress errors during silent refresh to avoid popup span
