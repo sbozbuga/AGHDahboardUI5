@@ -5,3 +5,7 @@
 ## 2026-02-16 - Responsive SearchField in OverflowToolbar
 **Learning:** Setting a percentage width on `SearchField` inside an `OverflowToolbar` can lead to poor responsiveness. `width='auto'` without constraints may collapse.
 **Action:** Use `OverflowToolbarLayoutData` with `minWidth`, `maxWidth`, and `shrinkable='true'` inside the `layoutData` aggregation to ensure proper sizing.
+
+## 2026-02-17 - Secondary Actions in Navigation List Items
+**Learning:** Adding a secondary action (e.g., "Copy" button) inside a `ColumnListItem` with `type="Navigation"` allows for quick utility without navigating away. Wrapping the text and button in an `HBox` with `wrap="Wrap"` ensures responsiveness on smaller screens.
+**Action:** Use `HBox` with `alignItems="Center"` and `wrap="Wrap"` to group primary text and secondary action buttons within table cells.
