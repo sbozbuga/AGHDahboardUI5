@@ -81,7 +81,7 @@
                                     <cells>
                                         <HBox alignItems="Center" wrap="Wrap">
                                             <Text text="{name}" class="sapUiTinyMarginEnd" />
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyClient" tooltip="{i18n>copyClient}" />
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyClient" tooltip="{i18n>copyClient}" class="copyButton" />
                                         </HBox>
                                         <Text text="{count}" />
                                     </cells>
@@ -110,7 +110,7 @@
                                     <cells>
                                         <HBox alignItems="Center" wrap="Wrap">
                                             <Text text="{name}" class="sapUiTinyMarginEnd" />
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" />
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton" />
                                         </HBox>
                                         <Text text="{count}" />
                                     </cells>
@@ -139,7 +139,7 @@
                                     <cells>
                                         <HBox alignItems="Center" wrap="Wrap">
                                             <Text text="{name}" class="sapUiTinyMarginEnd" />
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" />
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton" />
                                         </HBox>
                                         <Text text="{count}" />
                                     </cells>
@@ -182,7 +182,7 @@
                                                     formatter: '.formatter.formatDomainWithCount'
                                                 }"
                                                 class="sapUiTinyMarginEnd" />
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" />
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton" />
                                         </HBox>
                                         <ObjectNumber
 											number="{

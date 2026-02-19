@@ -1,0 +1,19 @@
+/* Copy button hidden by default on desktop to reduce clutter */
+html.sap-desktop .copyButton {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none; /* Prevent accidental clicks when hidden */
+}
+
+/* Show copy button on row hover on desktop */
+html.sap-desktop .sapMListTblRow:hover .copyButton {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Ensure copy button is always visible on touch devices (tablet/phone) where hover is not available */
+html.sap-tablet .copyButton,
+html.sap-phone .copyButton {
+    opacity: 1;
+    pointer-events: auto;
+}

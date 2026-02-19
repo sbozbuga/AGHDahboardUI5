@@ -274,6 +274,49 @@ export default class Dashboard extends BaseController {
         });
     }
 
+    private copyToClipboard(text: string, successMessage: string): void {
+        if (!text) return;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                MessageToast.show(successMessage);
+            }).catch((err) => {
+                console.warn("Clipboard API failed, falling back to execCommand", err);
+                this.fallbackCopy(text, successMessage);
+            });
+        } else {
+            this.fallbackCopy(text, successMessage);
+        }
+    }
+
+    private fallbackCopy(text: string, successMessage: string): void {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+
+        // Ensure it's not visible but part of the DOM
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+
+        textArea.focus();
+        textArea.select();
+
+        try {
+            const successful = document.execCommand("copy");
+            if (successful) {
+                MessageToast.show(successMessage);
+            } else {
+                MessageBox.error("Clipboard access not available. Please copy manually: " + text);
+            }
+        } catch (err) {
+            console.error("Fallback copy failed", err);
+            MessageBox.error("Clipboard access not available. Please copy manually: " + text);
+        }
+
+        document.body.removeChild(textArea);
+    }
+
     public onCopyDomain(event: Event): void {
         const source = event.getSource();
         if (!(source instanceof Button)) return;
@@ -287,22 +330,13 @@ export default class Dashboard extends BaseController {
         const textToCopy = name || domain;
 
         if (textToCopy) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unnecessary-type-assertion */
-                    const view = this.getView();
-                    const i18nModel = view?.getModel("i18n") as any;
-                    const bundle = i18nModel?.getResourceBundle() as any;
-                    const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
-                    MessageToast.show(msg);
-                    /* eslint-enable */
-                }).catch((err) => {
-                    console.error("Failed to copy domain: ", err);
-                    MessageToast.show("Failed to copy domain");
-                });
-            } else {
-                MessageBox.error("Clipboard access not available. Please copy manually: " + textToCopy);
-            }
+            /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
+            const view = this.getView();
+            const i18nModel = view?.getModel("i18n") as any;
+            const bundle = i18nModel?.getResourceBundle() as any;
+            const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
+            /* eslint-enable */
+            this.copyToClipboard(textToCopy, msg as string);
         }
     }
 
@@ -317,22 +351,13 @@ export default class Dashboard extends BaseController {
         const client = context.getProperty("name") as string;
 
         if (client) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(client).then(() => {
-                    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unnecessary-type-assertion */
-                    const view = this.getView();
-                    const i18nModel = view?.getModel("i18n") as any;
-                    const bundle = i18nModel?.getResourceBundle() as any;
-                    const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
-                    MessageToast.show(msg);
-                    /* eslint-enable */
-                }).catch((err) => {
-                    console.error("Failed to copy client IP: ", err);
-                    MessageToast.show("Failed to copy client IP");
-                });
-            } else {
-                MessageBox.error("Clipboard access not available. Please copy manually: " + client);
-            }
+            /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
+            const view = this.getView();
+            const i18nModel = view?.getModel("i18n") as any;
+            const bundle = i18nModel?.getResourceBundle() as any;
+            const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
+            /* eslint-enable */
+            this.copyToClipboard(client, msg as string);
         }
     }
 }
