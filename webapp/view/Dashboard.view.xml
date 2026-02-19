@@ -71,7 +71,7 @@
                         <card:Header title="{i18n>topClients}" iconSrc="sap-icon://group" />
                     </f:header>
                     <f:content>
-                        <Table items="{/top_clients}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noActiveClients}">
+                        <Table items="{/top_clients}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noActiveClients}">
                             <columns>
                                 <Column><Text text="{i18n>client}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -79,9 +79,17 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressClient" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="Wrap">
-                                            <Text text="{name}" class="sapUiTinyMarginEnd" />
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyClient" tooltip="{i18n>copyClient}" class="copyButton" />
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
+                                            <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
+                                                <layoutData>
+                                                    <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
+                                                </layoutData>
+                                            </Text>
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyClient" tooltip="{i18n>copyClient}" class="copyButton">
+                                                <layoutData>
+                                                    <FlexItemData shrinkFactor="0" />
+                                                </layoutData>
+                                            </Button>
                                         </HBox>
                                         <Text text="{count}" />
                                     </cells>
@@ -100,7 +108,7 @@
                         <card:Header title="{i18n>topDomains}" iconSrc="sap-icon://world" />
                     </f:header>
                      <f:content>
-                        <Table items="{/top_queried_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noQueriesRecorded}">
+                        <Table items="{/top_queried_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noQueriesRecorded}">
                              <columns>
                                 <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -108,9 +116,17 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressDomain" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="Wrap">
-                                            <Text text="{name}" class="sapUiTinyMarginEnd" />
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton" />
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
+                                            <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
+                                                <layoutData>
+                                                    <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
+                                                </layoutData>
+                                            </Text>
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton">
+                                                <layoutData>
+                                                    <FlexItemData shrinkFactor="0" />
+                                                </layoutData>
+                                            </Button>
                                         </HBox>
                                         <Text text="{count}" />
                                     </cells>
@@ -129,7 +145,7 @@
                         <card:Header title="{i18n>topBlockedDomains}" iconSrc="sap-icon://decline" />
                     </f:header>
                      <f:content>
-                        <Table items="{/top_blocked_domains}" inset="false" fixedLayout="false" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noBlockedDomains}">
+                        <Table items="{/top_blocked_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noBlockedDomains}">
                              <columns>
                                 <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -137,9 +153,17 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressBlockedDomain" tooltip="{parts:[{path:'i18n>viewBlockedLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="Wrap">
-                                            <Text text="{name}" class="sapUiTinyMarginEnd" />
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton" />
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
+                                            <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
+                                                <layoutData>
+                                                    <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
+                                                </layoutData>
+                                            </Text>
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton">
+                                                <layoutData>
+                                                    <FlexItemData shrinkFactor="0" />
+                                                </layoutData>
+                                            </Button>
                                         </HBox>
                                         <Text text="{count}" />
                                     </cells>
@@ -172,7 +196,7 @@
                                         formatter: '.formatter.slowestTooltip'
                                     }">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="Wrap">
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
                                             <Text
                                                 text="{
                                                     parts: [
@@ -181,8 +205,17 @@
                                                     ],
                                                     formatter: '.formatter.formatDomainWithCount'
                                                 }"
-                                                class="sapUiTinyMarginEnd" />
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton" />
+                                                wrapping="false"
+                                                class="sapUiTinyMarginEnd">
+                                                <layoutData>
+                                                    <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
+                                                </layoutData>
+                                            </Text>
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton">
+                                                <layoutData>
+                                                    <FlexItemData shrinkFactor="0" />
+                                                </layoutData>
+                                            </Button>
                                         </HBox>
                                         <ObjectNumber
 											number="{
