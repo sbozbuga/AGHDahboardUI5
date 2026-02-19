@@ -338,3 +338,59 @@ QUnit.test("getAvailableModels caches results and respects rate limit", async fu
     assert.strictEqual(fetchCount, 2, "Should fetch again after TTL expires");
     assert.strictEqual(models4.length, 2, "Should return fresh models");
 });
+
+QUnit.module("Gemini Service - PII Anonymization");
+
+QUnit.test("anonymizeClient correctly masks IPs", function (assert) {
+    const service = GeminiService.getInstance();
+    // Access private method via casting
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+    const anonymize = (service as any).anonymizeClient.bind(service);
+
+    // 1. IPv4
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    assert.strictEqual(anonymize("192.168.1.5"), "192.168.1.xxx", "IPv4 last octet masked");
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    assert.strictEqual(anonymize("10.0.0.1"), "10.0.0.xxx", "IPv4 class A masked");
+
+    // 2. IPv6
+    // Full IPv6
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    assert.strictEqual(anonymize("2001:0db8:85a3:0000:0000:8a2e:0370:7334"), "2001:0db8:85a3:0000:xxxx:xxxx:xxxx:xxxx", "IPv6 full address masked");
+    // Compressed IPv6
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    assert.strictEqual(anonymize("fe80::1"), "fe80::xxxx", "IPv6 short address masked");
+
+    // 3. Hostnames / Non-IPs
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    assert.strictEqual(anonymize("my-laptop.local"), "my-laptop.local", "Hostname unchanged");
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    assert.strictEqual(anonymize("Unknown"), "Unknown", "Unknown unchanged");
+});
+
+QUnit.test("summarizeLogs aggregates anonymized clients", function (assert) {
+    const service = GeminiService.getInstance();
+    const logs = [
+        { client: "192.168.1.5", question: { name: "d1" }, upstream: "u1", status: "OK" },
+        { client: "192.168.1.6", question: { name: "d2" }, upstream: "u1", status: "OK" }, // Same subnet
+        { client: "10.0.0.2", question: { name: "d3" }, upstream: "u1", status: "OK" }    // Different subnet
+    ];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+    const summary = (service as any).summarizeLogs(logs);
+
+    // 192.168.1.5 -> 192.168.1.xxx
+    // 192.168.1.6 -> 192.168.1.xxx
+    // Should be aggregated to count 2
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const topClients = summary.top_clients as [string, number][];
+
+    const subnet1 = topClients.find(c => c[0] === "192.168.1.xxx");
+    assert.ok(subnet1, "Found aggregated subnet 192.168.1.xxx");
+    assert.strictEqual(subnet1 ? subnet1[1] : 0, 2, "Aggregated count is 2");
+
+    const subnet2 = topClients.find(c => c[0] === "10.0.0.xxx");
+    assert.ok(subnet2, "Found subnet 10.0.0.xxx");
+    assert.strictEqual(subnet2 ? subnet2[1] : 0, 1, "Count is 1");
+});

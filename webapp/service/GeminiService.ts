@@ -125,7 +125,9 @@ export default class GeminiService {
 
             // Client counts
             // Performance: Removed sanitizeInput from loop to save regex overhead (approx 4x speedup)
-            const client = log.client || "Unknown";
+            // Privacy: Anonymize IP addresses before analysis to prevent PII leakage
+            let client = log.client || "Unknown";
+            client = this.anonymizeClient(client);
             clientCounts.set(client, (clientCounts.get(client) || 0) + 1);
 
             // Domain counts
@@ -168,6 +170,32 @@ export default class GeminiService {
         }
 
         return topK.map(([key, val]) => [this.sanitizeInput(key), val]);
+    }
+
+    private anonymizeClient(client: string): string {
+        // Simple IPv4 Check (x.x.x.x)
+        const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+        if (ipv4Regex.test(client)) {
+            const parts = client.split(".");
+            return `${parts[0]}.${parts[1]}.${parts[2]}.xxx`;
+        }
+
+        // Simple IPv6 Check (contains :)
+        if (client.includes(":")) {
+            // Keep the first few segments to identify subnet/device type loosely
+            const parts = client.split(":");
+            if (parts.length > 4) {
+                // Keep first 4 segments (64 bits usually network prefix)
+                return parts.slice(0, 4).join(":") + ":xxxx:xxxx:xxxx:xxxx";
+            } else {
+                // Fallback for short forms or compressed
+                const lastColon = client.lastIndexOf(":");
+                return (lastColon > -1 ? client.substring(0, lastColon) : client) + ":xxxx";
+            }
+        }
+
+        // Return hostname or unknown as is
+        return client;
     }
 
     private buildPrompt(summary: LogSummary): string {
