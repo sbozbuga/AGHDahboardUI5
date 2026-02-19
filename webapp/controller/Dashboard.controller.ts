@@ -4,6 +4,8 @@ import UIComponent from "sap/ui/core/UIComponent";
 import AdGuardService from "../service/AdGuardService";
 // formatter imported in BaseController
 import MessageBox from "sap/m/MessageBox";
+import MessageToast from "sap/m/MessageToast";
+import Button from "sap/m/Button";
 import { Constants } from "../model/Constants";
 import { AdGuardStats, StatsEntry } from "../model/AdGuardTypes";
 import Event from "sap/ui/base/Event";
@@ -270,5 +272,67 @@ export default class Dashboard extends BaseController {
                 }
             }
         });
+    }
+
+    public onCopyDomain(event: Event): void {
+        const source = event.getSource();
+        if (!(source instanceof Button)) return;
+
+        const context = source.getBindingContext();
+        if (!context) return;
+
+        // Try 'name' (Top Lists) or 'domain' (Slowest Queries)
+        const name = context.getProperty("name") as string;
+        const domain = context.getProperty("domain") as string;
+        const textToCopy = name || domain;
+
+        if (textToCopy) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unnecessary-type-assertion */
+                    const view = this.getView();
+                    const i18nModel = view?.getModel("i18n") as any;
+                    const bundle = i18nModel?.getResourceBundle() as any;
+                    const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
+                    MessageToast.show(msg);
+                    /* eslint-enable */
+                }).catch((err) => {
+                    console.error("Failed to copy domain: ", err);
+                    MessageToast.show("Failed to copy domain");
+                });
+            } else {
+                MessageBox.error("Clipboard access not available. Please copy manually: " + textToCopy);
+            }
+        }
+    }
+
+    public onCopyClient(event: Event): void {
+        const source = event.getSource();
+        if (!(source instanceof Button)) return;
+
+        const context = source.getBindingContext();
+        if (!context) return;
+
+        // Top Clients uses 'name' for IP
+        const client = context.getProperty("name") as string;
+
+        if (client) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(client).then(() => {
+                    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unnecessary-type-assertion */
+                    const view = this.getView();
+                    const i18nModel = view?.getModel("i18n") as any;
+                    const bundle = i18nModel?.getResourceBundle() as any;
+                    const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
+                    MessageToast.show(msg);
+                    /* eslint-enable */
+                }).catch((err) => {
+                    console.error("Failed to copy client IP: ", err);
+                    MessageToast.show("Failed to copy client IP");
+                });
+            } else {
+                MessageBox.error("Clipboard access not available. Please copy manually: " + client);
+            }
+        }
     }
 }

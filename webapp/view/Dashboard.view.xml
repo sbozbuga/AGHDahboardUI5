@@ -79,7 +79,10 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressClient" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: 'sap.base.strings.formatMessage'}">
                                     <cells>
-                                        <Text text="{name}" />
+                                        <HBox alignItems="Center" wrap="Wrap">
+                                            <Text text="{name}" class="sapUiTinyMarginEnd" />
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyClient" tooltip="{i18n>copyClient}" />
+                                        </HBox>
                                         <Text text="{count}" />
                                     </cells>
                                 </ColumnListItem>
@@ -105,7 +108,10 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressDomain" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: 'sap.base.strings.formatMessage'}">
                                     <cells>
-                                        <Text text="{name}" />
+                                        <HBox alignItems="Center" wrap="Wrap">
+                                            <Text text="{name}" class="sapUiTinyMarginEnd" />
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" />
+                                        </HBox>
                                         <Text text="{count}" />
                                     </cells>
                                 </ColumnListItem>
@@ -131,7 +137,10 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressBlockedDomain" tooltip="{parts:[{path:'i18n>viewBlockedLogsFor'}, {path:'name'}], formatter: 'sap.base.strings.formatMessage'}">
                                     <cells>
-                                        <Text text="{name}" />
+                                        <HBox alignItems="Center" wrap="Wrap">
+                                            <Text text="{name}" class="sapUiTinyMarginEnd" />
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" />
+                                        </HBox>
                                         <Text text="{count}" />
                                     </cells>
                                 </ColumnListItem>
@@ -163,14 +172,18 @@
                                         formatter: '.formatter.slowestTooltip'
                                     }">
                                     <cells>
-                                        <Text
-                                            text="{
-                                                parts: [
-                                                    {path: 'domain'},
-                                                    {path: 'occurrences'}
-                                                ],
-                                                formatter: '.formatter.formatDomainWithCount'
-                                            }" />
+                                        <HBox alignItems="Center" wrap="Wrap">
+                                            <Text
+                                                text="{
+                                                    parts: [
+                                                        {path: 'domain'},
+                                                        {path: 'occurrences'}
+                                                    ],
+                                                    formatter: '.formatter.formatDomainWithCount'
+                                                }"
+                                                class="sapUiTinyMarginEnd" />
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" />
+                                        </HBox>
                                         <ObjectNumber
 											number="{
 												path: 'elapsedMs',
