@@ -54,6 +54,13 @@
 				}
 			}
 		},
+		"resources": {
+			"css": [
+				{
+					"uri": "css/style.css"
+				}
+			]
+		},
 		"resourceRoots": {
 			"@google": "./thirdparty/@google"
 		},
