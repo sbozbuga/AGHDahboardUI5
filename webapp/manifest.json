@@ -46,9 +46,11 @@
 				"settings": {
 					"bundleName": "ui5.aghd.i18n.i18n",
 					"supportedLocales": [
-						""
+						"en",
+						"de",
+						"tr"
 					],
-					"fallbackLocale": ""
+					"fallbackLocale": "en"
 				}
 			}
 		},
