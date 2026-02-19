@@ -75,3 +75,9 @@ QUnit.test("Should format elapsed time to value color", function (assert) {
     assert.strictEqual(formatter.formatElapsedColor(null), "Neutral", "null should be Neutral");
     assert.strictEqual(formatter.formatElapsedColor("600"), "Error", "String '600' should be Error");
 });
+
+QUnit.module("formatter - formatMessage");
+
+QUnit.test("Should format message correctly", function (assert) {
+    assert.strictEqual(formatter.formatMessage("Hello {0}", ["World"]), "Hello World", "Formats message correctly");
+});

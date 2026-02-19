@@ -1,4 +1,7 @@
+import formatMessage from "sap/base/strings/formatMessage";
+
 export default {
+    formatMessage: formatMessage,
     /**
      * Formats elapsed time in milliseconds to a string with 3 decimal places.
      * @param ms Elapsed time in milliseconds (number)
