@@ -77,7 +77,7 @@
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem type="Navigation" press=".onPressClient" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: 'sap.base.strings.formatMessage'}">
+                                <ColumnListItem type="Navigation" press=".onPressClient" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
                                         <HBox alignItems="Center" wrap="Wrap">
                                             <Text text="{name}" class="sapUiTinyMarginEnd" />
@@ -106,7 +106,7 @@
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem type="Navigation" press=".onPressDomain" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: 'sap.base.strings.formatMessage'}">
+                                <ColumnListItem type="Navigation" press=".onPressDomain" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
                                         <HBox alignItems="Center" wrap="Wrap">
                                             <Text text="{name}" class="sapUiTinyMarginEnd" />
@@ -135,7 +135,7 @@
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
                             </columns>
                             <items>
-                                <ColumnListItem type="Navigation" press=".onPressBlockedDomain" tooltip="{parts:[{path:'i18n>viewBlockedLogsFor'}, {path:'name'}], formatter: 'sap.base.strings.formatMessage'}">
+                                <ColumnListItem type="Navigation" press=".onPressBlockedDomain" tooltip="{parts:[{path:'i18n>viewBlockedLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
                                         <HBox alignItems="Center" wrap="Wrap">
                                             <Text text="{name}" class="sapUiTinyMarginEnd" />
