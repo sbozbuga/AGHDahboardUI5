@@ -4,7 +4,6 @@ import UIComponent from "sap/ui/core/UIComponent";
 import AdGuardService from "../service/AdGuardService";
 // formatter imported in BaseController
 import MessageBox from "sap/m/MessageBox";
-import MessageToast from "sap/m/MessageToast";
 import Button from "sap/m/Button";
 import { Constants } from "../model/Constants";
 import { AdGuardStats, StatsEntry } from "../model/AdGuardTypes";
@@ -274,49 +273,6 @@ export default class Dashboard extends BaseController {
         });
     }
 
-    private copyToClipboard(text: string, successMessage: string): void {
-        if (!text) return;
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => {
-                MessageToast.show(successMessage);
-            }).catch((err) => {
-                console.warn("Clipboard API failed, falling back to execCommand", err);
-                this.fallbackCopy(text, successMessage);
-            });
-        } else {
-            this.fallbackCopy(text, successMessage);
-        }
-    }
-
-    private fallbackCopy(text: string, successMessage: string): void {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-
-        // Ensure it's not visible but part of the DOM
-        textArea.style.position = "fixed";
-        textArea.style.left = "-9999px";
-        textArea.style.top = "0";
-        document.body.appendChild(textArea);
-
-        textArea.focus();
-        textArea.select();
-
-        try {
-            const successful = document.execCommand("copy");
-            if (successful) {
-                MessageToast.show(successMessage);
-            } else {
-                MessageBox.error("Clipboard access not available. Please copy manually: " + text);
-            }
-        } catch (err) {
-            console.error("Fallback copy failed", err);
-            MessageBox.error("Clipboard access not available. Please copy manually: " + text);
-        }
-
-        document.body.removeChild(textArea);
-    }
-
     public onCopyDomain(event: Event): void {
         const source = event.getSource();
         if (!(source instanceof Button)) return;
@@ -336,8 +292,7 @@ export default class Dashboard extends BaseController {
             const bundle = i18nModel?.getResourceBundle() as any;
             const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
             /* eslint-enable */
-            this.copyToClipboard(textToCopy, msg as string);
-            this.animateCopyButton(source);
+            this.copyToClipboard(textToCopy, msg as string, source);
         }
     }
 
@@ -358,8 +313,7 @@ export default class Dashboard extends BaseController {
             const bundle = i18nModel?.getResourceBundle() as any;
             const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
             /* eslint-enable */
-            this.copyToClipboard(client, msg as string);
-            this.animateCopyButton(source);
+            this.copyToClipboard(client, msg as string, source);
         }
     }
 }
