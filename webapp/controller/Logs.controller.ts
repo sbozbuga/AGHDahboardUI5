@@ -1,5 +1,4 @@
 import MessageBox from "sap/m/MessageBox";
-import MessageToast from "sap/m/MessageToast";
 import AppComponent from "../Component";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import Filter from "sap/ui/model/Filter";
@@ -364,20 +363,20 @@ export default class Logs extends BaseController {
 		}
 	}
 
-	public onCopyInsights(): void {
+	public onCopyInsights(event: Event): void {
 		const view = this.getView();
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 		const text = model.getProperty("/analysisText") as string;
+		const source = event.getSource();
 
 		if (!text) return;
 
-		navigator.clipboard.writeText(text).then(() => {
-			MessageToast.show("Insights copied to clipboard.");
-		}).catch((err) => {
-			console.error("Could not copy text: ", err);
-			MessageBox.error("Failed to copy insights to clipboard.");
-		});
+        if (source instanceof Button) {
+		    this.copyToClipboard(text, "Insights copied to clipboard.", source);
+        } else {
+            this.copyToClipboard(text, "Insights copied to clipboard.");
+        }
 	}
 
 	public formatInsights(text: string): string {
@@ -467,18 +466,13 @@ export default class Logs extends BaseController {
 		const domain = question ? question.name : "";
 
 		if (domain) {
-			navigator.clipboard.writeText(domain).then(() => {
-				/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unnecessary-type-assertion */
-				const view = this.getView();
-				const i18nModel = view?.getModel("i18n") as any;
-				const bundle = i18nModel?.getResourceBundle() as any;
-				const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
-				MessageToast.show(msg);
-				/* eslint-enable */
-			}).catch((err) => {
-				console.error("Failed to copy domain: ", err);
-				MessageToast.show("Failed to copy domain");
-			});
+			/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
+			const view = this.getView();
+			const i18nModel = view?.getModel("i18n") as any;
+			const bundle = i18nModel?.getResourceBundle() as any;
+			const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
+			/* eslint-enable */
+			this.copyToClipboard(domain, msg as string, source);
 		}
 	}
 
@@ -492,18 +486,13 @@ export default class Logs extends BaseController {
 		const client = context.getProperty("client") as string;
 
 		if (client) {
-			navigator.clipboard.writeText(client).then(() => {
-				/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unnecessary-type-assertion */
-				const view = this.getView();
-				const i18nModel = view?.getModel("i18n") as any;
-				const bundle = i18nModel?.getResourceBundle() as any;
-				const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
-				MessageToast.show(msg);
-				/* eslint-enable */
-			}).catch((err) => {
-				console.error("Failed to copy client IP: ", err);
-				MessageToast.show("Failed to copy client IP");
-			});
+			/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
+			const view = this.getView();
+			const i18nModel = view?.getModel("i18n") as any;
+			const bundle = i18nModel?.getResourceBundle() as any;
+			const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
+			/* eslint-enable */
+			this.copyToClipboard(client, msg as string, source);
 		}
 	}
 }

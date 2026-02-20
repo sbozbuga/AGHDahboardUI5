@@ -72,6 +72,12 @@
                     </f:header>
                     <f:content>
                         <Table items="{/top_clients}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noActiveClients}">
+                            <headerToolbar>
+                                <OverflowToolbar design="Transparent">
+                                    <ToolbarSpacer />
+                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllClients" tooltip="{i18n>copyAll}" />
+                                </OverflowToolbar>
+                            </headerToolbar>
                             <columns>
                                 <Column><Text text="{i18n>client}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -109,6 +115,12 @@
                     </f:header>
                      <f:content>
                         <Table items="{/top_queried_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noQueriesRecorded}">
+                            <headerToolbar>
+                                <OverflowToolbar design="Transparent">
+                                    <ToolbarSpacer />
+                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllDomains" tooltip="{i18n>copyAll}" />
+                                </OverflowToolbar>
+                            </headerToolbar>
                              <columns>
                                 <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -146,6 +158,12 @@
                     </f:header>
                      <f:content>
                         <Table items="{/top_blocked_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noBlockedDomains}">
+                            <headerToolbar>
+                                <OverflowToolbar design="Transparent">
+                                    <ToolbarSpacer />
+                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllBlockedDomains" tooltip="{i18n>copyAll}" />
+                                </OverflowToolbar>
+                            </headerToolbar>
                              <columns>
                                 <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -183,6 +201,12 @@
                     </f:header>
                      <f:content>
                         <Table items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noPerformanceData}">
+                            <headerToolbar>
+                                <OverflowToolbar design="Transparent">
+                                    <ToolbarSpacer />
+                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllSlowestQueries" tooltip="{i18n>copyAll}" />
+                                </OverflowToolbar>
+                            </headerToolbar>
                              <columns>
                                 <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>elapsedMs}" /></Column>

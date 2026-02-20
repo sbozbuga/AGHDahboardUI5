@@ -7,10 +7,12 @@ import SettingsService from "../service/SettingsService";
 import GeminiService from "../service/GeminiService";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import MessageBox from "sap/m/MessageBox";
+import MessageToast from "sap/m/MessageToast";
 import Input from "sap/m/Input";
 import { InputType } from "sap/m/library";
 import Event from "sap/ui/base/Event";
 import formatter from "../model/formatter";
+import Button from "sap/m/Button";
 
 /**
  * @namespace ui5.aghd.controller
@@ -18,6 +20,21 @@ import formatter from "../model/formatter";
 export default class BaseController extends Controller {
     public formatter = formatter;
     protected _mDialogs: Map<string, Promise<Dialog>> = new Map();
+
+    protected animateCopyButton(button: Button, duration: number = 2000): void {
+        const originalIcon = button.getIcon();
+
+        // Prevent re-entrancy: if already animating (icon is accept), do nothing
+        // to avoid capturing "accept" as the original icon.
+        if (originalIcon === "sap-icon://accept") {
+            return;
+        }
+
+        button.setIcon("sap-icon://accept");
+        setTimeout(() => {
+            button.setIcon(originalIcon);
+        }, duration);
+    }
 
     public onExit(): void {
         this._mDialogs.clear();
@@ -145,5 +162,65 @@ export default class BaseController extends Controller {
             input.setType(InputType.Password);
             input.setValueHelpIconSrc("sap-icon://show");
         }
+    }
+
+    /**
+     * Copies text to clipboard with a fallback for non-secure contexts.
+     * @param text The text to copy
+     * @param successMessage The message to show on success
+     * @param button Optional button to animate on success
+     */
+    protected copyToClipboard(text: string, successMessage: string, button?: Button): void {
+        if (!text) return;
+
+        // Navigator clipboard requires Secure Context (HTTPS/localhost)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                MessageToast.show(successMessage);
+                if (button) {
+                    this.animateCopyButton(button);
+                }
+            }).catch((err) => {
+                console.warn("Clipboard API failed, falling back to execCommand", err);
+                this.fallbackCopy(text, successMessage, button);
+            });
+        } else {
+            this.fallbackCopy(text, successMessage, button);
+        }
+    }
+
+    /**
+     * Fallback for copying to clipboard using a hidden textarea and execCommand.
+     */
+    protected fallbackCopy(text: string, successMessage: string, button?: Button): void {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+
+        // Ensure it's not visible but part of the DOM
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+
+        textArea.focus();
+        textArea.select();
+
+        try {
+            // execCommand is deprecated but widely supported as fallback
+            const successful = document.execCommand("copy");
+            if (successful) {
+                MessageToast.show(successMessage);
+                if (button) {
+                    this.animateCopyButton(button);
+                }
+            } else {
+                MessageBox.error("Clipboard access not available. Please copy manually: " + text);
+            }
+        } catch (err) {
+            console.error("Fallback copy failed", err);
+            MessageBox.error("Clipboard access not available. Please copy manually: " + text);
+        }
+
+        document.body.removeChild(textArea);
     }
 }
