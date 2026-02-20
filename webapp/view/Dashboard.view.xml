@@ -72,6 +72,12 @@
                     </f:header>
                     <f:content>
                         <Table items="{/top_clients}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noActiveClients}">
+                            <headerToolbar>
+                                <OverflowToolbar design="Transparent">
+                                    <ToolbarSpacer />
+                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllClients" tooltip="{i18n>copyAll}" />
+                                </OverflowToolbar>
+                            </headerToolbar>
                             <columns>
                                 <Column><Text text="{i18n>client}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -79,7 +85,7 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressClient" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
                                             <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
                                                 <layoutData>
                                                     <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
@@ -109,6 +115,12 @@
                     </f:header>
                      <f:content>
                         <Table items="{/top_queried_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noQueriesRecorded}">
+                            <headerToolbar>
+                                <OverflowToolbar design="Transparent">
+                                    <ToolbarSpacer />
+                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllDomains" tooltip="{i18n>copyAll}" />
+                                </OverflowToolbar>
+                            </headerToolbar>
                              <columns>
                                 <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -116,7 +128,7 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressDomain" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
                                             <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
                                                 <layoutData>
                                                     <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
@@ -146,6 +158,12 @@
                     </f:header>
                      <f:content>
                         <Table items="{/top_blocked_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noBlockedDomains}">
+                            <headerToolbar>
+                                <OverflowToolbar design="Transparent">
+                                    <ToolbarSpacer />
+                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllBlockedDomains" tooltip="{i18n>copyAll}" />
+                                </OverflowToolbar>
+                            </headerToolbar>
                              <columns>
                                 <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -153,7 +171,7 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressBlockedDomain" tooltip="{parts:[{path:'i18n>viewBlockedLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
                                             <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
                                                 <layoutData>
                                                     <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
@@ -183,6 +201,12 @@
                     </f:header>
                      <f:content>
                         <Table items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noPerformanceData}">
+                            <headerToolbar>
+                                <OverflowToolbar design="Transparent">
+                                    <ToolbarSpacer />
+                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllSlowestQueries" tooltip="{i18n>copyAll}" />
+                                </OverflowToolbar>
+                            </headerToolbar>
                              <columns>
                                 <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>elapsedMs}" /></Column>
@@ -196,7 +220,7 @@
                                         formatter: '.formatter.slowestTooltip'
                                     }">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
                                             <Text
                                                 text="{
                                                     parts: [

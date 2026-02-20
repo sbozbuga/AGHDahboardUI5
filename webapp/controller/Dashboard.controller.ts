@@ -316,4 +316,70 @@ export default class Dashboard extends BaseController {
             this.copyToClipboard(client, msg as string, source);
         }
     }
+
+    public onCopyAllClients(event: Event): void {
+        const source = event.getSource();
+        if (!(source instanceof Button)) return;
+
+        const model = this.getView()?.getModel() as JSONModel;
+        const data = model.getData() as AdGuardStats;
+        const clients = data.top_clients || [];
+
+        if (clients.length > 0) {
+            const text = clients.map(c => c.name).join("\n");
+            this._copyList(text, source);
+        }
+    }
+
+    public onCopyAllDomains(event: Event): void {
+        const source = event.getSource();
+        if (!(source instanceof Button)) return;
+
+        const model = this.getView()?.getModel() as JSONModel;
+        const data = model.getData() as AdGuardStats;
+        const domains = data.top_queried_domains || [];
+
+        if (domains.length > 0) {
+            const text = domains.map(d => d.name).join("\n");
+            this._copyList(text, source);
+        }
+    }
+
+    public onCopyAllBlockedDomains(event: Event): void {
+        const source = event.getSource();
+        if (!(source instanceof Button)) return;
+
+        const model = this.getView()?.getModel() as JSONModel;
+        const data = model.getData() as AdGuardStats;
+        const domains = data.top_blocked_domains || [];
+
+        if (domains.length > 0) {
+            const text = domains.map(d => d.name).join("\n");
+            this._copyList(text, source);
+        }
+    }
+
+    public onCopyAllSlowestQueries(event: Event): void {
+        const source = event.getSource();
+        if (!(source instanceof Button)) return;
+
+        const model = this.getView()?.getModel() as JSONModel;
+        const data = model.getData() as AdGuardStats & { slowest_queries: { domain: string }[] };
+        const queries = data.slowest_queries || [];
+
+        if (queries.length > 0) {
+            const text = queries.map(q => q.domain).join("\n");
+            this._copyList(text, source);
+        }
+    }
+
+    private _copyList(text: string, source: Button): void {
+        /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
+        const view = this.getView();
+        const i18nModel = view?.getModel("i18n") as any;
+        const bundle = i18nModel?.getResourceBundle() as any;
+        const msg = bundle ? bundle.getText("listCopied") : "List copied to clipboard";
+        /* eslint-enable */
+        this.copyToClipboard(text, msg as string, source);
+    }
 }
