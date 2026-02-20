@@ -63,7 +63,7 @@
                 </f:layoutXS>
                 
                 <!-- Top Clients Card -->
-                <f:Card>
+                <f:Card class="hoverCopyCard">
                     <f:layoutData>
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
@@ -71,15 +71,11 @@
                         <card:Header title="{i18n>topClients}" iconSrc="sap-icon://group" />
                     </f:header>
                     <f:content>
-                        <Table items="{/top_clients}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noActiveClients}">
-                            <headerToolbar>
-                                <OverflowToolbar design="Transparent">
-                                    <ToolbarSpacer />
-                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllClients" tooltip="{i18n>copyAll}" />
-                                </OverflowToolbar>
-                            </headerToolbar>
-                            <columns>
-                                <Column><Text text="{i18n>client}" /></Column>
+                        <VBox height="100%" renderType="Bare">
+                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllClients" tooltip="{i18n>copyAll}" class="floatingCopyBtn" />
+                            <Table items="{/top_clients}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noActiveClients}">
+                                <columns>
+                                    <Column><Text text="{i18n>client}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
                             </columns>
                             <items>
@@ -102,11 +98,12 @@
                                 </ColumnListItem>
                             </items>
                         </Table>
+                        </VBox>
                     </f:content>
                 </f:Card>
 
                 <!-- Top Domains Card -->
-                <f:Card>
+                <f:Card class="hoverCopyCard">
                     <f:layoutData>
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
@@ -114,15 +111,11 @@
                         <card:Header title="{i18n>topDomains}" iconSrc="sap-icon://world" />
                     </f:header>
                      <f:content>
-                        <Table items="{/top_queried_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noQueriesRecorded}">
-                            <headerToolbar>
-                                <OverflowToolbar design="Transparent">
-                                    <ToolbarSpacer />
-                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllDomains" tooltip="{i18n>copyAll}" />
-                                </OverflowToolbar>
-                            </headerToolbar>
-                             <columns>
-                                <Column><Text text="{i18n>domain}" /></Column>
+                        <VBox height="100%" renderType="Bare">
+                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllDomains" tooltip="{i18n>copyAll}" class="floatingCopyBtn" />
+                            <Table items="{/top_queried_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noQueriesRecorded}">
+                                <columns>
+                                    <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
                             </columns>
                             <items>
@@ -145,11 +138,12 @@
                                 </ColumnListItem>
                             </items>
                         </Table>
+                        </VBox>
                     </f:content>
                 </f:Card>
 
                 <!-- Top Blocked Domains Card -->
-                <f:Card>
+                <f:Card class="hoverCopyCard">
                     <f:layoutData>
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
@@ -157,15 +151,11 @@
                         <card:Header title="{i18n>topBlockedDomains}" iconSrc="sap-icon://decline" />
                     </f:header>
                      <f:content>
-                        <Table items="{/top_blocked_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noBlockedDomains}">
-                            <headerToolbar>
-                                <OverflowToolbar design="Transparent">
-                                    <ToolbarSpacer />
-                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllBlockedDomains" tooltip="{i18n>copyAll}" />
-                                </OverflowToolbar>
-                            </headerToolbar>
-                             <columns>
-                                <Column><Text text="{i18n>domain}" /></Column>
+                        <VBox height="100%" renderType="Bare">
+                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllBlockedDomains" tooltip="{i18n>copyAll}" class="floatingCopyBtn" />
+                            <Table items="{/top_blocked_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noBlockedDomains}">
+                                <columns>
+                                    <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
                             </columns>
                             <items>
@@ -188,11 +178,12 @@
                                 </ColumnListItem>
                             </items>
                         </Table>
+                        </VBox>
                     </f:content>
                 </f:Card>
 
                 <!-- Slowest Queries Card -->
-                <f:Card>
+                <f:Card class="hoverCopyCard">
                     <f:layoutData>
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
@@ -200,15 +191,11 @@
                         <card:Header title="{i18n>slowestQueries}" iconSrc="sap-icon://time-account" />
                     </f:header>
                      <f:content>
-                        <Table items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noPerformanceData}">
-                            <headerToolbar>
-                                <OverflowToolbar design="Transparent">
-                                    <ToolbarSpacer />
-                                    <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllSlowestQueries" tooltip="{i18n>copyAll}" />
-                                </OverflowToolbar>
-                            </headerToolbar>
-                             <columns>
-                                <Column><Text text="{i18n>domain}" /></Column>
+                        <VBox height="100%" renderType="Bare">
+                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllSlowestQueries" tooltip="{i18n>copyAll}" class="floatingCopyBtn" />
+                            <Table items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noPerformanceData}">
+                                <columns>
+                                    <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>elapsedMs}" /></Column>
                             </columns>
                             <items>
@@ -259,6 +246,7 @@
                                 </ColumnListItem>
                             </items>
                         </Table>
+                        </VBox>
                     </f:content>
                 </f:Card>
             </f:GridContainer>
