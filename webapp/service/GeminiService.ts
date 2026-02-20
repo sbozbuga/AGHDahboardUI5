@@ -1,6 +1,7 @@
 import SettingsService from "./SettingsService";
 import { LogEntry } from "../model/AdGuardTypes";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import ResourceBundle from "sap/base/i18n/ResourceBundle";
 
 interface LogSummary {
     total_queries: number;
@@ -30,11 +31,13 @@ export default class GeminiService {
     private static readonly MAX_INPUT_LENGTH = 255;
     private static readonly MODELS_CACHE_TTL = 3600000; // 1 hour
     private static readonly MIN_MODELS_FETCH_INTERVAL = 10000; // 10 seconds
+    private static readonly MAX_LOGS_FOR_ANALYSIS = 100;
 
     private lastAnalysisTime = 0;
     private _cachedModels: { key: string, text: string }[] | null = null;
     private _cachedModelsApiKey: string | null = null;
     private _lastModelsFetchTime = 0;
+    private _resourceBundle: ResourceBundle | null = null;
 
     public static getInstance(): GeminiService {
         if (!GeminiService.instance) {
@@ -43,25 +46,30 @@ export default class GeminiService {
         return GeminiService.instance;
     }
 
+    public setResourceBundle(bundle: ResourceBundle): void {
+        this._resourceBundle = bundle;
+    }
+
+    private _getText(key: string, args: string[] = []): string {
+        if (this._resourceBundle) {
+            return this._resourceBundle.getText(key, args) || key;
+        }
+        return key;
+    }
+
     public sanitizeInput(str: string): string {
         let cleaned = str;
 
-        // Optimization: Truncate massively long strings BEFORE regex to prevent ReDoS/performance issues
-        // Use a safe buffer (4x max length) to account for characters that might be removed by regex/trim
         if (cleaned.length > GeminiService.MAX_INPUT_LENGTH * 4) {
             cleaned = cleaned.substring(0, GeminiService.MAX_INPUT_LENGTH * 4);
         }
 
-        // Remove control characters (0-31, 127, and C1 128-159) to prevent prompt injection via newlines etc.
         cleaned = cleaned.replace(GeminiService.CONTROL_CHARS_REGEX, "").trim();
 
-        // Truncate first to prevent token exhaustion / DoS (max 255 chars)
         if (cleaned.length > GeminiService.MAX_INPUT_LENGTH) {
             cleaned = cleaned.substring(0, GeminiService.MAX_INPUT_LENGTH);
         }
 
-        // Escape XML/HTML special characters to prevent tag injection in the prompt
-        // This ensures user input cannot break out of <system_context> tags
         return cleaned.replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
@@ -72,13 +80,13 @@ export default class GeminiService {
     public async generateInsights(logs: LogEntry[]): Promise<string> {
         const apiKey = SettingsService.getInstance().getApiKey();
         if (!apiKey) {
-            throw new Error("API Key is missing. Please configure it in settings.");
+            throw new Error(this._getText("apiKeyMissing"));
         }
 
         const now = Date.now();
         if (now - this.lastAnalysisTime < GeminiService.MIN_ANALYSIS_INTERVAL) {
             const waitSeconds = Math.ceil((GeminiService.MIN_ANALYSIS_INTERVAL - (now - this.lastAnalysisTime)) / 1000);
-            throw new Error(`Please wait ${waitSeconds} seconds before requesting new insights.`);
+            throw new Error(this._getText("pleaseWait", [waitSeconds.toString()]));
         }
 
         this.lastAnalysisTime = now;
@@ -87,54 +95,48 @@ export default class GeminiService {
         const prompt = this.buildPrompt(summary);
 
         try {
-            // Initialize Gemini AI Client
             const genAI = new GoogleGenerativeAI(apiKey);
             const modelName = SettingsService.getInstance().getModel();
             const model = genAI.getGenerativeModel({ model: modelName });
 
-            // Generate Content
             const result = await model.generateContent(prompt, { timeout: GeminiService.REQUEST_TIMEOUT });
             const response = result.response;
             const text = response.text();
 
-            return text || "No insights generated.";
+            return text || this._getText("noInsights");
         } catch (error) {
             const msg = error instanceof Error ? error.message : String(error);
-            // Safe redaction without Regex issues
             const safeMsg = apiKey ? msg.split(apiKey).join("[REDACTED]") : msg;
             console.error("Gemini API Error:", safeMsg);
-            // Security: Do not pass the raw error object as 'cause' to prevent potential API key leakage via internal properties
             // eslint-disable-next-line preserve-caught-error
-            throw new Error("Failed to generate insights. Check your API Key and network connection.", { cause: { message: safeMsg } });
+            throw new Error(this._getText("failedToGenerateInsights"), { cause: { message: safeMsg } });
         }
     }
 
     private summarizeLogs(logs: LogEntry[]): LogSummary {
-        const total = logs.length;
+        // Optimization: Limit to last N logs to prevent token exhaustion and slow processing
+        const logsToAnalyze = logs.length > GeminiService.MAX_LOGS_FOR_ANALYSIS
+            ? logs.slice(0, GeminiService.MAX_LOGS_FOR_ANALYSIS)
+            : logs;
+
+        const total = logsToAnalyze.length;
         let blockedCount = 0;
         const clientCounts = new Map<string, number>();
         const domainCounts = new Map<string, number>();
         const upstreamCounts = new Map<string, number>();
 
-        // Single pass aggregation
-        for (const log of logs) {
-            // Blocked status check
+        for (const log of logsToAnalyze) {
             if (log.status === "Blocked" || log.status === "Filtered" || log.status === "SafeBrowsing") {
                 blockedCount++;
             }
 
-            // Client counts
-            // Performance: Removed sanitizeInput from loop to save regex overhead (approx 4x speedup)
-            // Privacy: Anonymize IP addresses before analysis to prevent PII leakage
             let client = log.client || "Unknown";
             client = this.anonymizeClient(client);
             clientCounts.set(client, (clientCounts.get(client) || 0) + 1);
 
-            // Domain counts
             const domain = log.question?.name || "Unknown";
             domainCounts.set(domain, (domainCounts.get(domain) || 0) + 1);
 
-            // Upstream counts
             const upstream = log.upstream || "Unknown";
             upstreamCounts.set(upstream, (upstreamCounts.get(upstream) || 0) + 1);
         }
@@ -150,13 +152,10 @@ export default class GeminiService {
     }
 
     private getTopK(counts: Map<string, number>, k: number): [string, number][] {
-        // Optimization: Linear scan (O(N*k)) is significantly faster than sort (O(N log N)) for small k
-        // and avoids allocating a temporary array for all entries.
         const topK: [string, number][] = [];
 
         for (const [key, val] of counts) {
             let i = 0;
-            // Find insertion point (descending order)
             while (i < topK.length && val <= topK[i][1]) {
                 i++;
             }
@@ -173,33 +172,26 @@ export default class GeminiService {
     }
 
     private anonymizeClient(client: string): string {
-        // Simple IPv4 Check (x.x.x.x)
         const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
         if (ipv4Regex.test(client)) {
             const parts = client.split(".");
             return `${parts[0]}.${parts[1]}.${parts[2]}.xxx`;
         }
 
-        // Simple IPv6 Check (contains :)
         if (client.includes(":")) {
-            // Keep the first few segments to identify subnet/device type loosely
             const parts = client.split(":");
             if (parts.length > 4) {
-                // Keep first 4 segments (64 bits usually network prefix)
                 return parts.slice(0, 4).join(":") + ":xxxx:xxxx:xxxx:xxxx";
             } else {
-                // Fallback for short forms or compressed
                 const lastColon = client.lastIndexOf(":");
                 return (lastColon > -1 ? client.substring(0, lastColon) : client) + ":xxxx";
             }
         }
 
-        // Return hostname or unknown as is
         return client;
     }
 
     private buildPrompt(summary: LogSummary): string {
-        // Sanitize context to prevent prompt injection or control character issues
         const context = this.sanitizeInput(SettingsService.getInstance().getSystemContext());
         let contextSection = "";
         if (context) {
@@ -230,20 +222,19 @@ export default class GeminiService {
         Keep it concise and friendly.
         `;
     }
+
     public async getAvailableModels(): Promise<{ key: string, text: string }[]> {
         const apiKey = SettingsService.getInstance().getApiKey();
         if (!apiKey) return [];
 
         const now = Date.now();
 
-        // 1. Return valid cache
         if (this._cachedModels &&
             this._cachedModelsApiKey === apiKey &&
             (now - this._lastModelsFetchTime < GeminiService.MODELS_CACHE_TTL)) {
             return this._cachedModels;
         }
 
-        // 2. Rate limit if too frequent (and no cache or cache invalid)
         if (now - this._lastModelsFetchTime < GeminiService.MIN_MODELS_FETCH_INTERVAL) {
             if (this._cachedModels && this._cachedModelsApiKey === apiKey) {
                 return this._cachedModels;
@@ -258,8 +249,6 @@ export default class GeminiService {
         const timeoutId = setTimeout(() => controller.abort(), GeminiService.REQUEST_TIMEOUT);
 
         try {
-            // We use the REST API manually here because the SDK's listModels might be node-only or explicit
-            // simpler to just hit the endpoint for this specific list.
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models`, {
                 headers: {
                     "x-goog-api-key": apiKey
@@ -271,15 +260,13 @@ export default class GeminiService {
             const data = await response.json() as GeminiResponse;
             const models = (data.models || []);
 
-            // Filter for models that support 'generateContent'
             const result = models
                 .filter((m) => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
                 .map((m) => ({
-                    key: m.name.replace("models/", ""), // remove prefix for cleaner ID
+                    key: m.name.replace("models/", ""),
                     text: m.displayName || m.name
                 }));
 
-            // Update cache
             this._cachedModels = result;
             this._cachedModelsApiKey = apiKey;
             this._lastModelsFetchTime = now;
@@ -287,7 +274,6 @@ export default class GeminiService {
             return result;
         } catch (error) {
             const msg = error instanceof Error ? error.message : String(error);
-            // Safe redaction without Regex issues
             const safeMsg = apiKey ? msg.split(apiKey).join("[REDACTED]") : msg;
             console.error("Failed to fetch models", safeMsg);
             return [];

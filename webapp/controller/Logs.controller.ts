@@ -19,6 +19,7 @@ import { LogEntry, AdvancedFilterRule } from "../model/AdGuardTypes";
 import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import encodeXML from "sap/base/security/encodeXML";
 import { Constants } from "../model/Constants";
+import BaseController from "./BaseController";
 
 interface ProcessedLogEntry extends Omit<LogEntry, "time"> {
 	time: Date;
@@ -40,20 +41,8 @@ interface ViewSettingsEventParams {
 /**
  * @namespace ui5.aghd.controller
  */
-import BaseController from "./BaseController";
-
-
-// Local Interface for processed logs
-interface ProcessedLogEntry extends LogEntry {
-	time: Date;
-}
-
-/**
- * @namespace ui5.aghd.controller
- */
 export default class Logs extends BaseController {
 	// Dialog Cache (Inherited from BaseController)
-	// private _mDialogs: Map<string, Promise<Dialog>> = new Map(); <- Removed
 
 	// Filter State
 	private _sSearchQuery: string = "";
@@ -86,11 +75,6 @@ export default class Logs extends BaseController {
 		const router = UIComponent.getRouterFor(this);
 		router.getRoute(Constants.Routes.Logs)?.attachPatternMatched(this.onRouteMatched.bind(this), this);
 	}
-
-	// onExit is handled by BaseController for dialog cleanup
-
-	// ... (rest of the file)
-
 
 	public onRouteMatched(event: Event): void {
 		const view = this.getView();
@@ -326,13 +310,9 @@ export default class Logs extends BaseController {
 		});
 	}
 
-
-
-
-
 	public async onAnalyzeLogs(): Promise<void> {
 		if (!SettingsService.getInstance().hasApiKey()) {
-			MessageBox.warning("Please configure your Gemini API Key in Settings first.");
+			MessageBox.warning(this.getText("apiKeyMissing"));
 			void this.onOpenSettings();
 			return;
 		}
@@ -343,7 +323,7 @@ export default class Logs extends BaseController {
 		const logs = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
 
 		if (!logs || logs.length === 0) {
-			MessageBox.information("No logs available to analyze.");
+			MessageBox.information(this.getText("noLogsFound"));
 			return;
 		}
 
@@ -372,11 +352,9 @@ export default class Logs extends BaseController {
 
 		if (!text) return;
 
-        if (source instanceof Button) {
-		    this.copyToClipboard(text, "Insights copied to clipboard.", source);
-        } else {
-            this.copyToClipboard(text, "Insights copied to clipboard.");
-        }
+        // Pass source as Button if it is one, otherwise undefined
+        const btn = source instanceof Button ? source : undefined;
+		this.copyToClipboard(text, this.getText("listCopied"), btn);
 	}
 
 	public formatInsights(text: string): string {
@@ -466,13 +444,7 @@ export default class Logs extends BaseController {
 		const domain = question ? question.name : "";
 
 		if (domain) {
-			/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
-			const view = this.getView();
-			const i18nModel = view?.getModel("i18n") as any;
-			const bundle = i18nModel?.getResourceBundle() as any;
-			const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
-			/* eslint-enable */
-			this.copyToClipboard(domain, msg as string, source);
+			this.copyToClipboard(domain, this.getText("domainCopied"), source);
 		}
 	}
 
@@ -486,13 +458,7 @@ export default class Logs extends BaseController {
 		const client = context.getProperty("client") as string;
 
 		if (client) {
-			/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
-			const view = this.getView();
-			const i18nModel = view?.getModel("i18n") as any;
-			const bundle = i18nModel?.getResourceBundle() as any;
-			const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
-			/* eslint-enable */
-			this.copyToClipboard(client, msg as string, source);
+			this.copyToClipboard(client, this.getText("clientCopied"), source);
 		}
 	}
 
@@ -520,13 +486,7 @@ export default class Logs extends BaseController {
 
 			const csvContent = `${header}\n${rows}`;
 
-			/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
-			const i18nModel = view.getModel("i18n") as any;
-			const bundle = i18nModel?.getResourceBundle() as any;
-			const msg = bundle ? bundle.getText("listCopied") : "List copied to clipboard";
-			/* eslint-enable */
-
-			this.copyToClipboard(csvContent, msg as string, source);
+			this.copyToClipboard(csvContent, this.getText("listCopied"), source);
 		}
 	}
 }
