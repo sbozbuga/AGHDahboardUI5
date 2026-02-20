@@ -85,7 +85,7 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressClient" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
                                             <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
                                                 <layoutData>
                                                     <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
@@ -128,7 +128,7 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressDomain" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
                                             <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
                                                 <layoutData>
                                                     <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
@@ -171,7 +171,7 @@
                             <items>
                                 <ColumnListItem type="Navigation" press=".onPressBlockedDomain" tooltip="{parts:[{path:'i18n>viewBlockedLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
                                             <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
                                                 <layoutData>
                                                     <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
@@ -220,7 +220,7 @@
                                         formatter: '.formatter.slowestTooltip'
                                     }">
                                     <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%">
+                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
                                             <Text
                                                 text="{
                                                     parts: [
