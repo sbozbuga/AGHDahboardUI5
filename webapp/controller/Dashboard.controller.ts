@@ -292,7 +292,7 @@ export default class Dashboard extends BaseController {
             const bundle = i18nModel?.getResourceBundle() as any;
             const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
             /* eslint-enable */
-            this.copyToClipboard(textToCopy, msg as string);
+            this.copyToClipboard(textToCopy, msg as string, source);
         }
     }
 
@@ -313,7 +313,7 @@ export default class Dashboard extends BaseController {
             const bundle = i18nModel?.getResourceBundle() as any;
             const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
             /* eslint-enable */
-            this.copyToClipboard(client, msg as string);
+            this.copyToClipboard(client, msg as string, source);
         }
     }
 }

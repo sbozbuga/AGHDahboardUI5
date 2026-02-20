@@ -363,15 +363,20 @@ export default class Logs extends BaseController {
 		}
 	}
 
-	public onCopyInsights(): void {
+	public onCopyInsights(event: Event): void {
 		const view = this.getView();
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 		const text = model.getProperty("/analysisText") as string;
+		const source = event.getSource();
 
 		if (!text) return;
 
-		this.copyToClipboard(text, "Insights copied to clipboard.");
+        if (source instanceof Button) {
+		    this.copyToClipboard(text, "Insights copied to clipboard.", source);
+        } else {
+            this.copyToClipboard(text, "Insights copied to clipboard.");
+        }
 	}
 
 	public formatInsights(text: string): string {
@@ -467,7 +472,7 @@ export default class Logs extends BaseController {
 			const bundle = i18nModel?.getResourceBundle() as any;
 			const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
 			/* eslint-enable */
-			this.copyToClipboard(domain, msg as string);
+			this.copyToClipboard(domain, msg as string, source);
 		}
 	}
 
@@ -487,7 +492,7 @@ export default class Logs extends BaseController {
 			const bundle = i18nModel?.getResourceBundle() as any;
 			const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
 			/* eslint-enable */
-			this.copyToClipboard(client, msg as string);
+			this.copyToClipboard(client, msg as string, source);
 		}
 	}
 }
