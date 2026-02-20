@@ -364,16 +364,20 @@ export default class Logs extends BaseController {
 		}
 	}
 
-	public onCopyInsights(): void {
+	public onCopyInsights(event: Event): void {
 		const view = this.getView();
 		if (!view) return;
 		const model = view.getModel() as JSONModel;
 		const text = model.getProperty("/analysisText") as string;
+		const source = event.getSource();
 
 		if (!text) return;
 
 		navigator.clipboard.writeText(text).then(() => {
 			MessageToast.show("Insights copied to clipboard.");
+			if (source instanceof Button) {
+				this.animateCopyButton(source);
+			}
 		}).catch((err) => {
 			console.error("Could not copy text: ", err);
 			MessageBox.error("Failed to copy insights to clipboard.");
@@ -475,6 +479,7 @@ export default class Logs extends BaseController {
 				const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
 				MessageToast.show(msg);
 				/* eslint-enable */
+				this.animateCopyButton(source);
 			}).catch((err) => {
 				console.error("Failed to copy domain: ", err);
 				MessageToast.show("Failed to copy domain");
@@ -500,6 +505,7 @@ export default class Logs extends BaseController {
 				const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
 				MessageToast.show(msg);
 				/* eslint-enable */
+				this.animateCopyButton(source);
 			}).catch((err) => {
 				console.error("Failed to copy client IP: ", err);
 				MessageToast.show("Failed to copy client IP");

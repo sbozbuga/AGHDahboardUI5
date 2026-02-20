@@ -9,3 +9,7 @@
 ## 2026-02-17 - Secondary Actions in Navigation List Items
 **Learning:** Adding a secondary action (e.g., "Copy" button) inside a `ColumnListItem` with `type="Navigation"` allows for quick utility without navigating away. Wrapping the text and button in an `HBox` with `wrap="Wrap"` ensures responsiveness on smaller screens.
 **Action:** Use `HBox` with `alignItems="Center"` and `wrap="Wrap"` to group primary text and secondary action buttons within table cells.
+
+## 2026-02-18 - Visual Feedback for Icon-Only Actions
+**Learning:** Toast notifications alone are insufficient for repeated icon-only actions (like "Copy"). Users miss the connection to the source button.
+**Action:** Implement immediate icon change (e.g., to "accept") on the triggering button alongside the toast for clearer feedback.
