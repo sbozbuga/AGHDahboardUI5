@@ -11,6 +11,7 @@ import Input from "sap/m/Input";
 import { InputType } from "sap/m/library";
 import Event from "sap/ui/base/Event";
 import formatter from "../model/formatter";
+import Button from "sap/m/Button";
 
 /**
  * @namespace ui5.aghd.controller
@@ -18,6 +19,21 @@ import formatter from "../model/formatter";
 export default class BaseController extends Controller {
     public formatter = formatter;
     protected _mDialogs: Map<string, Promise<Dialog>> = new Map();
+
+    protected animateCopyButton(button: Button, duration: number = 2000): void {
+        const originalIcon = button.getIcon();
+
+        // Prevent re-entrancy: if already animating (icon is accept), do nothing
+        // to avoid capturing "accept" as the original icon.
+        if (originalIcon === "sap-icon://accept") {
+            return;
+        }
+
+        button.setIcon("sap-icon://accept");
+        setTimeout(() => {
+            button.setIcon(originalIcon);
+        }, duration);
+    }
 
     public onExit(): void {
         this._mDialogs.clear();
