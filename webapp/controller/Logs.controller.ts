@@ -495,4 +495,38 @@ export default class Logs extends BaseController {
 			this.copyToClipboard(client, msg as string, source);
 		}
 	}
+
+	public onCopyAllLogs(event: Event): void {
+		const source = event.getSource();
+		if (!(source instanceof Button)) return;
+
+		const view = this.getView();
+		if (!view) return;
+		const model = view.getModel() as JSONModel;
+		const data = model.getProperty("/data") as LogEntry[];
+
+		if (data && data.length > 0) {
+			const header = "Time,Client,Domain,Type,Status,Elapsed(ms),Reason";
+			const rows = data.map(log => {
+				const time = log.time instanceof Date ? log.time.toISOString() : log.time;
+				const client = log.client;
+				const domain = log.question?.name || "";
+				const type = log.question?.type || "";
+				const status = log.status;
+				const elapsed = log.elapsedMs;
+				const reason = log.reason;
+				return `${time},${client},${domain},${type},${status},${elapsed},${reason}`;
+			}).join("\n");
+
+			const csvContent = `${header}\n${rows}`;
+
+			/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
+			const i18nModel = view.getModel("i18n") as any;
+			const bundle = i18nModel?.getResourceBundle() as any;
+			const msg = bundle ? bundle.getText("listCopied") : "List copied to clipboard";
+			/* eslint-enable */
+
+			this.copyToClipboard(csvContent, msg as string, source);
+		}
+	}
 }
