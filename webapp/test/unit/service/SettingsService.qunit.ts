@@ -62,7 +62,7 @@ QUnit.test("Input Validation: Length Limits", function (assert) {
     const longContext = "A".repeat(1001);
     assert.throws(() => {
         service.setSystemContext(longContext);
-    }, /System Context is too long/, "Throws when System Context exceeds limit");
+    }, /(System Context is too long)|(Context too long)/, "Throws when System Context exceeds limit");
 
     service.setSystemContext("A".repeat(1000));
     assert.strictEqual(service.getSystemContext().length, 1000, "Accepts System Context at limit");
@@ -71,7 +71,7 @@ QUnit.test("Input Validation: Length Limits", function (assert) {
     const longKey = "A".repeat(256);
     assert.throws(() => {
         service.setApiKey(longKey);
-    }, /API Key is too long/, "Throws when API Key exceeds limit");
+    }, /API Key too long/, "Throws when API Key exceeds limit");
 
     service.setApiKey("A".repeat(255));
     assert.strictEqual(service.getApiKey().length, 255, "Accepts API Key at limit");

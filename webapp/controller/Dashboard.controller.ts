@@ -257,13 +257,13 @@ export default class Dashboard extends BaseController {
     }
 
     public onLogoutPress(): void {
-        MessageBox.confirm("Are you sure you want to log out?", {
-            title: "Logout",
+        MessageBox.confirm(this.getText("logoutConfirmation"), {
+            title: this.getText("logout"),
             actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
             onClose: (action: string | null) => {
                 if (action === MessageBox.Action.OK) {
                     AdGuardService.getInstance().logout();
-                    MessageBox.success("Logged out successfully.", {
+                    MessageBox.success(this.getText("loggedOut"), {
                         onClose: () => {
                             window.location.reload();
                         }
@@ -286,13 +286,7 @@ export default class Dashboard extends BaseController {
         const textToCopy = name || domain;
 
         if (textToCopy) {
-            /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
-            const view = this.getView();
-            const i18nModel = view?.getModel("i18n") as any;
-            const bundle = i18nModel?.getResourceBundle() as any;
-            const msg = bundle ? bundle.getText("domainCopied") : "Domain copied to clipboard";
-            /* eslint-enable */
-            this.copyToClipboard(textToCopy, msg as string, source);
+            this.copyToClipboard(textToCopy, this.getText("domainCopied"), source);
         }
     }
 
@@ -307,13 +301,7 @@ export default class Dashboard extends BaseController {
         const client = context.getProperty("name") as string;
 
         if (client) {
-            /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
-            const view = this.getView();
-            const i18nModel = view?.getModel("i18n") as any;
-            const bundle = i18nModel?.getResourceBundle() as any;
-            const msg = bundle ? bundle.getText("clientCopied") : "Client IP copied to clipboard";
-            /* eslint-enable */
-            this.copyToClipboard(client, msg as string, source);
+            this.copyToClipboard(client, this.getText("clientCopied"), source);
         }
     }
 
@@ -374,12 +362,6 @@ export default class Dashboard extends BaseController {
     }
 
     private _copyList(text: string, source: Button): void {
-        /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-assertion */
-        const view = this.getView();
-        const i18nModel = view?.getModel("i18n") as any;
-        const bundle = i18nModel?.getResourceBundle() as any;
-        const msg = bundle ? bundle.getText("listCopied") : "List copied to clipboard";
-        /* eslint-enable */
-        this.copyToClipboard(text, msg as string, source);
+        this.copyToClipboard(text, this.getText("listCopied"), source);
     }
 }

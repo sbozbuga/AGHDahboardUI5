@@ -292,3 +292,41 @@ QUnit.test("getSlowestQueries strictly limits occurrences to top 5", async funct
         globalThis.fetch = originalFetch;
     }
 });
+
+QUnit.test("getStats handles mixed key types in top lists", async function (assert) {
+    const service = AdGuardService.getInstance();
+
+    const mockResponse = {
+        num_dns_queries: 100,
+        num_blocked_filtering: 10,
+        avg_processing_time: 0.1,
+        top_queried_domains: [
+            { domain: "domain1.com", count: 10 },
+            { name: "domain2.com", count: 5 },
+            { "192.168.1.1": 3 } // Legacy/Edge case where key is the name
+        ],
+        top_blocked_domains: [],
+        top_clients: []
+    };
+
+    const originalFetch = globalThis.fetch;
+    // @ts-expect-error: Mocking fetch for testing purposes
+    globalThis.fetch = async () => {
+        return Promise.resolve({
+            ok: true,
+            status: 200,
+            text: async () => Promise.resolve(JSON.stringify(mockResponse)),
+            json: async () => Promise.resolve(mockResponse)
+        });
+    };
+
+    try {
+        const stats = await service.getStats();
+        assert.strictEqual(stats.top_queried_domains.length, 3, "Should return 3 items");
+        assert.strictEqual(stats.top_queried_domains[0].name, "domain1.com", "First item domain correct");
+        assert.strictEqual(stats.top_queried_domains[1].name, "domain2.com", "Second item name correct");
+        assert.strictEqual(stats.top_queried_domains[2].name, "192.168.1.1", "Third item key extraction correct");
+    } finally {
+        globalThis.fetch = originalFetch;
+    }
+});
