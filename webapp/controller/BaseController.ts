@@ -7,6 +7,7 @@ import SettingsService from "../service/SettingsService";
 import GeminiService from "../service/GeminiService";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import MessageBox from "sap/m/MessageBox";
+import MessageToast from "sap/m/MessageToast";
 import Input from "sap/m/Input";
 import { InputType } from "sap/m/library";
 import Event from "sap/ui/base/Event";
@@ -145,5 +146,58 @@ export default class BaseController extends Controller {
             input.setType(InputType.Password);
             input.setValueHelpIconSrc("sap-icon://show");
         }
+    }
+
+    /**
+     * Copies text to clipboard with a fallback for non-secure contexts.
+     * @param text The text to copy
+     * @param successMessage The message to show on success
+     */
+    protected copyToClipboard(text: string, successMessage: string): void {
+        if (!text) return;
+
+        // Navigator clipboard requires Secure Context (HTTPS/localhost)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                MessageToast.show(successMessage);
+            }).catch((err) => {
+                console.warn("Clipboard API failed, falling back to execCommand", err);
+                this.fallbackCopy(text, successMessage);
+            });
+        } else {
+            this.fallbackCopy(text, successMessage);
+        }
+    }
+
+    /**
+     * Fallback for copying to clipboard using a hidden textarea and execCommand.
+     */
+    protected fallbackCopy(text: string, successMessage: string): void {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+
+        // Ensure it's not visible but part of the DOM
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+
+        textArea.focus();
+        textArea.select();
+
+        try {
+            // execCommand is deprecated but widely supported as fallback
+            const successful = document.execCommand("copy");
+            if (successful) {
+                MessageToast.show(successMessage);
+            } else {
+                MessageBox.error("Clipboard access not available. Please copy manually: " + text);
+            }
+        } catch (err) {
+            console.error("Fallback copy failed", err);
+            MessageBox.error("Clipboard access not available. Please copy manually: " + text);
+        }
+
+        document.body.removeChild(textArea);
     }
 }
