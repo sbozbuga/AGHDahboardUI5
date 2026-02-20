@@ -1,6 +1,8 @@
 import UIComponent from "sap/ui/core/UIComponent";
 import Device from "sap/ui/Device";
-
+import AdGuardService from "./service/AdGuardService";
+import GeminiService from "./service/GeminiService";
+import ResourceModel from "sap/ui/model/resource/ResourceModel";
 
 /**
  * @namespace ui5.aghd
@@ -20,6 +22,21 @@ export default class Component extends UIComponent {
 
 		// enable routing
 		this.getRouter().initialize();
+
+		// Inject Resource Bundle into Services
+		const i18nModel = this.getModel("i18n") as ResourceModel;
+		if (i18nModel) {
+			const bundleOrPromise = i18nModel.getResourceBundle();
+			if (bundleOrPromise instanceof Promise) {
+				void bundleOrPromise.then((bundle) => {
+					AdGuardService.getInstance().setResourceBundle(bundle);
+					GeminiService.getInstance().setResourceBundle(bundle);
+				});
+			} else {
+				AdGuardService.getInstance().setResourceBundle(bundleOrPromise);
+				GeminiService.getInstance().setResourceBundle(bundleOrPromise);
+			}
+		}
 	}
 
 	/**

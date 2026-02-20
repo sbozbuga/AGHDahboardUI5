@@ -3,6 +3,7 @@ import { Constants } from "../model/Constants";
 import SettingsService from "./SettingsService";
 import MessageBox from "sap/m/MessageBox";
 import MessageToast from "sap/m/MessageToast";
+import ResourceBundle from "sap/base/i18n/ResourceBundle";
 
 /**
  * Service for interacting with AdGuard Home API
@@ -12,12 +13,24 @@ export default class AdGuardService {
 
     private static instance: AdGuardService;
     private _isLoginDialogOpen = false;
+    private _resourceBundle: ResourceBundle | null = null;
 
     public static getInstance(): AdGuardService {
         if (!AdGuardService.instance) {
             AdGuardService.instance = new AdGuardService();
         }
         return AdGuardService.instance;
+    }
+
+    public setResourceBundle(bundle: ResourceBundle): void {
+        this._resourceBundle = bundle;
+    }
+
+    private _getText(key: string, args: string[] = []): string {
+        if (this._resourceBundle) {
+            return this._resourceBundle.getText(key, args) || key;
+        }
+        return key; // Fallback to key if bundle not loaded
     }
 
     private static readonly DEFAULT_SCAN_DEPTH = 1000;
@@ -31,17 +44,11 @@ export default class AdGuardService {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), AdGuardService.REQUEST_TIMEOUT);
 
-        // Construct full URL with Base URL if configured
         const baseUrl = SettingsService.getInstance().getBaseUrl();
-        // If baseUrl is set, it might include a path. If set, we treat the input 'url' as relative to it.
-        // However, 'url' from Constants usually starts with '/'.
-        // We need to ensure correct concatenation.
-
         let targetUrl = url;
+
         if (baseUrl) {
             // Remove leading slash from endpoint if base url has no trailing slash (guaranteed by setter)
-            // But actually, Constants endpoints are like "/control/stats".
-            // If BaseUrl is "http://host/agh", we want "http://host/agh/control/stats".
             targetUrl = `${baseUrl}${url}`;
         }
 
@@ -50,7 +57,6 @@ export default class AdGuardService {
             signal: controller.signal
         };
 
-        // If using a custom Base URL (likely Cross-Origin), we must include credentials
         if (baseUrl) {
             config.credentials = "include";
         }
@@ -60,24 +66,22 @@ export default class AdGuardService {
 
             if (response.status === 401) {
                 this._handleSessionExpiration();
-                throw new Error("Unauthorized");
+                throw new Error(this._getText("unauthorized"));
             }
 
             if (!response.ok) {
-                throw new Error(`Request failed: ${response.statusText}`);
+                throw new Error(this._getText("requestFailed", [response.statusText]));
             }
 
-            // Handle empty bodies (e.g. login)
             const text = await response.text();
             try {
                 return text ? (JSON.parse(text) as T) : ({} as T);
             } catch (error) {
-                // If parsing fails (e.g., HTML error page), throw a generic error to avoid leaking implementation details
-                throw new Error("Invalid response format from AdGuard Home API", { cause: error });
+                throw new Error(this._getText("invalidResponseFormat"), { cause: error });
             }
         } catch (error) {
             if ((error as Error).name === "AbortError") {
-                throw new Error("Request timed out", { cause: error });
+                throw new Error(this._getText("requestTimedOut"), { cause: error });
             }
             throw error;
         } finally {
@@ -91,20 +95,16 @@ export default class AdGuardService {
         }
 
         const baseUrl = SettingsService.getInstance().getBaseUrl();
-
-        // Check if we likely need configuration (empty URL and unauthorized)
-        // If baseUrl is empty, we are in Proxy mode. If that fails with 401, it usually means 
-        // the proxy isn't authenticated or we really aren't logged in. 
-        // But user asked: "if base url empty and auth is failing then open up the settings popup"
+        const openSettingsText = this._getText("openSettings");
+        const logInText = this._getText("logIn");
 
         if (!baseUrl) {
             this._isLoginDialogOpen = true;
-            MessageBox.warning("Connection failed. Please configure the AdGuard Home Base URL.", {
-                actions: ["Open Settings", MessageBox.Action.CANCEL],
+            MessageBox.warning(this._getText("connectionFailed"), {
+                actions: [openSettingsText, MessageBox.Action.CANCEL],
                 onClose: (sAction: string | null) => {
                     this._isLoginDialogOpen = false;
-                    if (sAction === "Open Settings") {
-                        // Publish event to open settings
+                    if (sAction === openSettingsText) {
                         const bus = sap.ui.getCore().getEventBus();
                         bus.publish("ui5.aghd", "openSettings");
                     }
@@ -115,10 +115,10 @@ export default class AdGuardService {
 
         this._isLoginDialogOpen = true;
 
-        MessageBox.warning("Session expired. Please log in to AdGuard Home.", {
-            actions: ["Log In", MessageBox.Action.CANCEL],
+        MessageBox.warning(this._getText("sessionExpired"), {
+            actions: [logInText, MessageBox.Action.CANCEL],
             onClose: (sAction: string | null) => {
-                if (sAction === "Log In") {
+                if (sAction === logInText) {
                     this._openLoginPopup();
                 } else {
                     this._isLoginDialogOpen = false;
@@ -134,20 +134,21 @@ export default class AdGuardService {
         const top = (window.screen.height - height) / 2;
 
         const baseUrl = SettingsService.getInstance().getBaseUrl();
-        // If baseUrl is set, open that (it's the root of AGH).
-        // If not set, we default to "/" because we are serving from the same host (Proxy), 
-        // and usually AGH is at root or we are conducting a relative nav.
-        // Actually, if we are at /dashboard/index.html, opening "/" goes to root.
-        // If user wants specific login path, they can put it in Base URL? 
-        // No, Base URL is for API. Login is usually at root or /login.html.
-        // Let's assume opening the Base URL is the safest bet to get to the dashboard/login page.
-        // If empty, we try "/".
-
         const targetUrl = baseUrl || "/";
 
         // Security: Defense in Depth - Ensure targetUrl is safe before opening
-        if (targetUrl !== "/" && !targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
-            MessageBox.error("Blocked unsafe Base URL configuration.");
+        try {
+            // If it's a relative URL (starts with /), it's safe (same origin)
+            if (targetUrl.startsWith("/")) {
+                // Safe
+            } else {
+                const parsed = new URL(targetUrl);
+                if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+                    throw new Error("Unsafe Protocol");
+                }
+            }
+        } catch {
+            MessageBox.error(this._getText("unsafeBaseUrl"));
             this._isLoginDialogOpen = false;
             return;
         }
@@ -159,7 +160,7 @@ export default class AdGuardService {
         );
 
         if (!popup) {
-            MessageBox.error("Popup blocked. Please allow popups for this site.");
+            MessageBox.error(this._getText("popupBlocked"));
             this._isLoginDialogOpen = false;
             return;
         }
@@ -173,26 +174,19 @@ export default class AdGuardService {
                 }
 
                 try {
-                    // Try to fetch stats (lightweight check if session is active)
                     await this.getStats();
-
-                    // If we reach here, login was successful
                     clearInterval(pollInterval);
                     popup.close();
                     this._isLoginDialogOpen = false;
-                    MessageToast.show("Login successful. Reloading...");
-                    // Reload the page to restart timers and data fetching
+                    MessageToast.show(this._getText("loginSuccessful"));
                     setTimeout(() => window.location.reload(), 1000);
                 } catch {
-                    // Still unauthorized, continue polling
+                    // Still unauthorized
                 }
             })();
         }, 2000);
     }
 
-    /**
-     * Authenticates with AdGuard Home
-     */
     public async login(name: string, password: string): Promise<void> {
         await this._request(Constants.ApiEndpoints.Login, {
             method: "POST",
@@ -203,19 +197,10 @@ export default class AdGuardService {
         });
     }
 
-    /**
-     * Clears local session (cookie is cleared by browser or ignored on redirect)
-     */
     public logout(): void {
-        // Since it's a cookie, we can't delete it client-side if it's HttpOnly.
-        // But we can redirect to login. AdGuard Home doesn't seem to have a logout endpoint.
-        // We will just trust the redirect.
         SettingsService.getInstance().clearCredentials();
     }
 
-    /**
-     * Fetches dashboard statistics
-     */
     public async getStats(): Promise<AdGuardStats> {
         const rawData = await this._request<RawAdGuardStats>(Constants.ApiEndpoints.Stats);
 
@@ -234,31 +219,18 @@ export default class AdGuardService {
         };
     }
 
-    /**
-     * Fetches query logs with pagination and filtering
-     * @param limit Number of items to fetch
-     * @param offset Offset for pagination
-     * @param filterStatus Optional status filter (e.g., "Blocked")
-     */
     public async getQueryLog(limit: number, offset: number, filterStatus?: string): Promise<AdGuardData> {
         const data = await this._fetchRawQueryLog(limit, offset, filterStatus);
-
-        // Optimization: In-place mutation to avoid object allocation overhead of spread operator
-        // data.data is fresh from JSON.parse so mutation is safe.
         const processedList = data.data as unknown as LogEntry[];
 
         for (const entry of processedList) {
-            // Access raw properties via safe casting
-            // We know at runtime these are strings before we overwrite them
             const rawTime = (entry as unknown as { time: string }).time;
             const rawElapsed = (entry as unknown as { elapsedMs: number | string }).elapsedMs;
 
-            // Optimization: Avoid parseFloat if already a number (~9x faster)
             const elapsedMs = typeof rawElapsed === "number" ? rawElapsed : (parseFloat(rawElapsed) || 0);
             const isBlocked = (entry.reason && entry.reason.startsWith("Filtered")) ||
                 (entry.reason === "SafeBrowsing");
 
-            // Mutate in place
             entry.time = new Date(rawTime);
             entry.elapsedMs = elapsedMs;
             entry.blocked = isBlocked;
@@ -281,14 +253,9 @@ export default class AdGuardService {
         return await this._request<RawAdGuardData>(url);
     }
 
-    /**
-     * Helper to maintain a sorted array of top 5 occurrences
-     */
     private _updateTopOccurrences(occurrences: number[], val: number): void {
         const limit = 5;
         let i = 0;
-        // Find insertion point (descending order)
-        // Optimization: Linear scan is faster than sort() for small fixed-size arrays (N=5)
         while (i < occurrences.length && val <= occurrences[i]) {
             i++;
         }
@@ -301,36 +268,23 @@ export default class AdGuardService {
         }
     }
 
-    /**
-     * Fetches the last N records and returns the top 5 slowest queries
-     * @param scanDepth Number of records to scan (default 1000)
-     */
     public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[]; }[]> {
         try {
-            // Optimization: Fetch raw data directly to avoid unnecessary object creation (Date, etc.) in getQueryLog
             const data = await this._fetchRawQueryLog(scanDepth, 0);
 
             const domainMap = new Map<string, { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }>();
 
             for (const e of data.data) {
-                // Optimization: Avoid parseFloat if already a number (9x faster)
                 const rawElapsed = e.elapsedMs;
                 const val = typeof rawElapsed === "number" ? rawElapsed : (parseFloat(rawElapsed as unknown as string) || 0);
 
-                if (val <= 0) {
-                    continue;
-                }
+                if (val <= 0) continue;
 
-                // Optimization: Cache property access
                 const domainName = e.question.name;
-
-                // Optimization: Single map lookup
                 const existing = domainMap.get(domainName);
 
                 if (existing) {
                     this._updateTopOccurrences(existing.occurrences, val);
-
-                    // Keep the max elapsed time and its details
                     if (val > existing.elapsedMs) {
                         existing.elapsedMs = val;
                         existing.client = e.client;
@@ -347,14 +301,11 @@ export default class AdGuardService {
                 }
             }
 
-            // Single-pass selection of top 10 domains
             const top10: { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }[] = [];
             const limit = 10;
 
             for (const item of domainMap.values()) {
                 let i = 0;
-                // Find insertion point (descending order)
-                // Optimization: Linear scan is faster than sort() for small fixed-size arrays (N=10)
                 while (i < top10.length && item.elapsedMs <= top10[i].elapsedMs) {
                     i++;
                 }
@@ -375,85 +326,59 @@ export default class AdGuardService {
     }
 
     /**
-     * Helper to transform Map/Object/Array responses from AdGuard API into a unified Array format
+     * Transforms API response list into uniform StatsEntry array.
+     * Enforces type safety and avoids loose loops.
      */
     private transformList(list: unknown, preferredKey: string, limit?: number): StatsEntry[] {
-        if (!list) return [];
-        if (Array.isArray(list)) {
-            let targetList = list;
-            if (limit && list.length > limit) {
-                targetList = list.slice(0, limit);
+        if (!Array.isArray(list)) {
+            // Handle Map-like object { "domain": 123 }
+            if (typeof list === 'object' && list !== null) {
+                const entries = Object.entries(list as Record<string, unknown>);
+                const sliced = limit ? entries.slice(0, limit) : entries;
+                return sliced.map(([k, v]) => ({
+                    name: k,
+                    count: typeof v === 'number' ? v : Number(v) || 0
+                }));
             }
-
-            // Optimization: Cache discovered fallback key to avoid repeated searches
-            let fallbackKeyCache: string | null = null;
-
-            return targetList.map((item: unknown) => {
-                const obj = item as Record<string, unknown>;
-
-                // Case 1: Standard Object (already has keys like ip, domain, or name)
-                if (obj.count !== undefined || obj[preferredKey] !== undefined || obj.name !== undefined) {
-                    let nameVal = obj[preferredKey] || obj.name || obj.ip || obj.domain;
-
-                    // Try cached fallback key if specific keys are missing
-                    if (!nameVal && fallbackKeyCache && typeof obj[fallbackKeyCache] === 'string') {
-                        nameVal = obj[fallbackKeyCache];
-                    }
-
-                    if (!nameVal) {
-                        // Optimization: Use for...in loop instead of Object.keys().find()
-                        // to avoid array allocation and allow early exit.
-                        for (const key in obj) {
-                            if (key !== 'count' && key !== 'source' && typeof obj[key] === 'string') {
-                                nameVal = obj[key];
-                                fallbackKeyCache = key; // Cache for subsequent items
-                                break;
-                            }
-                        }
-                        if (!nameVal) {
-                            nameVal = "Unknown";
-                        }
-                    }
-                    return {
-                        name: String(nameVal),
-                        count: Number(obj.count)
-                    };
-                }
-
-                // Case 2: Single-Key Object { "192.168.1.1": 123 }
-                // Optimization: Use for...in loop instead of Object.keys() to avoid array allocation
-                for (const key in obj) {
-                    const val = obj[key];
-                    // robustly find the key that maps to a number (count)
-                    if (typeof val === 'number' || (typeof val === 'string' && !isNaN(Number(val)))) {
-                        return {
-                            name: key,
-                            count: Number(val)
-                        };
-                    }
-                }
-
-                // Fallback for truly single-key objects where value might not look numeric or we just take the first one
-                for (const key in obj) {
-                    return {
-                        name: key,
-                        count: Number(obj[key])
-                    };
-                }
-
-                return { name: "Unknown", count: 0 };
-            });
-        } else if (typeof list === 'object') {
-            // Case 3: Map { "192.168.1.1": 123 }
-            let entries = Object.entries(list as Record<string, unknown>);
-            if (limit && entries.length > limit) {
-                entries = entries.slice(0, limit);
-            }
-            return entries.map(([key, count]) => ({
-                name: key,
-                count: Number(count)
-            }));
+            return [];
         }
-        return [];
+
+        let targetList = list;
+        if (limit && list.length > limit) {
+            targetList = list.slice(0, limit);
+        }
+
+        return targetList.map((item: unknown) => {
+            // Strict check for known object shapes
+            if (typeof item !== 'object' || item === null) {
+                return { name: "Unknown", count: 0 };
+            }
+
+            const obj = item as Record<string, unknown>;
+            const count = typeof obj.count === 'number' ? obj.count : Number(obj.count) || 0;
+
+            // Try preferred key first (e.g., 'domain' or 'ip')
+            if (typeof obj[preferredKey] === 'string' && obj[preferredKey]) {
+                return { name: obj[preferredKey], count };
+            }
+
+            // Fallbacks for common keys if preferred key is missing or different
+            if (typeof obj.name === 'string' && obj.name) return { name: obj.name, count };
+            if (typeof obj.domain === 'string' && obj.domain) return { name: obj.domain, count };
+            if (typeof obj.ip === 'string' && obj.ip) return { name: obj.ip, count };
+
+            // Fallback for key-value pair object inside array (uncommon but possible in some legacy APIs)
+            // e.g. [{ "192.168.1.1": 123 }, ...]
+            const keys = Object.keys(obj);
+            if (keys.length === 1) {
+                const key = keys[0];
+                const val = obj[key];
+                if (typeof val === 'number') {
+                    return { name: key, count: val };
+                }
+            }
+
+            return { name: "Unknown", count };
+        });
     }
 }

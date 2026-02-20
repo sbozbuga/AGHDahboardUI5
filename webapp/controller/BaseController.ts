@@ -13,6 +13,8 @@ import { InputType } from "sap/m/library";
 import Event from "sap/ui/base/Event";
 import formatter from "../model/formatter";
 import Button from "sap/m/Button";
+import ResourceModel from "sap/ui/model/resource/ResourceModel";
+import ResourceBundle from "sap/base/i18n/ResourceBundle";
 
 /**
  * @namespace ui5.aghd.controller
@@ -38,6 +40,18 @@ export default class BaseController extends Controller {
 
     public onExit(): void {
         this._mDialogs.clear();
+    }
+
+    protected getText(key: string, args: string[] = []): string {
+        const model = this.getOwnerComponent()?.getModel("i18n") as ResourceModel;
+        if (!model) return key;
+        const bundle = model.getResourceBundle() as ResourceBundle;
+        // Check if bundle is loaded (it might be a promise if configured async, but usually loaded by controller time)
+        // If it's a promise, we can't synchronously return text. Fallback to key.
+        if (bundle && typeof bundle.getText === "function") {
+            return bundle.getText(key, args) || key;
+        }
+        return key;
     }
 
     /**
@@ -134,7 +148,7 @@ export default class BaseController extends Controller {
             SettingsService.getInstance().setBaseUrl(baseUrl);
 
             (view.byId("settingsDialog") as Dialog).close();
-            MessageBox.success("Settings saved successfully. The application will now reload.", {
+            MessageBox.success(this.getText("settingsSaved"), {
                 onClose: () => {
                     window.location.reload();
                 }
@@ -214,11 +228,11 @@ export default class BaseController extends Controller {
                     this.animateCopyButton(button);
                 }
             } else {
-                MessageBox.error("Clipboard access not available. Please copy manually: " + text);
+                MessageBox.error(this.getText("clipboardUnavailable", [text]));
             }
         } catch (err) {
             console.error("Fallback copy failed", err);
-            MessageBox.error("Clipboard access not available. Please copy manually: " + text);
+            MessageBox.error(this.getText("clipboardUnavailable", [text]));
         }
 
         document.body.removeChild(textArea);
