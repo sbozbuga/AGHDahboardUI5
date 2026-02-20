@@ -55,7 +55,11 @@ QUnit.test("onCopyInsights copies text to clipboard", function (assert) {
     };
 
     // Execute
-    controller.onCopyInsights();
+    const event = {
+        getSource: () => ({}) // simple mock
+    };
+    // @ts-expect-error - Mocking event
+    controller.onCopyInsights(event);
 
     // Assert
     setTimeout(() => {
