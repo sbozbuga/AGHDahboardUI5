@@ -211,7 +211,8 @@ QUnit.test("generateInsights enforces 10s rate limit", async function(assert) {
         assert.ok(false, "Should have thrown rate limit error");
     } catch (e) {
         const err = e as Error;
-        assert.ok(err.message.includes("Please wait"), "Second call (immediate) SHOULD be rate limited");
+        // Since we use i18n keys now, and no bundle is loaded in test, we get the key "pleaseWait"
+        assert.ok(err.message.includes("pleaseWait") || err.message.includes("Please wait"), "Second call (immediate) SHOULD be rate limited (key or text)");
     }
 
     // 3. Call after 11 seconds - should succeed

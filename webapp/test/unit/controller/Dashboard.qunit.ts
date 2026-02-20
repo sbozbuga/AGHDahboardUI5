@@ -301,7 +301,8 @@ QUnit.test("onLogoutPress asks for confirmation", function (this: TestContext, a
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     MessageBox.confirm = (message: string, options: any) => {
         confirmCalled = true;
-        assert.ok(message.includes("Are you sure"), "Confirmation message shown");
+        // Since i18n is not loaded, we get key "logoutConfirmation"
+        assert.ok(message.includes("logoutConfirmation") || message.includes("Are you sure"), "Confirmation message shown (key or text)");
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         assert.ok(options.actions.includes(MessageBox.Action.OK), "OK action available");
 
