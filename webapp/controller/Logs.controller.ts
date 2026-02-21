@@ -137,12 +137,15 @@ export default class Logs extends BaseController {
 			const len = processedData.length;
 
 			if (bAppend) {
-				const currentData = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
-				// Optimization: Push in loop to avoid stack limit issues with spread operator (...) and reduce memory pressure
+				const currentData = model.getProperty(Constants.ModelProperties.Data) as ProcessedLogEntry[];
+				// Optimization: Create a shallow copy to modify safely and update model with new reference
+				// This allows using setProperty which is much more efficient than model.refresh(true)
+				const newData = currentData.slice();
+				// Push in loop to avoid stack limit issues with spread operator (...) and reduce memory pressure
 				for (let i = 0; i < len; i++) {
-					currentData.push(processedData[i]);
+					newData.push(processedData[i]);
 				}
-				model.refresh(true);
+				model.setProperty(Constants.ModelProperties.Data, newData);
 			} else {
 				model.setProperty(Constants.ModelProperties.Data, processedData);
 			}
