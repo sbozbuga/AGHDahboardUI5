@@ -38,6 +38,9 @@ interface ViewSettingsEventParams {
 	filterItems?: ViewSettingsItem[];
 }
 
+const BOLD_REGEX = /\*\*(.*?)\*\*/g;
+const NEWLINE_REGEX = /\n/g;
+
 /**
  * @namespace ui5.aghd.controller
  */
@@ -50,8 +53,6 @@ export default class Logs extends BaseController {
 	private _aSorters: Sorter[] = [];
 
 	private static readonly DEFAULT_LIMIT = 1000;
-	private static readonly BOLD_REGEX = /\*\*(.*?)\*\*/g;
-	private static readonly NEWLINE_REGEX = /\n/g;
 
 	public onInit(): void {
 		// apply content density mode to root view
@@ -361,8 +362,8 @@ export default class Logs extends BaseController {
 		if (!text) return "";
 		let safeText = encodeXML(text);
 		safeText = safeText
-			.replace(Logs.BOLD_REGEX, "<strong>$1</strong>")
-			.replace(Logs.NEWLINE_REGEX, "<br/>");
+			.replace(BOLD_REGEX, "<strong>$1</strong>")
+			.replace(NEWLINE_REGEX, "<br/>");
 		return safeText;
 	}
 

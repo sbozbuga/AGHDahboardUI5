@@ -87,12 +87,6 @@ QUnit.test("formatInsights sanitizes HTML and applies Markdown", function (asser
     // 2. HTML Sanitization
     input = "<script>alert('xss')</script>";
     const actual = controller.formatInsights(input);
-    const valid = [
-        "&lt;script&gt;alert('xss')&lt;/script&gt;",
-        "&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;",
-        "&lt;script&gt;alert(&apos;xss&apos;)&lt;/script&gt;",
-        "&lt;script&gt;alert&#x28;&#x27;xss&#x27;&#x29;&lt;&#x2f;script&gt;"
-    ];
     // Relaxed check: just ensure it starts with escaped script
     assert.ok(actual.startsWith("&lt;script&gt;"), "Starts with escaped script tag. Got: " + actual);
 
