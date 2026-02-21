@@ -2,7 +2,11 @@ import AdGuardService from "ui5/aghd/service/AdGuardService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import { RawAdGuardData, RawAdGuardStats, RawLogEntry } from "ui5/aghd/model/AdGuardTypes";
 
-QUnit.module("AdGuardService");
+QUnit.module("AdGuardService", {
+    beforeEach: function () {
+        AdGuardService.getInstance().clearCache();
+    }
+});
 
 QUnit.test("getStats limits the processing of top domains", async function (assert) {
     const service = AdGuardService.getInstance();
