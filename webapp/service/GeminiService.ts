@@ -125,13 +125,17 @@ export default class GeminiService {
         const domainCounts = new Map<string, number>();
         const upstreamCounts = new Map<string, number>();
 
+        // Anonymization map to maintain consistent pseudonyms for hostnames within this summary
+        const hostnameMap = new Map<string, string>();
+        let hostnameCounter = 1;
+
         for (const log of logsToAnalyze) {
             if (log.status === "Blocked" || log.status === "Filtered" || log.status === "SafeBrowsing") {
                 blockedCount++;
             }
 
             let client = log.client || "Unknown";
-            client = this.anonymizeClient(client);
+            client = this.anonymizeClient(client, hostnameMap, () => `Client-${hostnameCounter++}`);
             clientCounts.set(client, (clientCounts.get(client) || 0) + 1);
 
             const domain = log.question?.name || "Unknown";
@@ -171,7 +175,7 @@ export default class GeminiService {
         return topK.map(([key, val]) => [this.sanitizeInput(key), val]);
     }
 
-    private anonymizeClient(client: string): string {
+    private anonymizeClient(client: string, hostnameMap?: Map<string, string>, nameGenerator?: () => string): string {
         const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
         if (ipv4Regex.test(client)) {
             const parts = client.split(".");
@@ -188,7 +192,19 @@ export default class GeminiService {
             }
         }
 
-        return client;
+        if (client === "Unknown") {
+            return client;
+        }
+
+        // Hostname Redaction logic
+        if (hostnameMap && nameGenerator) {
+            if (!hostnameMap.has(client)) {
+                hostnameMap.set(client, nameGenerator());
+            }
+            return hostnameMap.get(client) as string;
+        }
+
+        return "Client-Redacted";
     }
 
     private buildPrompt(summary: LogSummary): string {
