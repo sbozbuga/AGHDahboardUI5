@@ -3,10 +3,7 @@
 	displayBlock="true"
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc"
-	xmlns:core="sap.ui.core"
-	core:require="{
-		DateTime: 'sap/ui/model/type/DateTime'
-	}">
+	xmlns:core="sap.ui.core">
 
 	<App id="app">
 		<Page
@@ -151,10 +148,7 @@
 							<cells>
 								<Text text="{
 									path: 'time',
-									type: 'DateTime',
-									formatOptions: {
-										pattern: 'yyyy-MM-dd HH:mm:ss.SSS'
-									}
+									formatter: '.formatter.formatDateTime'
 								}" />
 								<core:Icon src="sap-icon://database" 
 									color="Positive" 

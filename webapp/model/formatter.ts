@@ -1,7 +1,23 @@
 import formatMessage from "sap/base/strings/formatMessage";
+import DateFormat from "sap/ui/core/format/DateFormat";
 
 export default {
     formatMessage: formatMessage,
+
+    /**
+     * Formats a date string or Date object.
+     * @param date Date object or string
+     * @returns Formatted date string
+     */
+    formatDateTime: function (date: string | Date | null | undefined): string {
+        if (!date) {
+            return "";
+        }
+        const oDate = date instanceof Date ? date : new Date(date);
+        const oFormat = DateFormat.getDateTimeInstance({ pattern: "yyyy-MM-dd HH:mm:ss.SSS" });
+        return oFormat.format(oDate);
+    },
+
     /**
      * Formats elapsed time in milliseconds to a string with 3 decimal places.
      * @param ms Elapsed time in milliseconds (number)
