@@ -245,9 +245,9 @@ QUnit.test("summarizeLogs sanitizes log data", function (assert) {
     const summary = (service as any).summarizeLogs(logs);
 
     // Assert keys are sanitized
-    // Client\nBad -> ClientBad
+    // Client\nBad -> Client-1 (Redacted)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    assert.strictEqual(summary.top_clients[0][0], "ClientBad", "Client name sanitized");
+    assert.strictEqual(summary.top_clients[0][0], "Client-1", "Client name sanitized and redacted");
 
     // Domain\tBad -> DomainBad
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -364,7 +364,7 @@ QUnit.test("anonymizeClient correctly masks IPs", function (assert) {
 
     // 3. Hostnames / Non-IPs
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    assert.strictEqual(anonymize("my-laptop.local"), "my-laptop.local", "Hostname unchanged");
+    assert.strictEqual(anonymize("my-laptop.local"), "Client-Redacted", "Hostname redacted");
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     assert.strictEqual(anonymize("Unknown"), "Unknown", "Unknown unchanged");
 });
