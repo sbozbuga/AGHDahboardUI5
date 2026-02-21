@@ -26,7 +26,7 @@ export interface RawLogEntry {
 }
 
 export interface LogEntry extends Omit<RawLogEntry, "time" | "elapsedMs"> {
-    time: Date;
+    time: string | Date;
     elapsedMs: number;
 }
 
