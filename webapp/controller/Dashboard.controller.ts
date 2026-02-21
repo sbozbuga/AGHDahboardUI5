@@ -116,7 +116,13 @@ export default class Dashboard extends BaseController {
                 AdGuardService.getInstance().getQueryLog(1, 0)
             ]);
 
-            const latestTime = latestLog.data.length > 0 ? latestLog.data[0].time : undefined;
+            const latestLogEntry = latestLog.data.length > 0 ? latestLog.data[0] : undefined;
+            const latestTimeStr = latestLogEntry ? latestLogEntry.time : undefined;
+            // Parse time if it's a string (new optimization)
+            const latestTime = latestTimeStr instanceof Date
+                ? latestTimeStr
+                : (latestTimeStr ? new Date(latestTimeStr) : undefined);
+
             const currentData = model.getData() as AdGuardStats & { slowest_queries: unknown[] };
 
             let slowest = currentData?.slowest_queries || [];

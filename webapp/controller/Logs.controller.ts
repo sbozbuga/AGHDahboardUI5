@@ -21,10 +21,6 @@ import encodeXML from "sap/base/security/encodeXML";
 import { Constants } from "../model/Constants";
 import BaseController from "./BaseController";
 
-interface ProcessedLogEntry extends Omit<LogEntry, "time"> {
-	time: Date;
-}
-
 interface RouteArguments {
 	"?query"?: {
 		status?: string;
@@ -137,11 +133,11 @@ export default class Logs extends BaseController {
 			const data = await AdGuardService.getInstance().getQueryLog(limit, offset, filterStatus);
 
 			// Use processed data directly from service
-			const processedData = data.data as unknown as ProcessedLogEntry[];
+			const processedData = data.data;
 			const len = processedData.length;
 
 			if (bAppend) {
-				const currentData = model.getProperty(Constants.ModelProperties.Data) as ProcessedLogEntry[];
+				const currentData = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
 				// Optimization: Push in loop to avoid stack limit issues with spread operator (...) and reduce memory pressure
 				for (let i = 0; i < len; i++) {
 					currentData.push(processedData[i]);
@@ -169,9 +165,12 @@ export default class Logs extends BaseController {
 		const binding = table.getBinding("items") as ListBinding;
 		if (!binding) return;
 
-		const reason = (event.getParameters() as { reason: string }).reason;
+		const params = event.getParameters() as { reason: string; actual: number; total: number };
+		const reason = params.reason;
+		const actual = params.actual;
+		const total = params.total;
 
-		if (reason === "Growing") {
+		if (reason === "Growing" && actual >= total) {
 			// Attempt to fetch next chunk
 			void this.onRefreshLogs(true);
 		}

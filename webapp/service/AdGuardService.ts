@@ -234,14 +234,14 @@ export default class AdGuardService {
         const processedList = data.data as unknown as LogEntry[];
 
         for (const entry of processedList) {
-            const rawTime = (entry as unknown as { time: string }).time;
             const rawElapsed = (entry as unknown as { elapsedMs: number | string }).elapsedMs;
 
             const elapsedMs = typeof rawElapsed === "number" ? rawElapsed : (parseFloat(rawElapsed) || 0);
             const isBlocked = (entry.reason && entry.reason.startsWith("Filtered")) ||
                 (entry.reason === "SafeBrowsing");
 
-            entry.time = new Date(rawTime);
+            // entry.time is already a string from the API response
+            // optimization: parsing is deferred to the formatter
             entry.elapsedMs = elapsedMs;
             entry.blocked = isBlocked;
         }
