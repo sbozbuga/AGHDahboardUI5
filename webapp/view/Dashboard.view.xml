@@ -87,7 +87,7 @@
                                                     <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
                                                 </layoutData>
                                             </Text>
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyClient" tooltip="{i18n>copyClient}" class="copyButton">
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyClient" tooltip="{parts:[{path:'i18n>copyClientName'}, {path:'name'}], formatter: '.formatter.formatMessage'}" class="copyButton">
                                                 <layoutData>
                                                     <FlexItemData shrinkFactor="0" />
                                                 </layoutData>
@@ -127,7 +127,7 @@
                                                     <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
                                                 </layoutData>
                                             </Text>
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton">
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{parts:[{path:'i18n>copyDomainName'}, {path:'name'}], formatter: '.formatter.formatMessage'}" class="copyButton">
                                                 <layoutData>
                                                     <FlexItemData shrinkFactor="0" />
                                                 </layoutData>
@@ -167,7 +167,7 @@
                                                     <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
                                                 </layoutData>
                                             </Text>
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton">
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{parts:[{path:'i18n>copyDomainName'}, {path:'name'}], formatter: '.formatter.formatMessage'}" class="copyButton">
                                                 <layoutData>
                                                     <FlexItemData shrinkFactor="0" />
                                                 </layoutData>
@@ -222,7 +222,7 @@
                                                     <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
                                                 </layoutData>
                                             </Text>
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{i18n>copyDomain}" class="copyButton">
+                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{parts:[{path:'i18n>copyDomainName'}, {path:'domain'}], formatter: '.formatter.formatMessage'}" class="copyButton">
                                                 <layoutData>
                                                     <FlexItemData shrinkFactor="0" />
                                                 </layoutData>
