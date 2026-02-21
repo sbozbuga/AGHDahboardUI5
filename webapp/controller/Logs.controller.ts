@@ -165,9 +165,12 @@ export default class Logs extends BaseController {
 		const binding = table.getBinding("items") as ListBinding;
 		if (!binding) return;
 
-		const reason = (event.getParameters() as { reason: string }).reason;
+		const params = event.getParameters() as { reason: string; actual: number; total: number };
+		const reason = params.reason;
+		const actual = params.actual;
+		const total = params.total;
 
-		if (reason === "Growing") {
+		if (reason === "Growing" && actual >= total) {
 			// Attempt to fetch next chunk
 			void this.onRefreshLogs(true);
 		}
