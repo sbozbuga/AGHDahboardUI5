@@ -138,16 +138,17 @@ QUnit.test("getQueryLog returns correctly processed LogEntry objects", async fun
 
         // Check first item (Blocked)
         const item1 = logs.data[0];
-        assert.ok(item1.time instanceof Date, "Time should be converted to Date object");
-        assert.strictEqual(item1.time.toISOString(), "2023-01-01T12:00:00.000Z", "Time value correct");
+        // Time is now kept as string for performance
+        assert.strictEqual(typeof item1.time, "string", "Time should be a string (lazy parsing)");
+        assert.strictEqual(item1.time, "2023-01-01T12:00:00Z", "Time value correct");
         assert.strictEqual(typeof item1.elapsedMs, "number", "elapsedMs should be number");
         assert.strictEqual(item1.elapsedMs, 123.45, "elapsedMs value correct");
         assert.strictEqual(item1.blocked, true, "Should be identified as blocked");
 
         // Check second item (Safe)
         const item2 = logs.data[1];
-        assert.ok(item2.time instanceof Date, "Time should be converted to Date object");
-        assert.strictEqual(item2.time.toISOString(), "2023-01-02T12:00:00.000Z", "Time value correct");
+        assert.strictEqual(typeof item2.time, "string", "Time should be a string (lazy parsing)");
+        assert.strictEqual(item2.time, "2023-01-02T12:00:00Z", "Time value correct");
         assert.strictEqual(item2.elapsedMs, 50, "elapsedMs value correct");
         assert.strictEqual(item2.blocked, false, "Should not be blocked");
 
