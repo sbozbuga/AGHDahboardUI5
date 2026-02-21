@@ -305,6 +305,11 @@ export default class AdGuardService {
             const limit = 10;
 
             for (const item of domainMap.values()) {
+                // Optimization: Early exit if item is smaller than the smallest in top10
+                if (top10.length === limit && item.elapsedMs <= top10[limit - 1].elapsedMs) {
+                    continue;
+                }
+
                 let i = 0;
                 while (i < top10.length && item.elapsedMs <= top10[i].elapsedMs) {
                     i++;
