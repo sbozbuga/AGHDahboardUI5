@@ -6,7 +6,7 @@ import "unit/controller/Logs.qunit";
 import "unit/controller/LogsPerformance.qunit";
 import "unit/controller/LogsOptimization.qunit";
 import "unit/service/AdGuardService.qunit";
-import "unit/service/AdGuardServicePerf.qunit";
+import "unit/service/AdGuardServicePerformance.qunit";
 import "unit/service/AdGuardServiceSecurity.qunit";
 import "unit/service/GeminiService.qunit";
 import "unit/service/GeminiServiceSecurity.qunit";

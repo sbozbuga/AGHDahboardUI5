@@ -26,6 +26,12 @@ export default class AdGuardService {
         this._resourceBundle = bundle;
     }
 
+    public clearCache(): void {
+        this._slowestQueriesCache = null;
+        this._slowestQueriesCacheTime = 0;
+        this._slowestQueriesCacheDepth = 0;
+    }
+
     private _getText(key: string, args: string[] = []): string {
         if (this._resourceBundle) {
             return this._resourceBundle.getText(key, args) || key;
@@ -36,6 +42,10 @@ export default class AdGuardService {
     private static readonly DEFAULT_SCAN_DEPTH = 1000;
     private static readonly TOP_LIST_LIMIT = 10;
     private static readonly REQUEST_TIMEOUT = 10000;
+    private static readonly SLOWEST_QUERY_CACHE_DURATION = 60000;
+    private _slowestQueriesCache: { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[]; }[] | null = null;
+    private _slowestQueriesCacheTime: number = 0;
+    private _slowestQueriesCacheDepth: number = 0;
 
     /**
      * Generic wrapper for API requests
@@ -269,6 +279,13 @@ export default class AdGuardService {
     }
 
     public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[]; }[]> {
+        // Cache Optimization: Check if we have a valid cache entry
+        if (this._slowestQueriesCache &&
+            (Date.now() - this._slowestQueriesCacheTime < AdGuardService.SLOWEST_QUERY_CACHE_DURATION) &&
+            this._slowestQueriesCacheDepth === scanDepth) {
+            return this._slowestQueriesCache;
+        }
+
         try {
             const data = await this._fetchRawQueryLog(scanDepth, 0);
 
@@ -322,6 +339,11 @@ export default class AdGuardService {
                     }
                 }
             }
+
+            // Update Cache
+            this._slowestQueriesCache = top10;
+            this._slowestQueriesCacheTime = Date.now();
+            this._slowestQueriesCacheDepth = scanDepth;
 
             return top10;
         } catch (error) {
