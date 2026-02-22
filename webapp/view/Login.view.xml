@@ -15,7 +15,7 @@
                             <Label text="Password" labelFor="passwordInput" class="sapUiSmallMarginTop" required="true"/>
                             <Input id="passwordInput" value="{/password}" required="true" type="Password" placeholder="Enter your password" submit=".onLoginPress" liveChange=".onInputChange" maxLength="100" showValueHelp="true" valueHelpIconSrc="sap-icon://show" valueHelpRequest=".onShowPassword" />
                             
-                            <Button text="Login" type="Emphasized" press=".onLoginPress" class="sapUiMediumMarginTop" width="100%"/>
+                            <Button text="{i18n>logIn}" type="Emphasized" press=".onLoginPress" class="sapUiMediumMarginTop" width="100%"/>
                         </VBox>
                     </content>
                 </Panel>
