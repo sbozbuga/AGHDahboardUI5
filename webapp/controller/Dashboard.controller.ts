@@ -321,7 +321,7 @@ export default class Dashboard extends BaseController {
 
         if (clients.length > 0) {
             const text = clients.map(c => c.name).join("\n");
-            this._copyList(text, source);
+            this._copyList(text, source, "clientsListCopied");
         }
     }
 
@@ -335,7 +335,7 @@ export default class Dashboard extends BaseController {
 
         if (domains.length > 0) {
             const text = domains.map(d => d.name).join("\n");
-            this._copyList(text, source);
+            this._copyList(text, source, "domainsListCopied");
         }
     }
 
@@ -349,7 +349,7 @@ export default class Dashboard extends BaseController {
 
         if (domains.length > 0) {
             const text = domains.map(d => d.name).join("\n");
-            this._copyList(text, source);
+            this._copyList(text, source, "blockedDomainsListCopied");
         }
     }
 
@@ -363,11 +363,11 @@ export default class Dashboard extends BaseController {
 
         if (queries.length > 0) {
             const text = queries.map(q => q.domain).join("\n");
-            this._copyList(text, source);
+            this._copyList(text, source, "slowestQueriesListCopied");
         }
     }
 
-    private _copyList(text: string, source: Button): void {
-        this.copyToClipboard(text, this.getText("listCopied"), source);
+    private _copyList(text: string, source: Button, messageKey: string): void {
+        this.copyToClipboard(text, this.getText(messageKey), source);
     }
 }
