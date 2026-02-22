@@ -159,6 +159,11 @@ export default class GeminiService {
         const topK: [string, number][] = [];
 
         for (const [key, val] of counts) {
+            // Optimization: Early exit if item is smaller than the smallest in topK
+            if (k > 0 && topK.length === k && val <= topK[k - 1][1]) {
+                continue;
+            }
+
             let i = 0;
             while (i < topK.length && val <= topK[i][1]) {
                 i++;
