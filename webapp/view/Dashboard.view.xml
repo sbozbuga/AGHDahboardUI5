@@ -72,7 +72,7 @@
                     </f:header>
                     <f:content>
                         <VBox height="100%" renderType="Bare">
-                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllClients" tooltip="{i18n>copyAll}" class="floatingCopyBtn" />
+                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllClients" tooltip="{i18n>copyAllClients}" class="floatingCopyBtn" />
                             <Table items="{/top_clients}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noActiveClients}">
                                 <columns>
                                     <Column><Text text="{i18n>client}" /></Column>
@@ -112,7 +112,7 @@
                     </f:header>
                      <f:content>
                         <VBox height="100%" renderType="Bare">
-                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllDomains" tooltip="{i18n>copyAll}" class="floatingCopyBtn" />
+                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllDomains" tooltip="{i18n>copyAllDomains}" class="floatingCopyBtn" />
                             <Table items="{/top_queried_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noQueriesRecorded}">
                                 <columns>
                                     <Column><Text text="{i18n>domain}" /></Column>
@@ -152,7 +152,7 @@
                     </f:header>
                      <f:content>
                         <VBox height="100%" renderType="Bare">
-                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllBlockedDomains" tooltip="{i18n>copyAll}" class="floatingCopyBtn" />
+                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllBlockedDomains" tooltip="{i18n>copyAllBlockedDomains}" class="floatingCopyBtn" />
                             <Table items="{/top_blocked_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noBlockedDomains}">
                                 <columns>
                                     <Column><Text text="{i18n>domain}" /></Column>
@@ -192,7 +192,7 @@
                     </f:header>
                      <f:content>
                         <VBox height="100%" renderType="Bare">
-                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllSlowestQueries" tooltip="{i18n>copyAll}" class="floatingCopyBtn" />
+                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllSlowestQueries" tooltip="{i18n>copyAllSlowestQueries}" class="floatingCopyBtn" />
                             <Table items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noPerformanceData}">
                                 <columns>
                                     <Column><Text text="{i18n>domain}" /></Column>
