@@ -57,6 +57,15 @@ export default class GeminiService {
         return key;
     }
 
+    private _redactApiKey(message: string, apiKey: string): string {
+        // Security: Avoid false positives with short dummy keys (e.g. "test")
+        // Real Gemini API keys are ~39 characters long.
+        if (!apiKey || apiKey.length < 8) {
+            return message;
+        }
+        return message.split(apiKey).join("[REDACTED]");
+    }
+
     public sanitizeInput(str: string): string {
         let cleaned = str;
 
@@ -106,7 +115,7 @@ export default class GeminiService {
             return text || this._getText("noInsights");
         } catch (error) {
             const msg = error instanceof Error ? error.message : String(error);
-            const safeMsg = apiKey ? msg.split(apiKey).join("[REDACTED]") : msg;
+            const safeMsg = this._redactApiKey(msg, apiKey);
             console.error("Gemini API Error:", safeMsg);
             // eslint-disable-next-line preserve-caught-error
             throw new Error(this._getText("failedToGenerateInsights"), { cause: { message: safeMsg } });
@@ -295,7 +304,7 @@ export default class GeminiService {
             return result;
         } catch (error) {
             const msg = error instanceof Error ? error.message : String(error);
-            const safeMsg = apiKey ? msg.split(apiKey).join("[REDACTED]") : msg;
+            const safeMsg = this._redactApiKey(msg, apiKey);
             console.error("Failed to fetch models", safeMsg);
             return [];
         } finally {
