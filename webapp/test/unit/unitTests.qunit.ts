@@ -9,6 +9,7 @@ import "unit/service/AdGuardService.qunit";
 import "unit/service/AdGuardServicePerformance.qunit";
 import "unit/service/AdGuardServiceSecurity.qunit";
 import "unit/service/GeminiService.qunit";
+import "unit/service/GeminiServiceBenchmark.qunit";
 import "unit/service/GeminiServiceSecurity.qunit";
 import "unit/service/SettingsService.qunit";
 import "unit/service/SettingsServiceSecurity.qunit";
