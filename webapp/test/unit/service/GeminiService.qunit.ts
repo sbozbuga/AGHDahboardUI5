@@ -395,3 +395,41 @@ QUnit.test("summarizeLogs aggregates anonymized clients", function (assert) {
     assert.ok(subnet2, "Found subnet 10.0.0.xxx");
     assert.strictEqual(subnet2 ? subnet2[1] : 0, 1, "Count is 1");
 });
+
+QUnit.module("Gemini Service - Error Handling & Redaction");
+
+QUnit.test("Redacts API Key from error messages", function (assert) {
+    const service = GeminiService.getInstance();
+
+    // Access private method via casting
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+    const redact = (service as any)._redactApiKey.bind(service);
+
+    // 1. Long API Key (Standard)
+    const apiKey = "AIzaSyD-1234567890abcdef1234567890abcde"; // 39 chars
+    const msg = "Error: Invalid API Key AIzaSyD-1234567890abcdef1234567890abcde provided.";
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    assert.strictEqual(redact(msg, apiKey), "Error: Invalid API Key [REDACTED] provided.", "Redacts standard API key");
+
+    // 2. Short Dummy Key (Should NOT redact)
+    const shortKey = "test";
+    const shortMsg = "This is a test message.";
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    assert.strictEqual(redact(shortMsg, shortKey), shortMsg, "Does NOT redact short dummy keys (< 8 chars)");
+
+    // 3. Medium Key (Boundary Condition - 8 chars)
+    const mediumKey = "12345678";
+    const mediumMsg = "Key 12345678 is invalid.";
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    assert.strictEqual(redact(mediumMsg, mediumKey), "Key [REDACTED] is invalid.", "Redacts keys >= 8 chars");
+
+    // 4. Empty Key
+    const emptyKey = "";
+    const emptyMsg = "Error: Something went wrong.";
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    assert.strictEqual(redact(emptyMsg, emptyKey), emptyMsg, "Handles empty API key gracefully");
+
+    // 5. Null/Undefined Key (Simulated)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    assert.strictEqual(redact(emptyMsg, null), emptyMsg, "Handles null API key gracefully");
+});
