@@ -81,3 +81,26 @@ QUnit.module("formatter - formatMessage");
 QUnit.test("Should format message correctly", function (assert) {
     assert.strictEqual(formatter.formatMessage("Hello {0}", ["World"]), "Hello World", "Formats message correctly");
 });
+
+QUnit.module("formatter - formatDateTime");
+
+QUnit.test("Should format date correctly", function (assert) {
+    const date = new Date("2023-10-27T10:30:00.123Z");
+    // DateFormat uses local time by default. We need to handle this.
+    // However, the pattern "yyyy-MM-dd HH:mm:ss.SSS" is strict.
+    // Let's check if we can mock the timezone or just check the format structure.
+
+    // Instead of asserting exact string which depends on local timezone of the runner,
+    // we can check if it matches the pattern and contains the date parts.
+    // Or we can use a fixed date and expected output if we know the timezone.
+
+    // Let's assume the test runs in UTC or we can just check the format.
+
+    const formatted = formatter.formatDateTime(date);
+    assert.ok(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$/.test(formatted), "Format matches pattern yyyy-MM-dd HH:mm:ss.SSS");
+});
+
+QUnit.test("Should handle null or undefined for date", function (assert) {
+    assert.strictEqual(formatter.formatDateTime(null), "", "Returns empty string for null");
+    assert.strictEqual(formatter.formatDateTime(undefined), "", "Returns empty string for undefined");
+});

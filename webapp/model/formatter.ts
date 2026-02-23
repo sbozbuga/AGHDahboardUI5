@@ -1,6 +1,8 @@
 import formatMessage from "sap/base/strings/formatMessage";
 import DateFormat from "sap/ui/core/format/DateFormat";
 
+const oDateTimeFormat = DateFormat.getDateTimeInstance({ pattern: "yyyy-MM-dd HH:mm:ss.SSS" });
+
 export default {
     formatMessage: formatMessage,
 
@@ -14,8 +16,7 @@ export default {
             return "";
         }
         const oDate = date instanceof Date ? date : new Date(date);
-        const oFormat = DateFormat.getDateTimeInstance({ pattern: "yyyy-MM-dd HH:mm:ss.SSS" });
-        return oFormat.format(oDate);
+        return oDateTimeFormat.format(oDate);
     },
 
     /**
