@@ -288,6 +288,9 @@ export default class Logs extends BaseController {
 
 		source.setIcon(newDesc ? "sap-icon://sort-descending" : "sap-icon://sort-ascending");
 
+		const directionText = this.getText(newDesc ? "sortDescending" : "sortAscending");
+		source.setTooltip(`${source.getText()} (${directionText})`);
+
 		this._aSorters = [];
 		this.resetColumnIcons(source);
 		this._aSorters.push(new Sorter(key, newDesc, false));
@@ -309,6 +312,7 @@ export default class Logs extends BaseController {
 			const header = col.getHeader();
 			if (header && header !== activeButton && header instanceof Button) {
 				header.setIcon("");
+				header.setTooltip(header.getText());
 			}
 		});
 	}
