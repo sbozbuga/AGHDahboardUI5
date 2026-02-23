@@ -5,6 +5,7 @@ import "unit/controller/Login.qunit";
 import "unit/controller/Logs.qunit";
 import "unit/controller/LogsPerformance.qunit";
 import "unit/controller/LogsOptimization.qunit";
+import "unit/controller/LogsSearchDebounce.qunit";
 import "unit/service/AdGuardService.qunit";
 import "unit/service/AdGuardServicePerformance.qunit";
 import "unit/service/AdGuardServiceSecurity.qunit";
