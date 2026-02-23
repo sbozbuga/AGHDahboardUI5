@@ -99,6 +99,43 @@ export default class AdGuardService {
         }
     }
 
+    private _isSafeUrl(url: string): boolean {
+        try {
+            // Handle relative URLs
+            if (url.startsWith("/")) {
+                return true;
+            }
+
+            const urlObj = new URL(url);
+            const hostname = urlObj.hostname;
+
+            // Check if same origin
+            if (hostname === window.location.hostname) {
+                return true;
+            }
+
+            // Check localhost
+            if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]") {
+                return true;
+            }
+
+            // Check private IPs (IPv4)
+            // 10.0.0.0 - 10.255.255.255
+            // 172.16.0.0 - 172.31.255.255
+            // 192.168.0.0 - 192.168.255.255
+            const parts = hostname.split(".").map(Number);
+            if (parts.length === 4 && parts.every((p) => !isNaN(p) && p >= 0 && p <= 255)) {
+                if (parts[0] === 10) return true;
+                if (parts[0] === 192 && parts[1] === 168) return true;
+                if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
+            }
+
+            return false;
+        } catch {
+            return false;
+        }
+    }
+
     private _handleSessionExpiration(): void {
         if (this._isLoginDialogOpen) {
             return;
@@ -163,38 +200,54 @@ export default class AdGuardService {
             return;
         }
 
-        const popup = window.open(
-            targetUrl,
-            "agh_login",
-            `width=${width},height=${height},top=${top},left=${left},resizable,scrollbars,noopener,noreferrer`
-        );
+        const performOpen = () => {
+            const popup = window.open(
+                targetUrl,
+                "agh_login",
+                `width=${width},height=${height},top=${top},left=${left},resizable,scrollbars,noopener,noreferrer`
+            );
 
-        if (!popup) {
-            MessageBox.error(this._getText("popupBlocked"));
-            this._isLoginDialogOpen = false;
-            return;
+            if (!popup) {
+                MessageBox.error(this._getText("popupBlocked"));
+                this._isLoginDialogOpen = false;
+                return;
+            }
+
+            const pollInterval = setInterval(() => {
+                void (async () => {
+                    if (popup.closed) {
+                        clearInterval(pollInterval);
+                        this._isLoginDialogOpen = false;
+                        return;
+                    }
+
+                    try {
+                        await this.getStats();
+                        clearInterval(pollInterval);
+                        popup.close();
+                        this._isLoginDialogOpen = false;
+                        MessageToast.show(this._getText("loginSuccessful"));
+                        setTimeout(() => window.location.reload(), 1000);
+                    } catch {
+                        // Still unauthorized
+                    }
+                })();
+            }, 2000);
+        };
+
+        if (this._isSafeUrl(targetUrl)) {
+            performOpen();
+        } else {
+            MessageBox.confirm(this._getText("externalUrlWarning", [targetUrl]), {
+                onClose: (sAction: string | null) => {
+                    if (sAction === MessageBox.Action.OK) {
+                        performOpen();
+                    } else {
+                        this._isLoginDialogOpen = false;
+                    }
+                }
+            });
         }
-
-        const pollInterval = setInterval(() => {
-            void (async () => {
-                if (popup.closed) {
-                    clearInterval(pollInterval);
-                    this._isLoginDialogOpen = false;
-                    return;
-                }
-
-                try {
-                    await this.getStats();
-                    clearInterval(pollInterval);
-                    popup.close();
-                    this._isLoginDialogOpen = false;
-                    MessageToast.show(this._getText("loginSuccessful"));
-                    setTimeout(() => window.location.reload(), 1000);
-                } catch {
-                    // Still unauthorized
-                }
-            })();
-        }, 2000);
     }
 
     public async login(name: string, password: string): Promise<void> {
