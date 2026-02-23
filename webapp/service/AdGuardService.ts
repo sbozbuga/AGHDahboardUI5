@@ -370,42 +370,57 @@ export default class AdGuardService {
             return [];
         }
 
-        let targetList = list;
-        if (limit && list.length > limit) {
-            targetList = list.slice(0, limit);
-        }
+        // Optimization: Single pass loop with pre-allocation to avoid intermediate array creation (slice)
+        // and reduce function call overhead (map). Significant for high-frequency polling.
+        const arr = list as unknown[];
+        const len = arr.length;
+        const count = limit && len > limit ? limit : len;
+        const result = new Array<StatsEntry>(count);
 
-        return targetList.map((item: unknown) => {
+        for (let i = 0; i < count; i++) {
+            const item = arr[i];
+            let entry: StatsEntry;
+
             // Strict check for known object shapes
             if (typeof item !== 'object' || item === null) {
-                return { name: "Unknown", count: 0 };
-            }
+                entry = { name: "Unknown", count: 0 };
+            } else {
+                const obj = item as Record<string, unknown>;
+                const cnt = typeof obj.count === 'number' ? obj.count : Number(obj.count) || 0;
 
-            const obj = item as Record<string, unknown>;
-            const count = typeof obj.count === 'number' ? obj.count : Number(obj.count) || 0;
-
-            // Try preferred key first (e.g., 'domain' or 'ip')
-            if (typeof obj[preferredKey] === 'string' && obj[preferredKey]) {
-                return { name: obj[preferredKey], count };
-            }
-
-            // Fallbacks for common keys if preferred key is missing or different
-            if (typeof obj.name === 'string' && obj.name) return { name: obj.name, count };
-            if (typeof obj.domain === 'string' && obj.domain) return { name: obj.domain, count };
-            if (typeof obj.ip === 'string' && obj.ip) return { name: obj.ip, count };
-
-            // Fallback for key-value pair object inside array (uncommon but possible in some legacy APIs)
-            // e.g. [{ "192.168.1.1": 123 }, ...]
-            const keys = Object.keys(obj);
-            if (keys.length === 1) {
-                const key = keys[0];
-                const val = obj[key];
-                if (typeof val === 'number') {
-                    return { name: key, count: val };
+                // Try preferred key first (e.g., 'domain' or 'ip')
+                // Use type assertion to ensure TypeScript knows we're accessing a string
+                const preferredVal = obj[preferredKey];
+                if (typeof preferredVal === 'string' && preferredVal) {
+                    entry = { name: preferredVal, count: cnt };
+                }
+                // Fallbacks for common keys if preferred key is missing or different
+                else if (typeof obj.name === 'string' && obj.name) {
+                    entry = { name: obj.name, count: cnt };
+                } else if (typeof obj.domain === 'string' && obj.domain) {
+                    entry = { name: obj.domain, count: cnt };
+                } else if (typeof obj.ip === 'string' && obj.ip) {
+                    entry = { name: obj.ip, count: cnt };
+                } else {
+                    // Fallback for key-value pair object inside array (uncommon but possible in some legacy APIs)
+                    // e.g. [{ "192.168.1.1": 123 }, ...]
+                    const keys = Object.keys(obj);
+                    if (keys.length === 1) {
+                        const key = keys[0];
+                        const val = obj[key];
+                        if (typeof val === 'number') {
+                            entry = { name: key, count: val };
+                        } else {
+                            entry = { name: "Unknown", count: cnt };
+                        }
+                    } else {
+                        entry = { name: "Unknown", count: cnt };
+                    }
                 }
             }
+            result[i] = entry;
+        }
 
-            return { name: "Unknown", count };
-        });
+        return result;
     }
 }
