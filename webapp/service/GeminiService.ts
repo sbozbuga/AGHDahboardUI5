@@ -210,12 +210,14 @@ export default class GeminiService {
             return client;
         }
 
-        // Hostname Redaction logic
-        if (hostnameMap && nameGenerator) {
-            if (!hostnameMap.has(client)) {
-                hostnameMap.set(client, nameGenerator());
+        // Hostname Redaction logic: Maintain consistency within a single summary
+        if (hostnameMap) {
+            let pseudonym = hostnameMap.get(client);
+            if (!pseudonym) {
+                pseudonym = nameGenerator ? nameGenerator() : `Client-${hostnameMap.size + 1}`;
+                hostnameMap.set(client, pseudonym);
             }
-            return hostnameMap.get(client) as string;
+            return pseudonym;
         }
 
         return "Client-Redacted";
