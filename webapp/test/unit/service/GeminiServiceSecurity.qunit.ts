@@ -17,13 +17,11 @@ QUnit.test("anonymizeClient should redact PII from hostnames", function(assert) 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     assert.strictEqual(anonymize("2001:db8::1"), "2001:db8::xxxx", "IPv6 should be anonymized");
 
-    // Hostnames (Vulnerability)
+    // Hostnames
     const hostname = "Johns-iPhone";
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
     const result = anonymize(hostname);
 
-    // This assertion expects the FIX to be implemented.
-    // Currently it will FAIL because result will be "Johns-iPhone"
     assert.notEqual(result, hostname, "Hostname should be redacted");
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     assert.ok(result.startsWith("Client-") || result.includes("xxx"), "Hostname should be masked");
