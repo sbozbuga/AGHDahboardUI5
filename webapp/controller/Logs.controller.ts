@@ -47,8 +47,10 @@ export default class Logs extends BaseController {
 	private _sSearchQuery: string = "";
 	private _aViewSettingsFilters: Filter[] = [];
 	private _aSorters: Sorter[] = [];
+	private _iSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
 	private static readonly DEFAULT_LIMIT = 1000;
+	private static readonly SEARCH_DELAY = 300;
 
 	public onInit(): void {
 		// apply content density mode to root view
@@ -179,11 +181,38 @@ export default class Logs extends BaseController {
 		}
 	}
 
+	public onExit(): void {
+		super.onExit();
+		if (this._iSearchTimer) {
+			clearTimeout(this._iSearchTimer);
+			this._iSearchTimer = null;
+		}
+	}
+
 	public onSearch(event: Event): void {
 		const source = event.getSource();
 		if (!(source instanceof SearchField)) return;
-		this._sSearchQuery = source.getValue();
-		this._applyFilters();
+
+		const sQuery = source.getValue();
+		const sEventId = event.getId();
+
+		if (this._iSearchTimer) {
+			clearTimeout(this._iSearchTimer);
+			this._iSearchTimer = null;
+		}
+
+		if (sEventId === "search") {
+			// Immediate search
+			this._sSearchQuery = sQuery;
+			this._applyFilters();
+		} else {
+			// Debounced search
+			this._iSearchTimer = setTimeout(() => {
+				this._sSearchQuery = sQuery;
+				this._applyFilters();
+				this._iSearchTimer = null;
+			}, Logs.SEARCH_DELAY);
+		}
 	}
 
 	private _applyFilters(): void {
