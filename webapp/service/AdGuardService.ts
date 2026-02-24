@@ -318,6 +318,13 @@ export default class AdGuardService {
 
     private _updateTopOccurrences(occurrences: number[], val: number): void {
         const limit = 5;
+
+        // Optimization: Early exit if val is smaller than or equal to the smallest item (last item)
+        // This avoids iterating through the list when the new value is not a candidate for top K.
+        if (occurrences.length === limit && val <= occurrences[limit - 1]) {
+            return;
+        }
+
         let i = 0;
         while (i < occurrences.length && val <= occurrences[i]) {
             i++;
