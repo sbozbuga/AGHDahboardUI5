@@ -112,5 +112,14 @@ export default {
         } else {
             return "Good";
         }
+    },
+
+    /**
+     * Returns the length of an array or 0 if null/undefined.
+     * @param list Array to check length of
+     * @returns Length of array
+     */
+    getLength: function (list: unknown[] | null | undefined): number {
+        return list && Array.isArray(list) ? list.length : 0;
     }
 };
