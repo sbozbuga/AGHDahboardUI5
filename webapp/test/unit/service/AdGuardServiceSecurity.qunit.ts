@@ -34,6 +34,7 @@ QUnit.test("_isSafeUrl validates URLs correctly", function (assert) {
     assert.notOk(isSafeUrl("http://8.8.8.8"), "Public IP 8.8.8.8 is unsafe");
     assert.notOk(isSafeUrl("http://172.32.0.1/"), "Public IP 172.32.x.x is unsafe");
     assert.notOk(isSafeUrl("http://1.1.1.1"), "Public IP 1.1.1.1 is unsafe");
+    assert.notOk(isSafeUrl("//attacker.com"), "Protocol-relative URL is unsafe");
 });
 
 QUnit.test("_openLoginPopup warns on unsafe URL", function (assert) {

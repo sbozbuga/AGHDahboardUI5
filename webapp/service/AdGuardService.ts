@@ -103,7 +103,8 @@ export default class AdGuardService {
         try {
             // Handle relative URLs
             if (url.startsWith("/")) {
-                return true;
+                // Ensure it's not a protocol-relative URL (e.g., //attacker.com)
+                return !url.startsWith("//");
             }
 
             const urlObj = new URL(url);
@@ -187,6 +188,9 @@ export default class AdGuardService {
         try {
             // If it's a relative URL (starts with /), it's safe (same origin)
             if (targetUrl.startsWith("/")) {
+                if (targetUrl.startsWith("//")) {
+                    throw new Error("Protocol-relative URLs are not allowed");
+                }
                 // Safe
             } else {
                 const parsed = new URL(targetUrl);
