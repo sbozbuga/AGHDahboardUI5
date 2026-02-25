@@ -511,12 +511,12 @@ export default class Logs extends BaseController {
 			const header = "Time,Client,Domain,Type,Status,Elapsed(ms),Reason";
 			const rows = data.map(log => {
 				const time = log.time instanceof Date ? log.time.toISOString() : log.time;
-				const client = log.client;
-				const domain = log.question?.name || "";
-				const type = log.question?.type || "";
-				const status = log.status;
-				const elapsed = log.elapsedMs;
-				const reason = log.reason;
+				const client = this._escapeCsvField(log.client);
+				const domain = this._escapeCsvField(log.question?.name);
+				const type = this._escapeCsvField(log.question?.type);
+				const status = this._escapeCsvField(log.status);
+				const elapsed = this._escapeCsvField(log.elapsedMs);
+				const reason = this._escapeCsvField(log.reason);
 				return `${time},${client},${domain},${type},${status},${elapsed},${reason}`;
 			}).join("\n");
 
@@ -524,5 +524,24 @@ export default class Logs extends BaseController {
 
 			this.copyToClipboard(csvContent, this.getText("listCopied"), source);
 		}
+	}
+
+	private _escapeCsvField(value: string | number | boolean | null | undefined): string {
+		if (value === null || value === undefined) {
+			return "";
+		}
+		let str = String(value);
+
+		// Prevent Formula Injection
+		if (/^[=+\-@\t\r]/.test(str)) {
+			str = "'" + str;
+		}
+
+		// Quote if necessary
+		if (/[",\n\r]/.test(str)) {
+			str = '"' + str.replace(/"/g, '""') + '"';
+		}
+
+		return str;
 	}
 }
