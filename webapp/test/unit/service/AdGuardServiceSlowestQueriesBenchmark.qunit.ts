@@ -45,7 +45,7 @@ QUnit.test("getSlowestQueries performance with high repetition and mixed values"
     // @ts-expect-error: Mocking fetch
     globalThis.fetch = async () => {
         // Return a copy to simulate parsing overhead if needed, though here we care about processing
-        const copy = JSON.parse(JSON.stringify(mockResponse));
+        const copy = JSON.parse(JSON.stringify(mockResponse)) as RawAdGuardData;
         return Promise.resolve({
             ok: true,
             status: 200,
