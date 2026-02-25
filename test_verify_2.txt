@@ -1,0 +1,93 @@
+
+> ui5-agh-dashboard@1.0.0 test-runner-coverage
+> ui5-test-runner --url http://localhost:8080/test/testsuite.qunit.html --coverage -ccb 60 -ccf 100 -ccl 80 -ccs 80
+
+﻿       _ ____        _            _
+ _   _(_) ___|      | |_ ___  ___| |_      _ __ _   _ _ __  _ __   ___ _ __
+| | | | |___ \ _____| __/ _ \/ __| __|____| '__| | | | '_ \| '_ \ / _ \ '__|
+| |_| | |___) |_____| ||  __/\__ \ ||_____| |  | |_| | | | | | | |  __/ |
+ \__,_|_|____/       \__\___||___/\__|    |_|   \__,_|_| |_|_| |_|\___|_|
+ui5-test-runner@5.13.0 / Node.js v22.22.0 / 2026-02-25T01:25:48.425Z (0)
+x86_64 / 4x Intel(R) Xeon(R) Processor @ 2.30GHz
+UI5 version used by the local server: 1.145.0
+Server running at http://192.168.0.2:42369/
+
+00:01 │ Probing browser instantiation command
+──────┴──────────────────────────────────────
+puppeteer@24.37.5 in ...s/.nvm/versions/node/v22.22.0/lib/node_modules/puppeteer
+Browser capabilities :
+ ├─ modules
+ │  └─  puppeteer
+ ├─ screenshot: ".png"
+ ├─ scripts: true
+ ├─ parallel: true
+ └─ traces: ["console","network"]
+nyc@17.1.0 in /home/jules/.nvm/versions/node/v22.22.0/lib/node_modules/nyc
+⚠️ [SKPNYC] Skipping nyc instrumentation (--url)
+
+00:01 │ Probing urls
+──────┴─────────────
+00:01 >> http://localhost:8080/test/testsuite.qunit.html           [vDOUTCY$Tfg]
+00:02 << http://localhost:8080/test/testsuite.qunit.html           [vDOUTCY$Tfg]
+
+00:02 │ Executing test pages
+──────┴─────────────────────
+00:02 >> ...ces/ui5/aghd/testsuite.qunit&test=integration/opaTests [AuLs7sNHqOI]
+00:02 >> ...resources/ui5/aghd/testsuite.qunit&test=unit/unitTests [fJvQ1qbgEB8]
+00:11 << ...ghd/testsuite.qunit&test=integration/opaTests  (00:05) [AuLs7sNHqOI]
+00:11 << .../ui5/aghd/testsuite.qunit&test=unit/unitTests  (00:03) [fJvQ1qbgEB8]
+
+00:11 │ Generating coverage report
+──────┴───────────────────────────
+nyc merge /app/.nyc_output /app/.nyc_output/merged/coverage.json
+coverage files in /app/.nyc_output merged into /app/.nyc_output/merged/coverage.json
+
+
+00:12 │ Checking remote source files
+──────┴─────────────────────────────
+nyc report --reporter=lcov --reporter=cobertura --reporter=text --branches=60 --functions=100 --lines=80 --statements=80 --check-coverage --temp-dir /app/.nyc_output/merged --report-dir /app/coverage --nycrc-path /app/.nyc_output/settings/.nycrc.json
+--------------------------|---------|----------|---------|---------|--------------------------------
+File                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+--------------------------|---------|----------|---------|---------|--------------------------------
+All files                 |   48.41 |    48.72 |   48.34 |   50.99 |
+ webapp                   |   47.36 |    16.66 |   33.33 |   47.36 |
+  Component.ts            |   47.36 |    16.66 |   33.33 |   47.36 | 31-33,50-61
+ webapp/controller        |   25.23 |    23.32 |   28.23 |    27.5 |
+  App.controller.ts       |   83.33 |      100 |   66.66 |   83.33 | 21
+  BaseController.ts       |    9.82 |    14.58 |   26.66 |    9.61 | 27-37,48-177,195-238
+  Dashboard.controller.ts |    32.8 |    33.85 |   32.25 |   37.88 | ...160,175-176,191-258,274-371
+  Login.controller.ts     |      12 |       10 |      20 |   12.24 | 17-39,56-108
+  Logs.controller.ts      |   27.36 |    18.91 |   22.58 |   29.84 | ...161,185-188,219-378,406-525
+ webapp/model             |    92.3 |    85.71 |   88.88 |    92.1 |
+  AdGuardTypes.ts         |       0 |        0 |       0 |       0 |
+  Constants.ts            |     100 |      100 |     100 |     100 |
+  formatter.ts            |    92.1 |    85.71 |   88.88 |   91.89 | 38-41
+ webapp/service           |   78.53 |    72.84 |   74.07 |   79.48 |
+  AdGuardService.ts       |   71.49 |    68.71 |   61.53 |   72.14 | ...436-444,460,475,477,488-491
+  GeminiService.ts        |   89.36 |    77.08 |   93.75 |   91.17 | 55,92,117-121,143,272,308-311
+  SettingsService.ts      |   79.71 |    79.06 |      75 |   79.71 | ...7,49,61-62,69-70,92,133-139
+--------------------------|---------|----------|---------|---------|--------------------------------
+ERROR: Coverage for lines (50.99%) does not meet global threshold (80%)
+ERROR: Coverage for functions (48.34%) does not meet global threshold (100%)
+ERROR: Coverage for branches (48.72%) does not meet global threshold (60%)
+ERROR: Coverage for statements (48.41%) does not meet global threshold (80%)
+
+
+
+00:12 │ Generating reports
+──────┴───────────────────
+┌──────────────────────────────────────────────────────────────────────────────┐
+│...-resources/ui5/aghd/testsuite.qunit&test=integration/opaTests 🥼      1/1  │
+│...e=test-resources/ui5/aghd/testsuite.qunit&test=unit/unitTests 🧪 🐞  58/59 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+[....html?testsuite=test-resources/ui5/aghd/testsuite.qunit&test=unit/unitTests]
+Page execution folder name : fJvQ1qbgEB8
+Logs Controller ▶ formatInsights sanitizes HTML and applies Markdown
+Markdown Bold works
+Mixed Markdown and HTML works
+Newlines are converted
+
+
+00:12 │ Reports generated
+──────┴──────────────────
