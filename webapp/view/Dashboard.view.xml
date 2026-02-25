@@ -93,7 +93,7 @@
                                                 </layoutData>
                                             </Button>
                                         </HBox>
-                                        <Text text="{count}" />
+                                        <Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
                                     </cells>
                                 </ColumnListItem>
                             </items>
@@ -133,7 +133,7 @@
                                                 </layoutData>
                                             </Button>
                                         </HBox>
-                                        <Text text="{count}" />
+                                        <Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
                                     </cells>
                                 </ColumnListItem>
                             </items>
@@ -173,7 +173,7 @@
                                                 </layoutData>
                                             </Button>
                                         </HBox>
-                                        <Text text="{count}" />
+                                        <Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
                                     </cells>
                                 </ColumnListItem>
                             </items>

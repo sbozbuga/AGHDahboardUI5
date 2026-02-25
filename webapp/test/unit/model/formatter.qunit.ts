@@ -15,6 +15,37 @@ QUnit.test("Should handle null or undefined", function (assert) {
     assert.strictEqual(formatter.formatElapsed(undefined), "0.000", "Returns 0.000 for undefined");
 });
 
+QUnit.module("formatter - formatNumber");
+
+QUnit.test("Should format numbers with thousands separators", function (assert) {
+    // NumberFormat uses grouping enabled. The separator depends on locale.
+    // Assuming 'en' locale for the test environment or generic.
+    // However, NumberFormat behavior might vary.
+    // We can check if it contains a separator if value > 1000.
+
+    const val = 1234;
+    const formatted = formatter.formatNumber(val);
+    // Check if it's "1,234" or "1.234" depending on locale
+    // Just check length is 5 (4 digits + 1 separator)
+    assert.ok(formatted.length > 4, "Output should be formatted with separator");
+    assert.ok(formatted.includes(",") || formatted.includes(".") || formatted.includes(" ") || formatted.includes("\u202f"), "Output should contain a separator");
+
+    // Check simple number
+    assert.strictEqual(formatter.formatNumber(123), "123", "Formats 123 correctly without separator");
+});
+
+QUnit.test("Should handle string input", function (assert) {
+    const formatted = formatter.formatNumber("1234");
+    assert.ok(formatted.length > 4, "Formats string input correctly");
+});
+
+QUnit.test("Should handle null/undefined/0", function (assert) {
+    assert.strictEqual(formatter.formatNumber(0), "0", "Formats 0 correctly");
+    assert.strictEqual(formatter.formatNumber(null), "0", "Formats null as 0");
+    assert.strictEqual(formatter.formatNumber(undefined), "0", "Formats undefined as 0");
+});
+
+
 QUnit.module("formatter - slowestTooltip");
 
 QUnit.test("Should format sorted array correctly without re-sorting", function (assert) {

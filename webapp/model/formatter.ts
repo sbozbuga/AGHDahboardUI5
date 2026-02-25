@@ -1,7 +1,9 @@
 import formatMessage from "sap/base/strings/formatMessage";
 import DateFormat from "sap/ui/core/format/DateFormat";
+import NumberFormat from "sap/ui/core/format/NumberFormat";
 
 const oDateTimeFormat = DateFormat.getDateTimeInstance({ pattern: "yyyy-MM-dd HH:mm:ss.SSS" });
+const oIntegerFormat = NumberFormat.getIntegerInstance({ groupingEnabled: true });
 
 export default {
     formatMessage: formatMessage,
@@ -17,6 +19,22 @@ export default {
         }
         const oDate = date instanceof Date ? date : new Date(date);
         return oDateTimeFormat.format(oDate);
+    },
+
+    /**
+     * Formats a number with thousands separators.
+     * @param value Number or string to format
+     * @returns Formatted string (e.g. "1,234") or "0"
+     */
+    formatNumber: function (value: number | string | null | undefined): string {
+        if (value === null || value === undefined) {
+            return "0";
+        }
+        const num = typeof value === 'string' ? parseFloat(value) : value;
+        if (isNaN(num)) {
+            return "0";
+        }
+        return oIntegerFormat.format(num);
     },
 
     /**
