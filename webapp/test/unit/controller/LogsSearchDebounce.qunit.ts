@@ -44,8 +44,7 @@ QUnit.module("Logs Controller Search Debounce", {
 
         // Spy on _applyFilters
         ctx.applyFiltersSpy = { callCount: 0 };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (ctx.controller as any)._applyFilters = () => {
+        (ctx.controller as unknown as { _applyFilters: () => void })._applyFilters = () => {
             ctx.applyFiltersSpy.callCount++;
         };
     },

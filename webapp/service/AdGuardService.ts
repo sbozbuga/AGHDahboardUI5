@@ -5,6 +5,14 @@ import MessageBox from "sap/m/MessageBox";
 import MessageToast from "sap/m/MessageToast";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
 
+export interface SlowestQueryEntry {
+    domain: string;
+    elapsedMs: number;
+    client: string;
+    reason: string;
+    occurrences: number[];
+}
+
 /**
  * Service for interacting with AdGuard Home API
  * @namespace ui5.aghd.service
@@ -14,6 +22,9 @@ export default class AdGuardService {
     private static instance: AdGuardService;
     private _isLoginDialogOpen = false;
     private _resourceBundle: ResourceBundle | null = null;
+
+    // Optimization: Reuse map instance to reduce memory allocation during high-frequency updates
+    private _slowestQueriesMap = new Map<string, SlowestQueryEntry>();
 
     public static getInstance(): AdGuardService {
         if (!AdGuardService.instance) {
@@ -43,7 +54,7 @@ export default class AdGuardService {
     private static readonly TOP_LIST_LIMIT = 10;
     private static readonly REQUEST_TIMEOUT = 10000;
     private static readonly SLOWEST_QUERY_CACHE_DURATION = 60000;
-    private _slowestQueriesCache: { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[]; }[] | null = null;
+    private _slowestQueriesCache: SlowestQueryEntry[] | null = null;
     private _slowestQueriesCacheTime: number = 0;
     private _slowestQueriesCacheDepth: number = 0;
 
@@ -307,16 +318,13 @@ export default class AdGuardService {
     }
 
     private async _fetchRawQueryLog(limit: number, offset: number, filterStatus?: string): Promise<RawAdGuardData> {
-        const params = new URLSearchParams({
-            limit: limit.toString(),
-            offset: offset.toString()
-        });
+        // Optimization: Use string concatenation instead of URLSearchParams to reduce object allocation
+        let url = `${Constants.ApiEndpoints.QueryLog}?limit=${limit}&offset=${offset}`;
 
         if (filterStatus) {
-            params.append("response_status", filterStatus);
+            url += `&response_status=${encodeURIComponent(filterStatus)}`;
         }
 
-        const url = `${Constants.ApiEndpoints.QueryLog}?${params.toString()}`;
         return await this._request<RawAdGuardData>(url);
     }
 
@@ -342,7 +350,7 @@ export default class AdGuardService {
         }
     }
 
-    public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<{ domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[]; }[]> {
+    public async getSlowestQueries(scanDepth: number = AdGuardService.DEFAULT_SCAN_DEPTH): Promise<SlowestQueryEntry[]> {
         // Cache Optimization: Check if we have a valid cache entry
         if (this._slowestQueriesCache &&
             (Date.now() - this._slowestQueriesCacheTime < AdGuardService.SLOWEST_QUERY_CACHE_DURATION) &&
@@ -353,7 +361,9 @@ export default class AdGuardService {
         try {
             const data = await this._fetchRawQueryLog(scanDepth, 0);
 
-            const domainMap = new Map<string, { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }>();
+            // Optimization: Clear existing map to reuse backing store instead of allocating new Map
+            this._slowestQueriesMap.clear();
+            const domainMap = this._slowestQueriesMap;
 
             for (const e of data.data) {
                 const rawElapsed = e.elapsedMs;
@@ -382,7 +392,7 @@ export default class AdGuardService {
                 }
             }
 
-            const top10: { domain: string; elapsedMs: number; client: string; reason: string; occurrences: number[] }[] = [];
+            const top10: SlowestQueryEntry[] = [];
             const limit = 10;
 
             for (const item of domainMap.values()) {
