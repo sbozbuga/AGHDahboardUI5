@@ -1,5 +1,7 @@
 import Dashboard from "ui5/aghd/controller/Dashboard.controller";
-import AdGuardService from "ui5/aghd/service/AdGuardService";
+import StatsService from "ui5/aghd/service/StatsService";
+import LogService from "ui5/aghd/service/LogService";
+import AuthService from "ui5/aghd/service/AuthService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import MessageBox from "sap/m/MessageBox";
@@ -18,7 +20,9 @@ interface TestContext {
     model: JSONModel;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockService: any;
-    originalGetInstance: () => AdGuardService;
+    originalGetStatsInstance: () => StatsService;
+    originalGetLogInstance: () => LogService;
+    originalGetAuthInstance: () => AuthService;
 }
 
 QUnit.module("Dashboard Controller Performance");
@@ -32,7 +36,7 @@ QUnit.test("Refresh Interval should be optimized", function (assert) {
 });
 
 QUnit.module("Dashboard Polling Logic", {
-    beforeEach: function() {
+    beforeEach: function () {
         const ctx = this as unknown as TestContext;
         ctx.controller = new Dashboard("dashboard");
 
@@ -40,9 +44,9 @@ QUnit.module("Dashboard Polling Logic", {
         const model = new JSONModel();
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ctx.controller.getView = (() => ({
-            setModel: () => {},
+            setModel: () => { },
             getModel: () => model,
-            setBusy: () => {}
+            setBusy: () => { }
         })) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
         ctx.model = model;
 
@@ -75,15 +79,15 @@ QUnit.module("Dashboard Polling Logic", {
             ctx.eventListeners[event] = handler;
         };
         document.removeEventListener = (event: string, handler: EventListenerOrEventListenerObject) => {
-             if (ctx.eventListeners[event] === handler) {
-                 delete ctx.eventListeners[event];
-             }
+            if (ctx.eventListeners[event] === handler) {
+                delete ctx.eventListeners[event];
+            }
         };
 
         // Save original hidden property descriptor
         ctx.originalHiddenDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'hidden');
     },
-    afterEach: function() {
+    afterEach: function () {
         const ctx = this as unknown as TestContext;
         ctx.controller.destroy();
         window.setTimeout = ctx.originalSetTimeout;
@@ -98,7 +102,7 @@ QUnit.module("Dashboard Polling Logic", {
     }
 });
 
-QUnit.test("onInit starts polling and registers visibility listener", function(this: TestContext, assert: Assert) {
+QUnit.test("onInit starts polling and registers visibility listener", function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
     ctx.controller.onInit();
@@ -107,7 +111,7 @@ QUnit.test("onInit starts polling and registers visibility listener", function(t
     assert.ok(ctx.eventListeners["visibilitychange"], "Visibility listener registered");
 });
 
-QUnit.test("onExit stops polling and removes visibility listener", function(this: TestContext, assert: Assert) {
+QUnit.test("onExit stops polling and removes visibility listener", function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
     ctx.controller.onInit();
@@ -121,7 +125,7 @@ QUnit.test("onExit stops polling and removes visibility listener", function(this
     assert.notOk(ctx.eventListeners["visibilitychange"], "Visibility listener removed");
 });
 
-QUnit.test("onVisibilityChange pauses polling when hidden", function(this: TestContext, assert: Assert) {
+QUnit.test("onVisibilityChange pauses polling when hidden", function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
     ctx.controller.onInit();
@@ -148,7 +152,7 @@ QUnit.test("onVisibilityChange pauses polling when hidden", function(this: TestC
 });
 
 QUnit.module("Dashboard Data Fetching", {
-    beforeEach: function(this: TestContext) {
+    beforeEach: function (this: TestContext) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
         ctx.controller = new Dashboard("dashboard");
@@ -157,14 +161,16 @@ QUnit.module("Dashboard Data Fetching", {
         // Mock getView
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ctx.controller.getView = (() => ({
-            setModel: () => {},
+            setModel: () => { },
             getModel: () => ctx.model,
-            setBusy: () => {}
+            setBusy: () => { }
         })) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-        // Mock AdGuardService
+        // Mock Services
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        ctx.originalGetInstance = AdGuardService.getInstance;
+        ctx.originalGetStatsInstance = StatsService.getInstance;
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        ctx.originalGetLogInstance = LogService.getInstance;
 
         ctx.mockService = {
             getStats: () => Promise.resolve({ num_dns_queries: 100 }),
@@ -173,17 +179,20 @@ QUnit.module("Dashboard Data Fetching", {
         };
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        AdGuardService.getInstance = () => ctx.mockService;
+        StatsService.getInstance = () => ctx.mockService;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        LogService.getInstance = () => ctx.mockService;
     },
-    afterEach: function(this: TestContext) {
+    afterEach: function (this: TestContext) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
         ctx.controller.destroy();
-        AdGuardService.getInstance = ctx.originalGetInstance;
+        StatsService.getInstance = ctx.originalGetStatsInstance;
+        LogService.getInstance = ctx.originalGetLogInstance;
     }
 });
 
-QUnit.test("onRefreshStats fetches slowest queries on first run", async function(this: TestContext, assert: Assert) {
+QUnit.test("onRefreshStats fetches slowest queries on first run", async function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
     let called = false;
@@ -197,7 +206,7 @@ QUnit.test("onRefreshStats fetches slowest queries on first run", async function
     assert.ok(called, "getSlowestQueries called on first run");
 });
 
-QUnit.test("onRefreshStats skips slowest queries if logs unchanged", async function(this: TestContext, assert: Assert) {
+QUnit.test("onRefreshStats skips slowest queries if logs unchanged", async function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
 
@@ -217,7 +226,7 @@ QUnit.test("onRefreshStats skips slowest queries if logs unchanged", async funct
     assert.notOk(called, "getSlowestQueries skipped when log time matches");
 });
 
-QUnit.test("onRefreshStats fetches slowest queries if logs changed", async function(this: TestContext, assert: Assert) {
+QUnit.test("onRefreshStats fetches slowest queries if logs changed", async function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
     const originalDateNow = Date.now;
@@ -251,7 +260,7 @@ QUnit.test("onRefreshStats fetches slowest queries if logs changed", async funct
     }
 });
 
-QUnit.test("onRefreshStats updates lastUpdated property", async function(this: TestContext, assert: Assert) {
+QUnit.test("onRefreshStats updates lastUpdated property", async function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
     const model = ctx.model; // Use the mocked model directly
@@ -270,22 +279,22 @@ QUnit.module("Dashboard Logout Logic", {
         const ctx = this;
         ctx.controller = new Dashboard("dashboard");
 
-        // Mock AdGuardService
+        // Mock AuthService
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        ctx.originalGetInstance = AdGuardService.getInstance;
+        ctx.originalGetAuthInstance = AuthService.getInstance;
 
         ctx.mockService = {
-            logout: () => {}
+            logout: () => { }
         };
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        AdGuardService.getInstance = () => ctx.mockService;
+        AuthService.getInstance = () => ctx.mockService;
     },
     afterEach: function (this: TestContext) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
         ctx.controller.destroy();
-        AdGuardService.getInstance = ctx.originalGetInstance;
+        AuthService.getInstance = ctx.originalGetAuthInstance;
     }
 });
 
@@ -324,7 +333,7 @@ QUnit.test("onLogoutPress asks for confirmation", function (this: TestContext, a
     try {
         ctx.controller.onLogoutPress();
         assert.ok(confirmCalled, "MessageBox.confirm was called");
-        assert.ok(logoutCalled, "AdGuardService.logout was called after confirmation");
+        assert.ok(logoutCalled, "AuthService.logout was called after confirmation");
     } finally {
         // Restore
         MessageBox.confirm = originalConfirm;

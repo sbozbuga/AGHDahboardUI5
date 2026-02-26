@@ -1,5 +1,6 @@
 import Dashboard from "ui5/aghd/controller/Dashboard.controller";
-import AdGuardService from "ui5/aghd/service/AdGuardService";
+import StatsService from "ui5/aghd/service/StatsService";
+import LogService from "ui5/aghd/service/LogService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import JSONModel from "sap/ui/model/json/JSONModel";
 
@@ -8,11 +9,12 @@ interface TestContext {
     model: JSONModel;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockService: any;
-    originalGetInstance: () => AdGuardService;
+    originalGetStatsInstance: () => StatsService;
+    originalGetLogInstance: () => LogService;
 }
 
 QUnit.module("Dashboard Controller Performance Optimization", {
-    beforeEach: function(this: TestContext) {
+    beforeEach: function (this: TestContext) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
         ctx.controller = new Dashboard("dashboard");
@@ -21,14 +23,16 @@ QUnit.module("Dashboard Controller Performance Optimization", {
         // Mock getView
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ctx.controller.getView = (() => ({
-            setModel: () => {},
+            setModel: () => { },
             getModel: () => ctx.model,
-            setBusy: () => {}
+            setBusy: () => { }
         })) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-        // Mock AdGuardService
+        // Mock Services
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        ctx.originalGetInstance = AdGuardService.getInstance;
+        ctx.originalGetStatsInstance = StatsService.getInstance;
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        ctx.originalGetLogInstance = LogService.getInstance;
 
         ctx.mockService = {
             getStats: () => Promise.resolve({ num_dns_queries: 100 }),
@@ -37,17 +41,20 @@ QUnit.module("Dashboard Controller Performance Optimization", {
         };
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        AdGuardService.getInstance = () => ctx.mockService;
+        StatsService.getInstance = () => ctx.mockService;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        LogService.getInstance = () => ctx.mockService;
     },
-    afterEach: function(this: TestContext) {
+    afterEach: function (this: TestContext) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
         ctx.controller.destroy();
-        AdGuardService.getInstance = ctx.originalGetInstance;
+        StatsService.getInstance = ctx.originalGetStatsInstance;
+        LogService.getInstance = ctx.originalGetLogInstance;
     }
 });
 
-QUnit.test("Optimization: getSlowestQueries is throttled to 60s", async function(this: TestContext, assert: Assert) {
+QUnit.test("Optimization: getSlowestQueries is throttled to 60s", async function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
     let callCount = 0;

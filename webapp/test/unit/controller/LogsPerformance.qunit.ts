@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
 import LogsController from "ui5/aghd/controller/Logs.controller";
-import AdGuardService from "ui5/aghd/service/AdGuardService";
+import LogService from "ui5/aghd/service/LogService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import { Constants } from "ui5/aghd/model/Constants";
@@ -10,11 +10,11 @@ interface TestContext {
     model: JSONModel;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockService: any;
-    originalGetInstance: () => AdGuardService;
+    originalGetInstance: () => LogService;
 }
 
 QUnit.module("Logs Controller Performance Optimization", {
-    beforeEach: function(this: TestContext) {
+    beforeEach: function (this: TestContext) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
         ctx.controller = new LogsController("logs");
@@ -28,15 +28,15 @@ QUnit.module("Logs Controller Performance Optimization", {
         // Mock getView
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ctx.controller.getView = (() => ({
-            setModel: () => {},
+            setModel: () => { },
             getModel: () => ctx.model,
-            setBusy: () => {},
+            setBusy: () => { },
             byId: () => null // searchField, logsTable
         })) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-        // Mock AdGuardService
+        // Mock LogService
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        ctx.originalGetInstance = AdGuardService.getInstance;
+        ctx.originalGetInstance = LogService.getInstance;
 
         // Default Mock Data
         ctx.mockService = {
@@ -49,17 +49,17 @@ QUnit.module("Logs Controller Performance Optimization", {
         };
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        AdGuardService.getInstance = () => ctx.mockService;
+        LogService.getInstance = () => ctx.mockService;
     },
-    afterEach: function(this: TestContext) {
+    afterEach: function (this: TestContext) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
         ctx.controller.destroy();
-        AdGuardService.getInstance = ctx.originalGetInstance;
+        LogService.getInstance = ctx.originalGetInstance;
     }
 });
 
-QUnit.test("onRefreshLogs (Initial Load): Transforms data correctly without allocation overhead", async function(this: TestContext, assert: Assert) {
+QUnit.test("onRefreshLogs (Initial Load): Transforms data correctly without allocation overhead", async function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
 
@@ -82,7 +82,7 @@ QUnit.test("onRefreshLogs (Initial Load): Transforms data correctly without allo
     assert.strictEqual(data[1].question.name, "test2.com", "Second item data preserved");
 });
 
-QUnit.test("onRefreshLogs (Append): Appends data correctly using optimized push", async function(this: TestContext, assert: Assert) {
+QUnit.test("onRefreshLogs (Append): Appends data correctly using optimized push", async function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
 

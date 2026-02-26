@@ -10,10 +10,8 @@
 		<content>
 			<VBox class="sapUiSmallMargin">
                 <Text text="Analysis based on recent logs:" class="sapUiSmallMarginBottom" />
-				<FormattedText 
-                    htmlText="{/analysisHtml}" 
-                    width="100%" 
-                    class="sapUiSmallMarginBottom" />
+                <!-- HTML content takes formatting (strong headers, breaks) -->
+                <core:HTML content="{view>/analysisHtml}" preferDOM="false" />
 			</VBox>
 		</content>
 		<buttons>

@@ -1,15 +1,16 @@
-import AdGuardService from "ui5/aghd/service/AdGuardService";
+import StatsService from "ui5/aghd/service/StatsService";
+import LogService from "ui5/aghd/service/LogService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import { RawAdGuardData, RawAdGuardStats, RawLogEntry } from "ui5/aghd/model/AdGuardTypes";
 
-QUnit.module("AdGuardService", {
+QUnit.module("Integration Services Tests", {
     beforeEach: function () {
-        AdGuardService.getInstance().clearCache();
+        StatsService.getInstance().clearCache();
     }
 });
 
 QUnit.test("getStats limits the processing of top domains", async function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = StatsService.getInstance();
 
     // Create a large list of 100 items
     const largeList = Array.from({ length: 100 }, (_, i) => ({
@@ -49,7 +50,7 @@ QUnit.test("getStats limits the processing of top domains", async function (asse
 });
 
 QUnit.test("getQueryLog constructs correct URL with parameters", async function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = LogService.getInstance();
     const mockResponse: RawAdGuardData = { data: [] };
 
     const originalFetch = globalThis.fetch;
@@ -86,7 +87,7 @@ QUnit.test("getQueryLog constructs correct URL with parameters", async function 
 });
 
 QUnit.test("getQueryLog returns correctly processed LogEntry objects", async function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = LogService.getInstance();
 
     const mockResponse: RawAdGuardData = {
         data: [
@@ -162,7 +163,7 @@ QUnit.test("getQueryLog returns correctly processed LogEntry objects", async fun
 });
 
 QUnit.test("getSlowestQueries returns top 10 sorted items", async function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = StatsService.getInstance();
 
     // Create 50 log entries with random elapsed times
     const entries: RawLogEntry[] = Array.from({ length: 50 }, (_, i) => ({
@@ -189,9 +190,9 @@ QUnit.test("getSlowestQueries returns top 10 sorted items", async function (asse
     entries[20].question.name = "second.com";
 
     // Top 3..12: 3000..2100ms (10 items total needed, so we need 8 more high ones)
-    for(let k=0; k<8; k++) {
-        entries[30+k].elapsedMs = String(3000 - k*100) as unknown as number; // 3000, 2900, ..., 2300
-        entries[30+k].question.name = `high${k}.com`;
+    for (let k = 0; k < 8; k++) {
+        entries[30 + k].elapsedMs = String(3000 - k * 100) as unknown as number; // 3000, 2900, ..., 2300
+        entries[30 + k].question.name = `high${k}.com`;
     }
 
     const mockResponse: RawAdGuardData = { data: entries };
@@ -218,7 +219,7 @@ QUnit.test("getSlowestQueries returns top 10 sorted items", async function (asse
 
         // Verify sorted order
         let prev = slowest[0].elapsedMs;
-        for(let i=1; i<slowest.length; i++) {
+        for (let i = 1; i < slowest.length; i++) {
             assert.ok(slowest[i].elapsedMs <= prev, `Item ${i} (${slowest[i].elapsedMs}) should be <= previous (${prev})`);
             prev = slowest[i].elapsedMs;
         }
@@ -229,7 +230,7 @@ QUnit.test("getSlowestQueries returns top 10 sorted items", async function (asse
 });
 
 QUnit.test("getSlowestQueries strictly limits occurrences to top 5", async function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = StatsService.getInstance();
 
     // Create 50 log entries for the SAME domain with descending elapsed times
     const entries: RawLogEntry[] = Array.from({ length: 50 }, (_, i) => ({
@@ -250,7 +251,7 @@ QUnit.test("getSlowestQueries strictly limits occurrences to top 5", async funct
     // to trigger the threshold logic which depends on top 10 list analysis
     // But since we only have 1 dominant domain, it will be top 1.
     // Let's add 9 other dummy domains to fill top 10.
-    for(let k=0; k<9; k++) {
+    for (let k = 0; k < 9; k++) {
         entries.push({
             answer: [],
             original_answer: [],
@@ -299,7 +300,7 @@ QUnit.test("getSlowestQueries strictly limits occurrences to top 5", async funct
 });
 
 QUnit.test("getStats handles mixed key types in top lists", async function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = StatsService.getInstance();
 
     const mockResponse = {
         num_dns_queries: 100,

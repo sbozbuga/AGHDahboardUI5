@@ -17,7 +17,7 @@ interface TestContext {
 }
 
 QUnit.module("Logs Controller Optimization", {
-    beforeEach: function(this: TestContext) {
+    beforeEach: function (this: TestContext) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
         ctx.controller = new LogsController("logs");
@@ -30,16 +30,16 @@ QUnit.module("Logs Controller Optimization", {
 
         // Mock View
         ctx.controller.getView = (() => ({
-            setModel: () => {},
+            setModel: () => { },
             getModel: () => ctx.model,
-            setBusy: () => {},
+            setBusy: () => { },
             byId: () => null
-        })) as unknown as View;
+        })) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         // Mock Table and Binding
         ctx.mockBinding = {
-            filter: () => {},
-            sort: () => {}
+            filter: () => { },
+            sort: () => { }
         } as unknown as ListBinding;
 
         ctx.mockTable = new Table();
@@ -56,7 +56,7 @@ QUnit.module("Logs Controller Optimization", {
             return Promise.resolve();
         };
     },
-    afterEach: function(this: TestContext) {
+    afterEach: function (this: TestContext) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
         ctx.controller.destroy();
@@ -64,7 +64,7 @@ QUnit.module("Logs Controller Optimization", {
     }
 });
 
-QUnit.test("onUpdateFinished: Should NOT fetch when growing but data still available in model", function(this: TestContext, assert: Assert) {
+QUnit.test("onUpdateFinished: Should NOT fetch when growing but data still available in model", function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
 
@@ -84,7 +84,7 @@ QUnit.test("onUpdateFinished: Should NOT fetch when growing but data still avail
     assert.strictEqual(ctx.refreshSpy.called, false, "onRefreshLogs should NOT be called when actual < total");
 });
 
-QUnit.test("onUpdateFinished: Should fetch when growing and end of data reached", function(this: TestContext, assert: Assert) {
+QUnit.test("onUpdateFinished: Should fetch when growing and end of data reached", function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
 

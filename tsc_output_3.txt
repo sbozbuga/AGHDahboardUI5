@@ -1,0 +1,4 @@
+
+> ui5-agh-dashboard@1.0.0 ts-typecheck
+> tsc --noEmit
+

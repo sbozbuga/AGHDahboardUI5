@@ -16,7 +16,7 @@ interface TestContext {
 }
 
 QUnit.module("Logs Controller Search Debounce", {
-    beforeEach: function(this: TestContext) {
+    beforeEach: function (this: TestContext) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
         ctx.controller = new LogsController("logs");
@@ -27,16 +27,16 @@ QUnit.module("Logs Controller Search Debounce", {
 
         // Mock View
         ctx.controller.getView = (() => ({
-            setModel: () => {},
+            setModel: () => { },
             getModel: () => ctx.model,
-            setBusy: () => {},
+            setBusy: () => { },
             byId: () => null
-        })) as unknown as View;
+        })) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         // Mock Table and Binding
         ctx.mockBinding = {
-            filter: () => {},
-            sort: () => {}
+            filter: () => { },
+            sort: () => { }
         } as unknown as ListBinding;
 
         ctx.mockTable = new Table();
@@ -48,7 +48,7 @@ QUnit.module("Logs Controller Search Debounce", {
             ctx.applyFiltersSpy.callCount++;
         };
     },
-    afterEach: function(this: TestContext) {
+    afterEach: function (this: TestContext) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
         ctx.controller.destroy();
@@ -56,7 +56,7 @@ QUnit.module("Logs Controller Search Debounce", {
     }
 });
 
-QUnit.test("onSearch: Should debounce liveChange events", function(this: TestContext, assert: Assert) {
+QUnit.test("onSearch: Should debounce liveChange events", function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
     const done = assert.async();
@@ -79,7 +79,7 @@ QUnit.test("onSearch: Should debounce liveChange events", function(this: TestCon
     }, 400);
 });
 
-QUnit.test("onSearch: Should NOT debounce search (Enter) events", function(this: TestContext, assert: Assert) {
+QUnit.test("onSearch: Should NOT debounce search (Enter) events", function (this: TestContext, assert: Assert) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
 

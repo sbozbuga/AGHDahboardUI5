@@ -1,0 +1,14 @@
+
+> ui5-agh-dashboard@1.0.0 ts-typecheck
+> tsc --noEmit
+
+webapp/test/unit/controller/LogsOptimization.qunit.ts(32,9): error TS2322: Type 'View' is not assignable to type '() => View | undefined'.
+  Type 'View' provides no match for the signature '(): View | undefined'.
+webapp/test/unit/controller/LogsPerformance.qunit.ts(3,28): error TS2307: Cannot find module 'ui5/aghd/service/AdGuardService' or its corresponding type declarations.
+webapp/test/unit/controller/LogsSearchDebounce.qunit.ts(29,9): error TS2322: Type 'View' is not assignable to type '() => View | undefined'.
+  Type 'View' provides no match for the signature '(): View | undefined'.
+webapp/test/unit/service/AdGuardService.qunit.ts(1,28): error TS2307: Cannot find module 'ui5/aghd/service/AdGuardService' or its corresponding type declarations.
+webapp/test/unit/service/AdGuardServicePerf.qunit.ts(1,28): error TS2307: Cannot find module 'ui5/aghd/service/AdGuardService' or its corresponding type declarations.
+webapp/test/unit/service/AdGuardServicePerformance.qunit.ts(1,28): error TS2307: Cannot find module 'ui5/aghd/service/AdGuardService' or its corresponding type declarations.
+webapp/test/unit/service/AdGuardServiceSlowestQueriesBenchmark.qunit.ts(1,28): error TS2307: Cannot find module 'ui5/aghd/service/AdGuardService' or its corresponding type declarations.
+webapp/test/unit/service/AdGuardServiceSlowestQueriesBenchmark.qunit.ts(45,5): error TS2578: Unused '@ts-expect-error' directive.

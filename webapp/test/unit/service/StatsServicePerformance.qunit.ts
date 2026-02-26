@@ -1,18 +1,18 @@
-import AdGuardService from "ui5/aghd/service/AdGuardService";
+import StatsService from "ui5/aghd/service/StatsService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import { RawAdGuardData } from "ui5/aghd/model/AdGuardTypes";
 
-QUnit.module("AdGuardService Performance", {
+QUnit.module("StatsService Performance", {
     beforeEach: function () {
-        AdGuardService.getInstance().clearCache();
+        StatsService.getInstance().clearCache();
     },
     afterEach: function () {
-        AdGuardService.getInstance().clearCache();
+        StatsService.getInstance().clearCache();
     }
 });
 
 QUnit.test("getSlowestQueries caching behavior", async function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = StatsService.getInstance();
 
     // Create dummy data
     const entries = Array.from({ length: 10 }, (_, i) => ({

@@ -1,11 +1,11 @@
-import AdGuardService from "ui5/aghd/service/AdGuardService";
+import LogService from "ui5/aghd/service/LogService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import { RawAdGuardData, RawLogEntry } from "ui5/aghd/model/AdGuardTypes";
 
-QUnit.module("AdGuardService Performance");
+QUnit.module("LogService Performance");
 
 QUnit.test("getQueryLog performance with large dataset (5000 items)", async function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = LogService.getInstance();
     const count = 5000;
 
     // Create large dataset

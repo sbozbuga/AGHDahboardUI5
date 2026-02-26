@@ -15,6 +15,7 @@ import formatter from "../model/formatter";
 import Button from "sap/m/Button";
 import ResourceModel from "sap/ui/model/resource/ResourceModel";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
+import Control from "sap/ui/core/Control";
 
 /**
  * @namespace ui5.aghd.controller
@@ -52,6 +53,24 @@ export default class BaseController extends Controller {
             return bundle.getText(key, args) || key;
         }
         return key;
+    }
+
+    /**
+     * Typed helper to get a model from the view.
+     * @param name Optional model name
+     * @returns JSONModel
+     */
+    protected getViewModel(name?: string): JSONModel {
+        return this.getView()?.getModel(name) as JSONModel;
+    }
+
+    /**
+     * Typed helper to get a control by ID from the view.
+     * @param id The ID of the control
+     * @returns The dynamically typed control
+     */
+    protected getControl<T extends Control>(id: string): T {
+        return this.getView()?.byId(id) as T;
     }
 
     /**
