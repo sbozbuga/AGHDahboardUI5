@@ -8,7 +8,7 @@ import SearchField from "sap/m/SearchField";
 import Event from "sap/ui/base/Event";
 import ListBinding from "sap/ui/model/ListBinding";
 import Sorter from "sap/ui/model/Sorter";
-import AdGuardService from "../service/AdGuardService";
+import LogService from "../service/LogService";
 import Dialog from "sap/m/Dialog";
 import Button from "sap/m/Button";
 import Column from "sap/m/Column";
@@ -58,17 +58,22 @@ export default class Logs extends BaseController {
 		if (view) {
 			view.addStyleClass((this.getOwnerComponent() as AppComponent).getContentDensityClass());
 
-			// Initialize Model with Pagination Defaults
-			const modelData = {
-				data: [],
+			// Initialize Data Model (default)
+			const contentModel = new JSONModel({
+				data: []
+			});
+			contentModel.setSizeLimit(Logs.DEFAULT_LIMIT);
+			view.setModel(contentModel);
+
+			// Initialize UI State Model ('view')
+			const viewModel = new JSONModel({
 				limit: Logs.DEFAULT_LIMIT,
 				offset: 0,
 				total: 0,
-				advancedFilters: []
-			};
-			const model = new JSONModel(modelData);
-			model.setSizeLimit(Logs.DEFAULT_LIMIT);
-			view.setModel(model);
+				advancedFilters: [],
+				filterStatus: ""
+			});
+			view.setModel(viewModel, "view");
 		}
 
 		const router = UIComponent.getRouterFor(this);
@@ -78,23 +83,23 @@ export default class Logs extends BaseController {
 	public onRouteMatched(event: Event): void {
 		const view = this.getView();
 		if (!view) return;
-		const model = view.getModel() as JSONModel;
+		const viewModel = this.getViewModel("view");
 
 		const params = event.getParameters() as { arguments: RouteArguments };
 		const args = params.arguments;
 		const query = args["?query"];
 
 		// Handle Status Filter
-		if (query && query.status === "Blocked") {
-			model.setProperty(Constants.ModelProperties.FilterStatus, "filtered");
-			model.setProperty(Constants.ModelProperties.Offset, 0);
+		if (query && query.status === Constants.LogStatus.Blocked) {
+			viewModel.setProperty(Constants.ModelProperties.FilterStatus, "filtered");
+			viewModel.setProperty(Constants.ModelProperties.Offset, 0);
 		} else {
-			model.setProperty(Constants.ModelProperties.FilterStatus, "");
-			model.setProperty(Constants.ModelProperties.Offset, 0);
+			viewModel.setProperty(Constants.ModelProperties.FilterStatus, "");
+			viewModel.setProperty(Constants.ModelProperties.Offset, 0);
 		}
 
 		// Handle Search Query
-		const searchField = view.byId("searchField") as SearchField;
+		const searchField = this.getControl<SearchField>("searchField");
 		if (query && query.search) {
 			this._sSearchQuery = query.search;
 			if (searchField) {
@@ -117,29 +122,30 @@ export default class Logs extends BaseController {
 	public async onRefreshLogs(bAppend: boolean = false): Promise<void> {
 		const view = this.getView();
 		if (!view) return;
-		const model = view.getModel() as JSONModel;
+		const dataModel = this.getViewModel();
+		const viewModel = this.getViewModel("view");
 
-		const limit = (model.getProperty(Constants.ModelProperties.Limit) as number) || Logs.DEFAULT_LIMIT;
+		const limit = (viewModel.getProperty(Constants.ModelProperties.Limit) as number) || Logs.DEFAULT_LIMIT;
 		// If appending, use current offset; if refreshing, reset to 0
-		let offset = (model.getProperty(Constants.ModelProperties.Offset) as number) || 0;
+		let offset = (viewModel.getProperty(Constants.ModelProperties.Offset) as number) || 0;
 		if (!bAppend) {
 			offset = 0;
-			model.setProperty(Constants.ModelProperties.Offset, 0);
+			viewModel.setProperty(Constants.ModelProperties.Offset, 0);
 		}
 
-		const filterStatus = (model.getProperty(Constants.ModelProperties.FilterStatus) as string) || "";
+		const filterStatus = (viewModel.getProperty(Constants.ModelProperties.FilterStatus) as string) || "";
 
 		view.setBusy(true);
 
 		try {
-			const data = await AdGuardService.getInstance().getQueryLog(limit, offset, filterStatus);
+			const data = await LogService.getInstance().getQueryLog(limit, offset, filterStatus);
 
 			// Use processed data directly from service
 			const processedData = data.data;
 			const len = processedData.length;
 
 			if (bAppend) {
-				const currentData = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
+				const currentData = dataModel.getProperty(Constants.ModelProperties.Data) as LogEntry[];
 				// Optimization: Use pre-allocated array and indexed assignment to avoid resize overhead of push()
 				// and allocation of slice(). Significant for large datasets (e.g. 10k+ items).
 				const newData = new Array(currentData.length + len);
@@ -149,14 +155,14 @@ export default class Logs extends BaseController {
 				for (let i = 0; i < len; i++) {
 					newData[currentData.length + i] = processedData[i];
 				}
-				model.setProperty(Constants.ModelProperties.Data, newData);
+				dataModel.setProperty(Constants.ModelProperties.Data, newData);
 			} else {
-				model.setProperty(Constants.ModelProperties.Data, processedData);
+				dataModel.setProperty(Constants.ModelProperties.Data, processedData);
 			}
 
 			// Increment offset for next fetch
 			if (len > 0) {
-				model.setProperty(Constants.ModelProperties.Offset, offset + len);
+				viewModel.setProperty(Constants.ModelProperties.Offset, offset + len);
 			}
 
 		} catch (error) {
@@ -177,7 +183,7 @@ export default class Logs extends BaseController {
 		const actual = params.actual;
 		const total = params.total;
 
-		if (reason === "Growing" && actual >= total) {
+		if (reason === Constants.Events.Growing && actual >= total) {
 			// Attempt to fetch next chunk
 			void this.onRefreshLogs(true);
 		}
@@ -203,7 +209,7 @@ export default class Logs extends BaseController {
 			this._iSearchTimer = null;
 		}
 
-		if (sEventId === "search") {
+		if (sEventId === Constants.Events.Search) {
 			// Immediate search
 			this._sSearchQuery = sQuery;
 			this._applyFilters();
@@ -220,7 +226,7 @@ export default class Logs extends BaseController {
 	private _applyFilters(): void {
 		const view = this.getView();
 		if (!view) return;
-		const table = view.byId("logsTable") as Table;
+		const table = this.getControl<Table>("logsTable");
 		const binding = table.getBinding("items") as ListBinding;
 
 		const aFilters: Filter[] = [];
@@ -242,8 +248,8 @@ export default class Logs extends BaseController {
 		}
 
 		// 3. Advanced Filters
-		const model = view.getModel() as JSONModel;
-		const advancedFilters = model.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
+		const viewModel = this.getViewModel("view");
+		const advancedFilters = viewModel.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
 
 		if (advancedFilters && advancedFilters.length > 0) {
 			advancedFilters.forEach(f => {
@@ -282,7 +288,7 @@ export default class Logs extends BaseController {
 		const view = this.getView();
 		if (!view) return;
 
-		const table = view.byId("logsTable") as Table;
+		const table = this.getControl<Table>("logsTable");
 		const binding = table.getBinding("items") as ListBinding;
 
 		const params = event.getParameters() as unknown as ViewSettingsEventParams;
@@ -328,7 +334,7 @@ export default class Logs extends BaseController {
 
 		const view = this.getView();
 		if (view) {
-			const table = view.byId("logsTable") as Table;
+			const table = this.getControl<Table>("logsTable");
 			const binding = table.getBinding("items") as ListBinding;
 			binding.sort(this._aSorters);
 		}
@@ -338,7 +344,7 @@ export default class Logs extends BaseController {
 		const view = this.getView();
 		if (!view) return;
 
-		const table = view.byId("logsTable") as Table;
+		const table = this.getControl<Table>("logsTable");
 		table.getColumns().forEach((col: Column) => {
 			const header = col.getHeader();
 			if (header && header !== activeButton && header instanceof Button) {
@@ -357,7 +363,7 @@ export default class Logs extends BaseController {
 
 		const view = this.getView();
 		if (!view) return;
-		const model = view.getModel() as JSONModel;
+		const model = this.getViewModel();
 		const logs = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
 
 		if (!logs || logs.length === 0) {
@@ -371,8 +377,10 @@ export default class Logs extends BaseController {
 			const insights = await GeminiService.getInstance().generateInsights(logs);
 			const html = this.formatInsights(insights);
 
-			model.setProperty("/analysisHtml", html);
-			model.setProperty("/analysisText", insights);
+			// We put these on the view model so they don't pollute the data model
+			const viewModel = this.getViewModel("view");
+			viewModel.setProperty("/analysisHtml", html);
+			viewModel.setProperty("/analysisText", insights);
 			void this.onOpenInsights();
 		} catch (error) {
 			MessageBox.error((error as Error).message);
@@ -382,16 +390,14 @@ export default class Logs extends BaseController {
 	}
 
 	public onCopyInsights(event: Event): void {
-		const view = this.getView();
-		if (!view) return;
-		const model = view.getModel() as JSONModel;
-		const text = model.getProperty("/analysisText") as string;
+		const viewModel = this.getViewModel("view");
+		const text = viewModel.getProperty("/analysisText") as string;
 		const source = event.getSource();
 
 		if (!text) return;
 
-        // Pass source as Button if it is one, otherwise undefined
-        const btn = source instanceof Button ? source : undefined;
+		// Pass source as Button if it is one, otherwise undefined
+		const btn = source instanceof Button ? source : undefined;
 		this.copyToClipboard(text, this.getText("listCopied"), btn);
 	}
 
@@ -412,7 +418,7 @@ export default class Logs extends BaseController {
 	public onCloseInsights(): void {
 		const view = this.getView();
 		if (!view) return;
-		(view.byId("insightsDialog") as Dialog).close();
+		this.getControl<Dialog>("insightsDialog").close();
 	}
 
 	// Advanced Filter Handlers
@@ -422,13 +428,11 @@ export default class Logs extends BaseController {
 	}
 
 	public onAddFilterRow(): void {
-		const view = this.getView();
-		if (!view) return;
-		const model = view.getModel() as JSONModel;
-		const filters = model.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
+		const viewModel = this.getViewModel("view");
+		const filters = viewModel.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
 
 		filters.push({ column: Constants.ColumnIds.ElapsedMs, operator: "GT", value: "" });
-		model.setProperty(Constants.ModelProperties.AdvancedFilters, filters);
+		viewModel.setProperty(Constants.ModelProperties.AdvancedFilters, filters);
 	}
 
 	public onRemoveFilterRow(event: Event): void {
@@ -441,13 +445,11 @@ export default class Logs extends BaseController {
 		const path = context.getPath();
 		const index = parseInt(path.split("/").pop() || "0", 10);
 
-		const view = this.getView();
-		if (!view) return;
-		const model = view.getModel() as JSONModel;
-		const filters = model.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
+		const viewModel = this.getViewModel("view");
+		const filters = viewModel.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
 
 		filters.splice(index, 1);
-		model.setProperty(Constants.ModelProperties.AdvancedFilters, filters);
+		viewModel.setProperty(Constants.ModelProperties.AdvancedFilters, filters);
 	}
 
 	public onConfirmAdvancedFilter(): void {
@@ -456,17 +458,16 @@ export default class Logs extends BaseController {
 	}
 
 	public onClearAdvancedFilters(): void {
-		const view = this.getView();
-		if (!view) return;
-		const model = view.getModel() as JSONModel;
-		model.setProperty(Constants.ModelProperties.AdvancedFilters, []);
+		const viewModel = this.getViewModel("view");
+		if (!viewModel) return;
+		viewModel.setProperty(Constants.ModelProperties.AdvancedFilters, []);
 		this._applyFilters();
 	}
 
 	public onCancelAdvancedFilter(): void {
 		const view = this.getView();
 		if (!view) return;
-		(view.byId("advancedFilterDialog") as Dialog).close();
+		this.getControl<Dialog>("advancedFilterDialog").close();
 
 	}
 
@@ -504,9 +505,7 @@ export default class Logs extends BaseController {
 		const source = event.getSource();
 		if (!(source instanceof Button)) return;
 
-		const view = this.getView();
-		if (!view) return;
-		const model = view.getModel() as JSONModel;
+		const model = this.getViewModel();
 		const data = model.getProperty("/data") as LogEntry[];
 
 		if (data && data.length > 0) {

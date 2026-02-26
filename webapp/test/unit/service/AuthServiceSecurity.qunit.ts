@@ -1,16 +1,16 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 /* eslint-disable */
-import AdGuardService from "ui5/aghd/service/AdGuardService";
+import AuthService from "ui5/aghd/service/AuthService";
 import SettingsService from "ui5/aghd/service/SettingsService";
 import MessageBox from "sap/m/MessageBox";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import sinon from "sap/ui/thirdparty/sinon";
 
-QUnit.module("AdGuardService Security");
+QUnit.module("AuthService Security");
 
 QUnit.test("_isSafeUrl validates URLs correctly", function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = AuthService.getInstance();
     // Access private method
     const isSafeUrl = (service as any)._isSafeUrl.bind(service);
 
@@ -38,9 +38,9 @@ QUnit.test("_isSafeUrl validates URLs correctly", function (assert) {
 });
 
 QUnit.test("_openLoginPopup warns on unsafe URL", function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = AuthService.getInstance();
     const openStub = sinon.stub(window, "open");
-    openStub.returns({ closed: false, close: () => {} } as Window);
+    openStub.returns({ closed: false, close: () => { } } as Window);
 
     const confirmStub = sinon.stub(MessageBox, "confirm");
 
@@ -59,7 +59,7 @@ QUnit.test("_openLoginPopup warns on unsafe URL", function (assert) {
         const args = confirmStub.getCall(0).args;
         const options = args[1];
         if (options && typeof options.onClose === "function") {
-             options.onClose(MessageBox.Action.OK);
+            options.onClose(MessageBox.Action.OK);
         }
 
         assert.ok(openStub.calledOnce, "window.open should be called after confirmation");
@@ -72,9 +72,9 @@ QUnit.test("_openLoginPopup warns on unsafe URL", function (assert) {
 });
 
 QUnit.test("_openLoginPopup proceeds on safe URL", function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = AuthService.getInstance();
     const openStub = sinon.stub(window, "open");
-    openStub.returns({ closed: false, close: () => {} } as Window);
+    openStub.returns({ closed: false, close: () => { } } as Window);
     const confirmStub = sinon.stub(MessageBox, "confirm");
 
     // Mock SettingsService to return safe URL

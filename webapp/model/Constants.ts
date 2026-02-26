@@ -29,5 +29,17 @@ export const Constants = {
         Login: "/control/login",
         Stats: "/control/stats",
         QueryLog: "/control/querylog"
+    },
+    LogStatus: {
+        Blocked: "Blocked",
+        Filtered: "Filtered",
+        SafeBrowsing: "SafeBrowsing"
+    },
+    FilterOperators: {
+        GreaterThan: "GT"
+    },
+    Events: {
+        Search: "search",
+        Growing: "Growing"
     }
 };

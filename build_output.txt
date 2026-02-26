@@ -1,0 +1,23 @@
+
+> ui5-agh-dashboard@1.0.0 build
+> ui5 build --clean-dest
+
+info graph:helpers:ui5Framework Using OpenUI5 version: 1.144.0
+info ProjectBuilder Preparing build for project ui5.aghd
+info ProjectBuilder   Target directory: ./dist
+info ProjectBuilder Cleaning target directory...
+info Project 1 of 1: ÔØ» Building application project ui5.aghd...
+info ui5.aghd ÔÇ║ Running task escapeNonAsciiCharacters...
+info ui5.aghd ÔÇ║ Running task replaceCopyright...
+info ui5.aghd ÔÇ║ Running task replaceVersion...
+info ui5.aghd ÔÇ║ Running task ui5-tooling-modules-task...
+error ProjectBuilder Build failed in 393 ms
+info ProjectBuilder Executing cleanup tasks...
+
+ÔÜá´©Å  Process Failed With Error
+
+Error Message:
+Cannot find package 'prettier' imported from D:\_Repos\Ui5mcp\ui5-ts-app\node_modules\make-synchronized\index.mjs
+
+
+For details, execute the same command again with an additional '--verbose' parameter

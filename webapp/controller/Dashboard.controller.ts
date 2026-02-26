@@ -1,7 +1,9 @@
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import UIComponent from "sap/ui/core/UIComponent";
-import AdGuardService from "../service/AdGuardService";
+import AuthService from "../service/AuthService";
+import StatsService from "../service/StatsService";
+import LogService from "../service/LogService";
 // formatter imported in BaseController
 import MessageBox from "sap/m/MessageBox";
 import Button from "sap/m/Button";
@@ -101,7 +103,7 @@ export default class Dashboard extends BaseController {
     }
 
     public async onRefreshStats(silent: boolean = false): Promise<void> {
-        const model = this.getView()?.getModel() as JSONModel;
+        const model = this.getViewModel();
         if (!model) return;
 
         if (!silent) {
@@ -112,8 +114,8 @@ export default class Dashboard extends BaseController {
             // Check for new logs before fetching heavy "slowest queries" list
             // We fetch stats (lightweight) and the latest log entry (lightweight)
             const [stats, latestLog] = await Promise.all([
-                AdGuardService.getInstance().getStats(),
-                AdGuardService.getInstance().getQueryLog(1, 0)
+                StatsService.getInstance().getStats(),
+                LogService.getInstance().getQueryLog(1, 0)
             ]);
 
             const latestLogEntry = latestLog.data.length > 0 ? latestLog.data[0] : undefined;
@@ -135,7 +137,7 @@ export default class Dashboard extends BaseController {
             const isTimeDue = !this._lastSlowestQueryFetchTime || (now - this._lastSlowestQueryFetchTime >= Dashboard.SLOWEST_QUERY_INTERVAL);
 
             if (isDataNew && isTimeDue) {
-                slowest = await AdGuardService.getInstance().getSlowestQueries(1000);
+                slowest = await StatsService.getInstance().getSlowestQueries(1000);
                 this._lastLatestTime = latestTime;
                 this._lastSlowestQueryFetchTime = now;
                 slowestChanged = true;
@@ -268,7 +270,7 @@ export default class Dashboard extends BaseController {
             actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
             onClose: (action: string | null) => {
                 if (action === MessageBox.Action.OK) {
-                    AdGuardService.getInstance().logout();
+                    AuthService.getInstance().logout();
                     MessageBox.success(this.getText("loggedOut"), {
                         onClose: () => {
                             window.location.reload();
@@ -315,7 +317,7 @@ export default class Dashboard extends BaseController {
         const source = event.getSource();
         if (!(source instanceof Button)) return;
 
-        const model = this.getView()?.getModel() as JSONModel;
+        const model = this.getViewModel();
         const data = model.getData() as AdGuardStats;
         const clients = data.top_clients || [];
 
@@ -329,7 +331,7 @@ export default class Dashboard extends BaseController {
         const source = event.getSource();
         if (!(source instanceof Button)) return;
 
-        const model = this.getView()?.getModel() as JSONModel;
+        const model = this.getViewModel();
         const data = model.getData() as AdGuardStats;
         const domains = data.top_queried_domains || [];
 
@@ -343,7 +345,7 @@ export default class Dashboard extends BaseController {
         const source = event.getSource();
         if (!(source instanceof Button)) return;
 
-        const model = this.getView()?.getModel() as JSONModel;
+        const model = this.getViewModel();
         const data = model.getData() as AdGuardStats;
         const domains = data.top_blocked_domains || [];
 
@@ -357,7 +359,7 @@ export default class Dashboard extends BaseController {
         const source = event.getSource();
         if (!(source instanceof Button)) return;
 
-        const model = this.getView()?.getModel() as JSONModel;
+        const model = this.getViewModel();
         const data = model.getData() as AdGuardStats & { slowest_queries: { domain: string }[] };
         const queries = data.slowest_queries || [];
 

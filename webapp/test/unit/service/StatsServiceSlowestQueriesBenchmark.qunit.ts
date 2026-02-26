@@ -1,18 +1,18 @@
-import AdGuardService from "ui5/aghd/service/AdGuardService";
+import StatsService from "ui5/aghd/service/StatsService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import { RawAdGuardData, RawLogEntry } from "ui5/aghd/model/AdGuardTypes";
 
-QUnit.module("AdGuardService Slowest Queries Benchmark", {
+QUnit.module("StatsService Slowest Queries Benchmark", {
     beforeEach: function () {
-        AdGuardService.getInstance().clearCache();
+        StatsService.getInstance().clearCache();
     },
     afterEach: function () {
-        AdGuardService.getInstance().clearCache();
+        StatsService.getInstance().clearCache();
     }
 });
 
 QUnit.test("getSlowestQueries performance with high repetition and mixed values", async function (assert) {
-    const service = AdGuardService.getInstance();
+    const service = StatsService.getInstance();
     const count = 5000;
     const uniqueDomains = 100;
 
@@ -42,7 +42,7 @@ QUnit.test("getSlowestQueries performance with high repetition and mixed values"
     const mockResponse: RawAdGuardData = { data: entries };
 
     const originalFetch = globalThis.fetch;
-    // @ts-expect-error: Mocking fetch
+    // Mock fetch
     globalThis.fetch = async () => {
         // Return a copy to simulate parsing overhead if needed, though here we care about processing
         const copy = JSON.parse(JSON.stringify(mockResponse)) as RawAdGuardData;

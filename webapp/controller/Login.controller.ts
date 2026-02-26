@@ -1,17 +1,18 @@
-import Controller from "sap/ui/core/mvc/Controller";
+import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import AdGuardService from "../service/AdGuardService";
+import AuthService from "../service/AuthService";
 import MessageBox from "sap/m/MessageBox";
 import UIComponent from "sap/ui/core/UIComponent";
 import Input from "sap/m/Input";
 import { ValueState } from "sap/ui/core/library";
 import { InputType } from "sap/m/library";
 import Event from "sap/ui/base/Event";
+import { Constants } from "../model/Constants";
 
 /**
  * @namespace ui5.aghd.controller
  */
-export default class Login extends Controller {
+export default class Login extends BaseController {
 
     public onInit(): void {
         const model = new JSONModel({
@@ -22,12 +23,9 @@ export default class Login extends Controller {
     }
 
     public onAfterRendering(): void {
-        const view = this.getView();
-        if (view) {
-            const usernameInput = view.byId("usernameInput") as Input;
-            if (usernameInput) {
-                usernameInput.focus();
-            }
+        const usernameInput = this.getControl<Input>("usernameInput");
+        if (usernameInput) {
+            usernameInput.focus();
         }
     }
 
@@ -56,12 +54,12 @@ export default class Login extends Controller {
         const view = this.getView();
         if (!view) return;
 
-        const model = view.getModel() as JSONModel;
+        const model = this.getViewModel();
         const username = model.getProperty("/username") as string;
         const password = model.getProperty("/password") as string;
 
-        const usernameInput = view.byId("usernameInput") as Input;
-        const passwordInput = view.byId("passwordInput") as Input;
+        const usernameInput = this.getControl<Input>("usernameInput");
+        const passwordInput = this.getControl<Input>("passwordInput");
         let bValidationError = false;
 
         if (!username) {
@@ -93,11 +91,11 @@ export default class Login extends Controller {
         view.setBusy(true);
 
         try {
-            await AdGuardService.getInstance().login(username, password);
+            await AuthService.getInstance().login(username, password);
 
             // Navigate to Dashboard on success
             const router = UIComponent.getRouterFor(this);
-            router.navTo("dashboard");
+            router.navTo(Constants.Routes.Dashboard);
 
             // Clear password
             model.setProperty("/password", "");

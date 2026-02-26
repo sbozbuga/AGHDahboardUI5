@@ -41,12 +41,16 @@
 										priority="NeverOverflow" />
 								</layoutData>
 							</SearchField>
-							<Button icon="sap-icon://sort" press=".onOpenViewSettings" tooltip="{i18n>sortFilter}"/>
+							<Button id="btnViewSettings" icon="sap-icon://sort" press=".onOpenViewSettings" tooltip="{i18n>viewSettingsTooltip}"/>
 							<Button icon="sap-icon://refresh" press=".onRefreshLogs" tooltip="{i18n>refresh}"/>
 							<Button icon="sap-icon://copy" press=".onCopyAllLogs" tooltip="{parts:[{path:'i18n>copyAll'}, {path:'/data', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"/>
                             <ToolbarSeparator />
                             <Button text="{i18n>smartAnalysis}" icon="sap-icon://lightbulb" press=".onAnalyzeLogs" type="Emphasized" tooltip="{i18n>generateAIInsights}" />
-                            <Button icon="sap-icon://filter" press=".onOpenAdvancedFilter" tooltip="{i18n>advancedFilter}" type="{= ${/advancedFilters}.length > 0 ? 'Emphasized' : 'Default' }" />
+                            <Button id="btnFilter" icon="sap-icon://filter" press=".onOpenAdvancedFilter" tooltip="{i18n>advancedFilterTooltip}">
+                                <customData>
+                                    <core:BadgeCustomData key="badge" value="{= ${view>/advancedFilters}.length > 0 ? ${view>/advancedFilters}.length : '' }" visible="true" />
+                                </customData>
+                            </Button>
                             <Button icon="sap-icon://action-settings" press=".onOpenSettings" tooltip="{i18n>settings}" />
 						</OverflowToolbar>
 					</headerToolbar>

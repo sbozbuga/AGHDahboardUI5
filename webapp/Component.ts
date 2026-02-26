@@ -1,6 +1,7 @@
 import UIComponent from "sap/ui/core/UIComponent";
 import Device from "sap/ui/Device";
-import AdGuardService from "./service/AdGuardService";
+import AuthService from "./service/AuthService";
+import StatsService from "./service/StatsService";
 import GeminiService from "./service/GeminiService";
 import ResourceModel from "sap/ui/model/resource/ResourceModel";
 
@@ -29,11 +30,13 @@ export default class Component extends UIComponent {
 			const bundleOrPromise = i18nModel.getResourceBundle();
 			if (bundleOrPromise instanceof Promise) {
 				void bundleOrPromise.then((bundle) => {
-					AdGuardService.getInstance().setResourceBundle(bundle);
+					AuthService.getInstance().setResourceBundle(bundle);
+					StatsService.getInstance().setResourceBundle(bundle);
 					GeminiService.getInstance().setResourceBundle(bundle);
 				});
 			} else {
-				AdGuardService.getInstance().setResourceBundle(bundleOrPromise);
+				AuthService.getInstance().setResourceBundle(bundleOrPromise);
+				StatsService.getInstance().setResourceBundle(bundleOrPromise);
 				GeminiService.getInstance().setResourceBundle(bundleOrPromise);
 			}
 		}
