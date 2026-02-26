@@ -218,7 +218,6 @@ QUnit.test("onCopyAllLogs escapes malicious CSV content", function (assert) {
     // Expected: Time,Client,"'=cmd|' /C calc'!A0",Type,Status,Elapsed(ms),Reason
     // Note: The date format depends on toISOString() in the controller.
     const row1 = lines[1];
-    const parts1 = row1.split(",");
     // We check if the domain part (index 2) is escaped with single quote
     // Since it contains comma (no) and quotes (yes), it might be quoted too.
     // The implementation should verify if it starts with ' after unquoting.
