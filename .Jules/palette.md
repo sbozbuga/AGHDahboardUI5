@@ -13,3 +13,7 @@
 ## 2026-02-18 - Visual Feedback for Icon-Only Actions
 **Learning:** Toast notifications alone are insufficient for repeated icon-only actions (like "Copy"). Users miss the connection to the source button.
 **Action:** Implement immediate icon change (e.g., to "accept") on the triggering button alongside the toast for clearer feedback.
+
+## 2026-02-26 - Reducing Table Clutter with Hover-Only Actions
+**Learning:** In dense tables with multiple columns, persistent secondary action buttons (like "Copy") add significant visual noise. Using CSS to hide them by default (`opacity: 0`) and show on row hover (`tr:hover .action`) provides a cleaner interface while maintaining accessibility via focus states.
+**Action:** Apply a utility class (e.g., `copyButton`) that manages opacity transitions for secondary row actions, ensuring focus visibility for keyboard users.
