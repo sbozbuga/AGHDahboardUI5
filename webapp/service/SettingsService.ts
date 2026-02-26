@@ -117,9 +117,12 @@ export default class SettingsService {
             if (parsedUrl.username || parsedUrl.password) {
                 throw new Error("Base URL must not contain credentials.");
             }
+            if (parsedUrl.search || parsedUrl.hash) {
+                throw new Error("Base URL must not contain query parameters or fragments.");
+            }
         } catch (error) {
             // Map URL constructor errors to friendly message if needed, or rethrow custom ones
-            if (error instanceof Error && (error.message.includes("Invalid Base URL") || error.message.includes("credentials"))) {
+            if (error instanceof Error && (error.message.includes("Invalid Base URL") || error.message.includes("credentials") || error.message.includes("query parameters"))) {
                 throw error;
             }
             throw new Error("Invalid URL format.", { cause: error });

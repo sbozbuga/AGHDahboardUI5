@@ -55,6 +55,18 @@ QUnit.test("setBaseUrl throws on invalid URLs", function(assert) {
     }, /Base URL must not contain credentials/, "Throws on embedded credentials");
 });
 
+QUnit.test("setBaseUrl throws on URLs with query params or fragments", function(assert) {
+    const service = SettingsService.getInstance();
+
+    assert.throws(() => {
+        service.setBaseUrl("http://example.com?foo=bar");
+    }, /Base URL must not contain query parameters/, "Throws on query params");
+
+    assert.throws(() => {
+        service.setBaseUrl("http://example.com#fragment");
+    }, /Base URL must not contain query parameters/, "Throws on fragments");
+});
+
 QUnit.test("Input Validation: Length Limits", function (assert) {
     const service = SettingsService.getInstance();
 
