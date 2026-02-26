@@ -48,7 +48,7 @@
                             <Button text="{i18n>smartAnalysis}" icon="sap-icon://lightbulb" press=".onAnalyzeLogs" type="Emphasized" tooltip="{i18n>generateAIInsights}" />
                             <Button id="btnFilter" icon="sap-icon://filter" press=".onOpenAdvancedFilter" tooltip="{i18n>advancedFilterTooltip}">
                                 <customData>
-                                    <core:BadgeCustomData key="badge" value="{= ${view>/advancedFilters}.length > 0 ? ${view>/advancedFilters}.length : '' }" visible="true" />
+                                    <BadgeCustomData key="badge" value="{= ${view>/advancedFilters}.length > 0 ? ${view>/advancedFilters}.length : '' }" visible="true" />
                                 </customData>
                             </Button>
                             <Button icon="sap-icon://action-settings" press=".onOpenSettings" tooltip="{i18n>settings}" />
