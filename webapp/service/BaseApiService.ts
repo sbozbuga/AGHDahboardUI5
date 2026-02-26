@@ -1,6 +1,7 @@
 import SettingsService from "./SettingsService";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import MessageBox from "sap/m/MessageBox";
+import UI5Object from "sap/ui/base/Object";
 
 export class ApiError extends Error {
     constructor(
@@ -18,7 +19,7 @@ export class ApiError extends Error {
  * like timeout handling, base URL resolution, and error parsing.
  * @namespace ui5.aghd.service
  */
-export default class BaseApiService {
+export default class BaseApiService extends UI5Object {
     protected _resourceBundle: ResourceBundle | null = null;
     protected _isLoginDialogOpen = false;
     protected static readonly REQUEST_TIMEOUT = 10000;
