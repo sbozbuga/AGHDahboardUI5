@@ -32,6 +32,14 @@ export default class GeminiService {
     private static readonly MODELS_CACHE_TTL = 3600000; // 1 hour
     private static readonly MIN_MODELS_FETCH_INTERVAL = 10000; // 10 seconds
     private static readonly MAX_LOGS_FOR_ANALYSIS = 100;
+    private static readonly IPV4_REGEX = /^(\d{1,3}\.){3}\d{1,3}$/;
+    private static readonly XML_ENTITIES: Record<string, string> = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&apos;"
+    };
 
     private lastAnalysisTime = 0;
     private _cachedModels: { key: string, text: string }[] | null = null;
@@ -79,11 +87,9 @@ export default class GeminiService {
             cleaned = cleaned.substring(0, GeminiService.MAX_INPUT_LENGTH);
         }
 
-        return cleaned.replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&apos;");
+        // Optimization: Single pass replacement using lookup map instead of chained calls
+        // to avoid repeated string traversals.
+        return cleaned.replace(/[&<>"']/g, (char) => GeminiService.XML_ENTITIES[char] || char);
     }
 
     public async generateInsights(logs: LogEntry[]): Promise<string> {
@@ -190,10 +196,14 @@ export default class GeminiService {
     }
 
     private anonymizeClient(client: string, hostnameMap?: Map<string, string>, nameGenerator?: () => string): string {
-        const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
-        if (ipv4Regex.test(client)) {
-            const parts = client.split(".");
-            return `${parts[0]}.${parts[1]}.${parts[2]}.xxx`;
+        // Optimization: Use pre-compiled Regex to avoid recompilation overhead on each call
+        if (GeminiService.IPV4_REGEX.test(client)) {
+            // Optimization: Use substring instead of split+join to reduce array allocation overhead
+            // "192.168.1.5" -> lastIndexOf(".") is 9 -> substring(0, 9) is "192.168.1"
+            const lastDotIndex = client.lastIndexOf(".");
+            if (lastDotIndex > 0) {
+                 return client.substring(0, lastDotIndex) + ".xxx";
+            }
         }
 
         if (client.includes(":")) {
