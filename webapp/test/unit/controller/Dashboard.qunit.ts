@@ -284,7 +284,7 @@ QUnit.module("Dashboard Logout Logic", {
         ctx.originalGetAuthInstance = AuthService.getInstance;
 
         ctx.mockService = {
-            logout: () => { }
+        logout: () => Promise.resolve()
         };
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -328,6 +328,7 @@ QUnit.test("onLogoutPress asks for confirmation", function (this: TestContext, a
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ctx.mockService.logout = () => {
         logoutCalled = true;
+        return Promise.resolve();
     };
 
     try {

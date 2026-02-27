@@ -27,6 +27,7 @@ export const Constants = {
     },
     ApiEndpoints: {
         Login: "/control/login",
+        Logout: "/control/logout",
         Stats: "/control/stats",
         QueryLog: "/control/querylog"
     },

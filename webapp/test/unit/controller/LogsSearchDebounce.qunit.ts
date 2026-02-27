@@ -2,7 +2,6 @@ import LogsController from "ui5/aghd/controller/Logs.controller";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import Event from "sap/ui/base/Event";
 import SearchField from "sap/m/SearchField";
-import View from "sap/ui/core/mvc/View";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import ListBinding from "sap/ui/model/ListBinding";
 import Table from "sap/m/Table";
@@ -26,6 +25,7 @@ QUnit.module("Logs Controller Search Debounce", {
         });
 
         // Mock View
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ctx.controller.getView = (() => ({
             setModel: () => { },
             getModel: () => ctx.model,
