@@ -74,7 +74,7 @@ export default class BaseApiService extends UI5Object {
             const text = await response.text();
             try {
                 return text ? (JSON.parse(text) as T) : ({} as T);
-            } catch (error) {
+            } catch {
                 throw new ApiError(this._getText("invalidResponseFormat"));
             }
         } catch (error) {

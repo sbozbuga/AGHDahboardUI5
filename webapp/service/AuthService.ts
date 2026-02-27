@@ -176,7 +176,15 @@ export default class AuthService extends BaseApiService {
         });
     }
 
-    public logout(): void {
-        SettingsService.getInstance().clearCredentials();
+    public async logout(): Promise<void> {
+        try {
+            await this._request(Constants.ApiEndpoints.Logout, {
+                method: "POST"
+            });
+        } catch (error) {
+            console.warn("Server logout failed, clearing local credentials anyway", error);
+        } finally {
+            SettingsService.getInstance().clearCredentials();
+        }
     }
 }

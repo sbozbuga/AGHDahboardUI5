@@ -270,12 +270,14 @@ export default class Dashboard extends BaseController {
             actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
             onClose: (action: string | null) => {
                 if (action === MessageBox.Action.OK) {
-                    AuthService.getInstance().logout();
-                    MessageBox.success(this.getText("loggedOut"), {
-                        onClose: () => {
-                            window.location.reload();
-                        }
-                    });
+                    void (async () => {
+                        await AuthService.getInstance().logout();
+                        MessageBox.success(this.getText("loggedOut"), {
+                            onClose: () => {
+                                window.location.reload();
+                            }
+                        });
+                    })();
                 }
             }
         });
