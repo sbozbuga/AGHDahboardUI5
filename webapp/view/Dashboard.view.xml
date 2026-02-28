@@ -68,12 +68,12 @@
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
                     <f:header>
-                        <card:Header title="{i18n>topClients}" iconSrc="sap-icon://group" />
+                        <card:Header id="cardHeaderClients" title="{i18n>topClients}" iconSrc="sap-icon://group" />
                     </f:header>
                     <f:content>
                         <VBox height="100%" renderType="Bare">
                             <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllClients" tooltip="{parts:[{path:'i18n>copyAllClients'}, {path:'/top_clients', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table items="{/top_clients}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noActiveClients}">
+                            <Table ariaLabelledBy="cardHeaderClients" items="{/top_clients}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noActiveClients}">
                                 <columns>
                                     <Column><Text text="{i18n>client}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -108,12 +108,12 @@
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
                     <f:header>
-                        <card:Header title="{i18n>topDomains}" iconSrc="sap-icon://world" />
+                        <card:Header id="cardHeaderDomains" title="{i18n>topDomains}" iconSrc="sap-icon://world" />
                     </f:header>
                      <f:content>
                         <VBox height="100%" renderType="Bare">
                             <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllDomains" tooltip="{parts:[{path:'i18n>copyAllDomains'}, {path:'/top_queried_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table items="{/top_queried_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noQueriesRecorded}">
+                            <Table ariaLabelledBy="cardHeaderDomains" items="{/top_queried_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noQueriesRecorded}">
                                 <columns>
                                     <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -148,12 +148,12 @@
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
                     <f:header>
-                        <card:Header title="{i18n>topBlockedDomains}" iconSrc="sap-icon://decline" />
+                        <card:Header id="cardHeaderBlockedDomains" title="{i18n>topBlockedDomains}" iconSrc="sap-icon://decline" />
                     </f:header>
                      <f:content>
                         <VBox height="100%" renderType="Bare">
                             <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllBlockedDomains" tooltip="{parts:[{path:'i18n>copyAllBlockedDomains'}, {path:'/top_blocked_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table items="{/top_blocked_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noBlockedDomains}">
+                            <Table ariaLabelledBy="cardHeaderBlockedDomains" items="{/top_blocked_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noBlockedDomains}">
                                 <columns>
                                     <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -188,12 +188,12 @@
                         <f:GridContainerItemLayoutData columns="4" rows="6" />
                     </f:layoutData>
                     <f:header>
-                        <card:Header title="{i18n>slowestQueries}" iconSrc="sap-icon://time-account" />
+                        <card:Header id="cardHeaderSlowestQueries" title="{i18n>slowestQueries}" iconSrc="sap-icon://time-account" />
                     </f:header>
                      <f:content>
                         <VBox height="100%" renderType="Bare">
                             <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllSlowestQueries" tooltip="{parts:[{path:'i18n>copyAllSlowestQueries'}, {path:'/slowest_queries', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noPerformanceData}">
+                            <Table ariaLabelledBy="cardHeaderSlowestQueries" items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noPerformanceData}">
                                 <columns>
                                     <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>elapsedMs}" /></Column>
