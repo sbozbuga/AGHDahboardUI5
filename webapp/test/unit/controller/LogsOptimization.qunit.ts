@@ -5,7 +5,6 @@ import Event from "sap/ui/base/Event";
 import Table from "sap/m/Table";
 import ListBinding from "sap/ui/model/ListBinding";
 import { Constants } from "ui5/aghd/model/Constants";
-import View from "sap/ui/core/mvc/View";
 
 interface TestContext {
     controller: LogsController;
@@ -29,6 +28,7 @@ QUnit.module("Logs Controller Optimization", {
         });
 
         // Mock View
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ctx.controller.getView = (() => ({
             setModel: () => { },
             getModel: () => ctx.model,
