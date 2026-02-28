@@ -18,8 +18,10 @@
 					growingScrollToLoad="true"
 					sticky="ColumnHeaders,HeaderToolbar"
 					alternateRowColors="true"
-					noDataText="{i18n>noLogsFound}"
 					updateFinished=".onUpdateFinished">
+					<noData>
+						<IllustratedMessage illustrationType="sapIllus-Search" title="{i18n>noLogsFoundTitle}" description="{i18n>noLogsFoundDescription}" />
+					</noData>
 					<headerToolbar>
 						<OverflowToolbar>
 							<Button icon="sap-icon://nav-back" press=".onNavBack" tooltip="{i18n>back}" />

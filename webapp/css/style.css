@@ -36,3 +36,8 @@
 .sap-touch .copyButton {
     opacity: 1;
 }
+
+/* Ensure floating copy buttons are always visible on touch devices */
+.sap-touch .floatingCopyBtn {
+    opacity: 1;
+}
