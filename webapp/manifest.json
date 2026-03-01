@@ -14,8 +14,7 @@
 	"sap.ui": {
 		"technology": "UI5",
 		"icons": {
-			"favIcon": "favicon.ico",
-			"icon": "favicon.svg"
+			"favIcon": ""
 		},
 		"deviceTypes": {
 			"desktop": true,
