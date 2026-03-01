@@ -13,7 +13,10 @@
 	"sap.fiori": {},
 	"sap.ui": {
 		"technology": "UI5",
-		"icons": {},
+		"icons": {
+			"favIcon": "favicon.ico",
+			"icon": "favicon.svg"
+		},
 		"deviceTypes": {
 			"desktop": true,
 			"tablet": true,
