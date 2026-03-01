@@ -17,3 +17,7 @@
 ## 2026-02-26 - Reducing Table Clutter with Hover-Only Actions
 **Learning:** In dense tables with multiple columns, persistent secondary action buttons (like "Copy") add significant visual noise. Using CSS to hide them by default (`opacity: 0`) and show on row hover (`tr:hover .action`) provides a cleaner interface while maintaining accessibility via focus states.
 **Action:** Apply a utility class (e.g., `copyButton`) that manages opacity transitions for secondary row actions, ensuring focus visibility for keyboard users.
+
+## 2026-03-01 - Linking Helper Text to Inputs with ariaDescribedBy
+**Learning:** Helper `<Text>` tags placed near `<Input>` or `<TextArea>` components are visually associated but ignored by screen readers unless explicitly linked.
+**Action:** Use the `ariaDescribedBy` property on the input control, setting it to the `id` of the descriptive `<Text>` element to ensure full accessibility.
