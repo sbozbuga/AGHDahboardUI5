@@ -21,7 +21,7 @@
 					alternateRowColors="true"
 					updateFinished=".onUpdateFinished">
 					<noData>
-						<IllustratedMessage illustrationType="sapIllus-Search" title="{i18n>noLogsFoundTitle}" description="{i18n>noLogsFoundDescription}" />
+						<IllustratedMessage illustrationType="sapIllus-NoSearchResults" title="{i18n>noLogsFoundTitle}" description="{i18n>noLogsFoundDescription}" />
 					</noData>
 					<headerToolbar>
 						<OverflowToolbar>
