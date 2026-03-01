@@ -11,6 +11,7 @@
 			id="page">
 				<Table
 					id="logsTable"
+					ariaLabelledBy="logsTableTitle"
 					items="{/data}"
 					inset="false"
 					growing="true"
@@ -25,7 +26,7 @@
 					<headerToolbar>
 						<OverflowToolbar>
 							<Button icon="sap-icon://nav-back" press=".onNavBack" tooltip="{i18n>back}" />
-							<Title text="{i18n>logsHeader}" level="H2"/>
+							<Title id="logsTableTitle" text="{i18n>logsHeader}" level="H2"/>
 							<ToolbarSpacer/>
 							<SearchField
 								id="searchField"
