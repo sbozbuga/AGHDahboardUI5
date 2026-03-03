@@ -21,3 +21,7 @@
 ## 2026-03-01 - Linking Helper Text to Inputs with ariaDescribedBy
 **Learning:** Helper `<Text>` tags placed near `<Input>` or `<TextArea>` components are visually associated but ignored by screen readers unless explicitly linked.
 **Action:** Use the `ariaDescribedBy` property on the input control, setting it to the `id` of the descriptive `<Text>` element to ensure full accessibility.
+
+## 2026-03-02 - Missing i18n Keys for Icon-Only Button Tooltips
+**Learning:** Using an undefined i18n key for the `tooltip` property on icon-only buttons causes UI5 to fall back to displaying the raw key string (e.g., `viewSettingsTooltip`). For screen reader users, this results in unhelpful, developer-centric announcements rather than meaningful labels.
+**Action:** Always verify that every i18n key referenced in the XML view exists in the corresponding `i18n.properties` file to ensure proper localization and accessibility.
