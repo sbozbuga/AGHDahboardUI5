@@ -156,11 +156,17 @@ export default class StatsService extends BaseApiService {
         if (!Array.isArray(list)) {
             if (typeof list === 'object' && list !== null) {
                 const entries = Object.entries(list as Record<string, unknown>);
-                const sliced = limit ? entries.slice(0, limit) : entries;
-                return sliced.map(([k, v]) => ({
-                    name: k,
-                    count: typeof v === 'number' ? v : Number(v) || 0
-                }));
+                const len = limit ? Math.min(entries.length, limit) : entries.length;
+                const result = new Array(len) as StatsEntry[];
+                // Optimization: Loop mapping avoids creating intermediate sliced arrays
+                for (let i = 0; i < len; i++) {
+                    const [k, v] = entries[i];
+                    result[i] = {
+                        name: k,
+                        count: typeof v === 'number' ? v : Number(v) || 0
+                    };
+                }
+                return result;
             }
             return [];
         }
