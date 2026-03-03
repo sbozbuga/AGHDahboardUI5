@@ -124,31 +124,33 @@ export default class AuthService extends BaseApiService {
 
             // Since we can't easily check auth status from another window due to CORS,
             // we will poll the server for stats. If we get stats, auth is successful.
-            const pollInterval = setInterval(() => {
-                void (async () => {
-                    if (popup.closed) {
-                        clearInterval(pollInterval);
+            const pollAuthStatus = async () => {
+                if (popup.closed) {
+                    this._isLoginDialogOpen = false;
+                    return;
+                }
+
+                try {
+                    const response = await fetch(baseUrl ? `${baseUrl}/control/status` : "/control/status", {
+                        credentials: baseUrl ? "include" : "same-origin"
+                    });
+
+                    if (response.ok) {
+                        popup.close();
                         this._isLoginDialogOpen = false;
+                        MessageToast.show(this._getText("loginSuccessful"));
+                        setTimeout(() => window.location.reload(), 1000);
                         return;
                     }
+                } catch {
+                    // Still unauthorized or net error, let polling continue
+                }
 
-                    try {
-                        const response = await fetch(baseUrl ? `${baseUrl}/control/status` : "/control/status", {
-                            credentials: baseUrl ? "include" : "same-origin"
-                        });
+                // Schedule next poll only after the current one finishes
+                setTimeout(() => void pollAuthStatus(), 2000);
+            };
 
-                        if (response.ok) {
-                            clearInterval(pollInterval);
-                            popup.close();
-                            this._isLoginDialogOpen = false;
-                            MessageToast.show(this._getText("loginSuccessful"));
-                            setTimeout(() => window.location.reload(), 1000);
-                        }
-                    } catch {
-                        // Still unauthorized or net error, let interval continue
-                    }
-                })();
-            }, 2000);
+            void pollAuthStatus();
         };
 
         if (this._isSafeUrl(targetUrl)) {
