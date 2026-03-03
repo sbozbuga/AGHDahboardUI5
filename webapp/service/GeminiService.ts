@@ -192,7 +192,15 @@ export default class GeminiService {
             }
         }
 
-        return topK.map(([key, val]) => [this.sanitizeInput(key), val]);
+        // Optimization: Use a pre-allocated array and simple for loop instead of .map()
+        // to avoid intermediate memory allocations and function overhead
+        const len = topK.length;
+        const result = new Array(len) as [string, number][];
+        for (let j = 0; j < len; j++) {
+            const entry = topK[j];
+            result[j] = [this.sanitizeInput(entry[0]), entry[1]];
+        }
+        return result;
     }
 
     private anonymizeClient(client: string, hostnameMap?: Map<string, string>, nameGenerator?: () => string): string {
@@ -302,12 +310,18 @@ export default class GeminiService {
             const data = await response.json() as GeminiResponse;
             const models = (data.models || []);
 
-            const result = models
-                .filter((m) => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
-                .map((m) => ({
-                    key: m.name.replace("models/", ""),
-                    text: m.displayName || m.name
-                }));
+            // Optimization: Single loop mapping with pre-allocation avoiding .filter().map() chains
+            // which creates unnecessary intermediate arrays
+            const result: Array<{ key: string; text: string }> = [];
+            for (let i = 0; i < models.length; i++) {
+                const m = models[i];
+                if (m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent")) {
+                    result.push({
+                        key: m.name.replace("models/", ""),
+                        text: m.displayName || m.name
+                    });
+                }
+            }
 
             this._cachedModels = result;
             this._cachedModelsApiKey = apiKey;
