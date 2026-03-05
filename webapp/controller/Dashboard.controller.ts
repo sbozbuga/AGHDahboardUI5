@@ -296,7 +296,7 @@ export default class Dashboard extends BaseController {
         const textToCopy = name || domain;
 
         if (textToCopy) {
-            this.copyToClipboard(textToCopy, this.getText("domainCopied"), source);
+            this.copyToClipboard(this.escapeCsvField(textToCopy), this.getText("domainCopied"), source);
         }
     }
 
@@ -311,7 +311,7 @@ export default class Dashboard extends BaseController {
         const client = context.getProperty("name") as string;
 
         if (client) {
-            this.copyToClipboard(client, this.getText("clientCopied"), source);
+            this.copyToClipboard(this.escapeCsvField(client), this.getText("clientCopied"), source);
         }
     }
 
@@ -324,7 +324,7 @@ export default class Dashboard extends BaseController {
         const clients = data.top_clients || [];
 
         if (clients.length > 0) {
-            const text = clients.map(c => c.name).join("\n");
+            const text = clients.map(c => this.escapeCsvField(c.name)).join("\n");
             this._copyList(text, source, "clientsListCopied");
         }
     }
@@ -338,7 +338,7 @@ export default class Dashboard extends BaseController {
         const domains = data.top_queried_domains || [];
 
         if (domains.length > 0) {
-            const text = domains.map(d => d.name).join("\n");
+            const text = domains.map(d => this.escapeCsvField(d.name)).join("\n");
             this._copyList(text, source, "domainsListCopied");
         }
     }
@@ -352,7 +352,7 @@ export default class Dashboard extends BaseController {
         const domains = data.top_blocked_domains || [];
 
         if (domains.length > 0) {
-            const text = domains.map(d => d.name).join("\n");
+            const text = domains.map(d => this.escapeCsvField(d.name)).join("\n");
             this._copyList(text, source, "blockedDomainsListCopied");
         }
     }
@@ -366,7 +366,7 @@ export default class Dashboard extends BaseController {
         const queries = data.slowest_queries || [];
 
         if (queries.length > 0) {
-            const text = queries.map(q => q.domain).join("\n");
+            const text = queries.map(q => this.escapeCsvField(q.domain)).join("\n");
             this._copyList(text, source, "slowestQueriesListCopied");
         }
     }
