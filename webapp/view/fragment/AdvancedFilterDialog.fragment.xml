@@ -20,7 +20,7 @@
 					<OverflowToolbar>
 						<Title text="Conditions ({= ${/advancedFilters}.length })" level="H4"/>
 						<ToolbarSpacer/>
-						<Button icon="sap-icon://add" text="Add Condition" press=".onAddFilterRow" type="Ghost"/>
+						<Button icon="sap-icon://add" text="{i18n>addCondition}" press=".onAddFilterRow" type="Ghost"/>
 					</OverflowToolbar>
 				</headerToolbar>
 				<columns>
