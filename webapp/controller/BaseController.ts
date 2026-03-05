@@ -256,4 +256,26 @@ export default class BaseController extends Controller {
 
         document.body.removeChild(textArea);
     }
+
+    /**
+     * Escapes a value to prevent CSV Formula Injection and properly quote it.
+     */
+    protected escapeCsvField(value: string | number | boolean | null | undefined): string {
+        if (value === null || value === undefined) {
+            return "";
+        }
+        let str = String(value);
+
+        // Prevent Formula Injection
+        if (/^[=+\-@\t\r]/.test(str)) {
+            str = "'" + str;
+        }
+
+        // Quote if necessary
+        if (/[",\n\r]/.test(str)) {
+            str = '"' + str.replace(/"/g, '""') + '"';
+        }
+
+        return str;
+    }
 }
