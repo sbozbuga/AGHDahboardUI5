@@ -28,6 +28,9 @@
 					width="100%"
 					maxLength="100"
 					ariaDescribedBy="apiKeyHelpText" />
+				<Text id="apiKeyHelpText" text="Your API key is stored locally in your browser." class="sapUiTinyMarginTop" />
+                <Link text="Get an API Key" href="https://aistudio.google.com/app/apikey" target="_blank" class="sapUiSmallMarginBottom" />
+
 				<Label text="Gemini Model" labelFor="modelSelect" class="sapUiSmallMarginTop"/>
 				<Select
 					id="modelSelect"
@@ -36,6 +39,7 @@
 					width="100%">
 					<core:Item key="{key}" text="{text}" />
 				</Select>
+
 				<Label text="System Context (Optional)" labelFor="contextInput" class="sapUiSmallMarginTop"/>
 				<TextArea
 					id="contextInput"
@@ -43,9 +47,9 @@
 					placeholder="Describe your network (e.g., Raspberry Pi 5, Unbound, IoT devices...)"
 					rows="4"
 					width="100%"
-					maxLength="500" />
-				<Text id="apiKeyHelpText" text="Your API key is stored locally in your browser." class="sapUiTinyMarginTop sapUiSmallMarginBottom" />
-                <Link text="Get an API Key" href="https://aistudio.google.com/app/apikey" target="_blank" />
+					maxLength="500"
+					showExceededText="true"
+					valueLiveUpdate="true" />
 			</VBox>
 		</content>
 		<buttons>
