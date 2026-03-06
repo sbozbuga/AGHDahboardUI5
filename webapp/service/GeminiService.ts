@@ -215,9 +215,15 @@ export default class GeminiService {
         }
 
         if (client.includes(":")) {
-            const parts = client.split(":");
-            if (parts.length > 4) {
-                return parts.slice(0, 4).join(":") + ":xxxx:xxxx:xxxx:xxxx";
+            // Optimization: Avoid split() and join() arrays for IPv6 string manipulation
+            let idx = client.indexOf(":");
+            let colons = 0;
+            while (idx !== -1 && colons < 3) {
+                colons++;
+                idx = client.indexOf(":", idx + 1);
+            }
+            if (idx !== -1) {
+                return client.substring(0, idx) + ":xxxx:xxxx:xxxx:xxxx";
             } else {
                 const lastColon = client.lastIndexOf(":");
                 return (lastColon > -1 ? client.substring(0, lastColon) : client) + ":xxxx";
