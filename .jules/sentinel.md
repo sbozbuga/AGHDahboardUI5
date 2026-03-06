@@ -47,7 +47,13 @@
 **Vulnerability:** Frequent fetching of static configuration data (like AI models) from external APIs can exhaust quotas and lead to denial of service, especially when triggered by UI events (e.g. opening a dialog).
 **Learning:** Rate limiting alone is insufficient for user experience if valid data is available. Caching provides both performance and security benefits (Availability) by reducing the attack surface on the external API quota.
 **Prevention:** Implement time-based caching (TTL) alongside rate limiting for all external API calls that return relatively static data.
+
 ## 2024-05-30 - Prevent Formula/CSV Injection in Dashboard Copies
 **Vulnerability:** Data copied to the clipboard from lists (e.g. Clients, Domains, Slowest Queries) in the Dashboard could contain malicious payloads starting with `=`, `+`, `-`, or `@`. When pasted into spreadsheet applications like Excel or Google Sheets, these would be executed as formulas (CSV/Formula Injection), potentially leading to arbitrary code execution or data exfiltration on the user's machine.
 **Learning:** Even though the lists are simple newline-separated text and not strictly CSV files, they are still vulnerable to Formula Injection when pasted into spreadsheet applications, as users frequently do to analyze data.
 **Prevention:** All data copied to the clipboard that might end up in a spreadsheet should be escaped for CSV/Formula Injection using a shared utility method (e.g., `escapeCsvField`), ensuring consistent protection across the entire application.
+
+## 2024-06-05 - CSV/Formula Injection Space Bypass
+**Vulnerability:** The existing protection against CSV/Formula Injection checking if strings started with specific malicious characters (`=`, `+`, `-`, `@`, `\t`, `\r`) was bypassed if a malicious payload started with spaces, tabs, or carriage returns (e.g., `  =cmd()`), because spreadsheet software ignores leading spaces before interpreting formulas.
+**Learning:** When evaluating user input for malicious formula prefixes, leading whitespace must be accounted for.
+**Prevention:** Apply a regular expression such as `/^[ \t\r]*[=+\-@\t\r]/` that captures preceding whitespace characters to ensure malicious commands padded with spaces are accurately identified and escaped.
