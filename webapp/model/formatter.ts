@@ -30,7 +30,7 @@ export default {
         if (value === null || value === undefined) {
             return "0";
         }
-        const num = typeof value === 'string' ? parseFloat(value) : value;
+        const num = typeof value === 'number' ? value : parseFloat(value);
         if (isNaN(num)) {
             return "0";
         }
@@ -81,7 +81,7 @@ export default {
         if (ms === null || ms === undefined) {
             return "None";
         }
-        const val = typeof ms === 'string' ? parseFloat(ms) : ms;
+        const val = typeof ms === 'number' ? ms : parseFloat(ms);
 
         if (val > 500) {
             return "Error";
@@ -101,7 +101,7 @@ export default {
         if (ms === null || ms === undefined) {
             return "None";
         }
-        const val = typeof ms === 'string' ? parseFloat(ms) : ms;
+        const val = typeof ms === 'number' ? ms : parseFloat(ms);
 
         if (val > 500) {
             return "Critical (> 500ms)";
@@ -121,7 +121,7 @@ export default {
         if (ms === null || ms === undefined) {
             return "Neutral";
         }
-        const val = typeof ms === 'string' ? parseFloat(ms) : ms;
+        const val = typeof ms === 'number' ? ms : parseFloat(ms);
 
         if (val > 500) {
             return "Error";

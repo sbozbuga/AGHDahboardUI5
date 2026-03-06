@@ -13,3 +13,11 @@
 ## 2026-02-21 - Top-K Early Exit Optimization
 **Learning:** Adding an early exit check (`if (item <= smallest_top_k) continue`) to a Top-K manual insertion loop (O(N*K)) drastically reduces comparisons (~90% reduction for sorted or random data), effectively making the best-case complexity O(N).
 **Action:** Always implement early exit checks in manual Top-K loops, especially for large datasets.
+
+## 2026-03-05 - Array Operations vs String Manipulation
+**Learning:** For parsing or masking simple structured strings (like IPv6 addresses), using `substring` combined with `indexOf` (e.g., manually counting delimiters in a loop) or `lastIndexOf` is measurably faster and more memory-efficient than `.split().slice().join()`. The array-based approach allocates new arrays and creates GC overhead that is easily avoided for simple parsing logic.
+**Action:** When repeatedly masking or parsing specific parts of delimited strings, use `indexOf` or `lastIndexOf` and `substring` rather than splitting into arrays.
+
+## 2026-03-05 - False Micro-Optimizations (Ternary Short-Circuiting)
+**Learning:** JavaScript ternary operators (e.g., `condition ? a : b`) already short-circuit automatically. Swapping the order of conditions (e.g., checking `typeof x === 'number'` instead of `typeof x === 'string'`) provides no runtime performance benefit for mixed-type datasets, as the execution branches identically.
+**Action:** Do not "optimize" ternary operator condition ordering based purely on expected data types; focus on reducing actual functional overhead like function calls or memory allocation.
