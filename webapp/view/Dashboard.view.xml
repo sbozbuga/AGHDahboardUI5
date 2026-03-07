@@ -12,7 +12,7 @@
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
 				header="{i18n>totalQueries}"
 				subheader="{i18n>last24Hours}"
-				press="onPressLogs"
+				press=".onPressLogs"
 				tooltip="{i18n>viewQueryLog}">
 				<TileContent>
 					<NumericContent value="{/num_dns_queries}" icon="sap-icon://line-chart" />
@@ -23,7 +23,7 @@
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
 				header="{i18n>blockedQueries}"
 				subheader="{i18n>last24Hours}"
-				press="onPressBlockedLogs"
+				press=".onPressBlockedLogs"
 				tooltip="{i18n>viewBlockedQueryLog}">
 				<TileContent>
 					<NumericContent value="{/num_blocked_filtering}" icon="sap-icon://shield" valueColor="Error" />
@@ -35,7 +35,7 @@
 				header="{i18n>processingTime}"
 				subheader="{i18n>average}"
 				frameType="OneByOne"
-				press="onPressLogs"
+				press=".onPressLogs"
 				tooltip="{i18n>viewQueryPerformanceLogs}">
 				<TileContent>
 					<NumericContent value="{/avg_processing_time}" scale="ms" icon="sap-icon://performance" valueColor="{path: '/avg_processing_time', formatter: '.formatter.formatElapsedColor'}" />
@@ -47,7 +47,7 @@
 				header="{i18n>blockedPercentage}"
 				subheader="{i18n>efficiency}"
 				frameType="OneByOne"
-				press="onPressBlockedLogs"
+				press=".onPressBlockedLogs"
 				tooltip="{i18n>viewBlockedQueryLogs}">
 				<TileContent>
 					<NumericContent value="{/block_percentage}" scale="%" icon="sap-icon://pie-chart" valueColor="Critical" />
@@ -256,9 +256,9 @@
 				<Text text="{i18n>lastUpdated} {path: '/lastUpdated', type: 'sap.ui.model.type.DateTime', formatOptions: { style: 'medium' }}" visible="{= !!${/lastUpdated} }" class="sapUiTinyMarginBegin" />
 				<Button icon="sap-icon://refresh" type="Transparent" press=".onManualRefresh" tooltip="{i18n>refreshData}" class="sapUiTinyMarginBegin" />
 				<ToolbarSpacer />
-				<Button text="{i18n>viewLogs}" press="onPressLogs" type="Emphasized" />
-				<Button icon="sap-icon://action-settings" tooltip="{i18n>settings}" press="onOpenSettings" />
-                <Button icon="sap-icon://log" tooltip="{i18n>logout}" press="onLogoutPress" />
+				<Button text="{i18n>viewLogs}" press=".onPressLogs" type="Emphasized" />
+				<Button icon="sap-icon://action-settings" tooltip="{i18n>settings}" press=".onOpenSettings" />
+                <Button icon="sap-icon://log" tooltip="{i18n>logout}" press=".onLogoutPress" />
 			</OverflowToolbar>
 		</footer>
 	</Page>
