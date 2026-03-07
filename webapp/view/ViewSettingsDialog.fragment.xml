@@ -2,7 +2,7 @@
 	xmlns="sap.m"
 	xmlns:core="sap.ui.core">
 	<ViewSettingsDialog
-		confirm="onConfirmViewSettings">
+		confirm=".onConfirmViewSettings">
 		<sortItems>
 			<ViewSettingsItem text="Time" key="time" selected="true" />
 			<ViewSettingsItem text="Client" key="client" />

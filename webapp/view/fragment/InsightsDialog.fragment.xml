@@ -15,8 +15,8 @@
 			</VBox>
 		</content>
 		<buttons>
-			<Button text="{i18n>copyAction}" icon="sap-icon://copy" press="onCopyInsights" tooltip="{i18n>copyAnalysis}" />
-			<Button text="{i18n>closeAction}" press="onCloseInsights" />
+			<Button text="{i18n>copyAction}" icon="sap-icon://copy" press=".onCopyInsights" tooltip="{i18n>copyAnalysis}" />
+			<Button text="{i18n>closeAction}" press=".onCloseInsights" />
 		</buttons>
 	</Dialog>
 </core:FragmentDefinition>
