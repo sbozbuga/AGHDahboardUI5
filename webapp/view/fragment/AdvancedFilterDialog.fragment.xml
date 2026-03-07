@@ -40,7 +40,7 @@
 				<items>
 					<ColumnListItem>
 						<cells>
-							<ComboBox aria-label="{i18n>column}" selectedKey="{column}" width="100%">
+							<ComboBox tooltip="{i18n>column}" selectedKey="{column}" width="100%">
 								<core:Item key="time" text="Time" />
 								<core:Item key="client" text="Client" />
 								<core:Item key="question/name" text="Question" />
@@ -49,7 +49,7 @@
 								<core:Item key="upstream" text="Upstream" />
 								<core:Item key="reason" text="Reason" />
 							</ComboBox>
-							<ComboBox aria-label="{i18n>operator}" selectedKey="{operator}" width="100%">
+							<ComboBox tooltip="{i18n>operator}" selectedKey="{operator}" width="100%">
 								<core:Item key="EQ" text="Equals" />
 								<core:Item key="Contains" text="Contains" />
 								<core:Item key="GT" text="Greater Than" />
@@ -60,7 +60,7 @@
 								<core:Item key="StartsWith" text="Starts With" />
 								<core:Item key="EndsWith" text="Ends With" />
 							</ComboBox>
-							<Input aria-label="{i18n>value}" value="{value}" width="100%" placeholder="{i18n>value}" submit=".onConfirmAdvancedFilter" maxLength="200" />
+							<Input tooltip="{i18n>value}" value="{value}" width="100%" placeholder="{i18n>value}" submit=".onConfirmAdvancedFilter" maxLength="200" />
 							<Button icon="sap-icon://delete" type="Transparent" press=".onRemoveFilterRow" tooltip="{i18n>removeCondition}" />
 						</cells>
 					</ColumnListItem>

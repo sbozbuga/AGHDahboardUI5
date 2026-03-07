@@ -25,3 +25,7 @@
 ## 2026-03-02 - Missing i18n Keys for Icon-Only Button Tooltips
 **Learning:** Using an undefined i18n key for the `tooltip` property on icon-only buttons causes UI5 to fall back to displaying the raw key string (e.g., `viewSettingsTooltip`). For screen reader users, this results in unhelpful, developer-centric announcements rather than meaningful labels.
 **Action:** Always verify that every i18n key referenced in the XML view exists in the corresponding `i18n.properties` file to ensure proper localization and accessibility.
+
+## 2024-03-06 - Fixing SAPUI5 XML View ARIA Labels
+**Learning:** In SAPUI5, `aria-label` is not a valid native property for standard controls like `sap.m.ComboBox` and `sap.m.Input` in XML views. Using it causes validation errors or it might be ignored.
+**Action:** Instead, use `ariaLabelledBy` (referencing a visible label or `sap.ui.core.InvisibleText`), `tooltip`, or `placeholder` to ensure screen reader accessibility. I used `tooltip` mapped to i18n keys for `ComboBox` and `Input` in this instance.
