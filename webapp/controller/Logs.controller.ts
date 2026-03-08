@@ -511,7 +511,8 @@ export default class Logs extends BaseController {
 		if (data && data.length > 0) {
 			const header = "Time,Client,Domain,Type,Status,Elapsed(ms),Reason";
 			const rows = data.map(log => {
-				const time = log.time instanceof Date ? log.time.toISOString() : log.time;
+				const timeStr = log.time instanceof Date ? log.time.toISOString() : log.time;
+				const time = this.escapeCsvField(timeStr);
 				const client = this.escapeCsvField(log.client);
 				const domain = this.escapeCsvField(log.question?.name);
 				const type = this.escapeCsvField(log.question?.type);
