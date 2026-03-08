@@ -29,3 +29,6 @@
 ## 2024-03-06 - Fixing SAPUI5 XML View ARIA Labels
 **Learning:** In SAPUI5, `aria-label` is not a valid native property for standard controls like `sap.m.ComboBox` and `sap.m.Input` in XML views. Using it causes validation errors or it might be ignored.
 **Action:** Instead, use `ariaLabelledBy` (referencing a visible label or `sap.ui.core.InvisibleText`), `tooltip`, or `placeholder` to ensure screen reader accessibility. I used `tooltip` mapped to i18n keys for `ComboBox` and `Input` in this instance.
+## 2026-03-08 - SAP Fiori Navigation Consistency
+**Learning:** Placing page-level navigation controls (like "Back" buttons) inside specific component toolbars (e.g., a Table's `headerToolbar`) clutters the component's action space and violates standard SAP Fiori/UI5 navigation patterns. Users expect primary navigation controls to be consistently located at the top-left of the application shell/page.
+**Action:** Always utilize the built-in navigation properties of container controls like `sap.m.Page` (`showNavButton="true"` and `navButtonPress`) instead of manually rendering navigation buttons within content blocks, ensuring a familiar and accessible UX for UI5 users.
