@@ -8,6 +8,8 @@
 	<App id="app">
 		<Page
 			title="{i18n>logsTitle}"
+			showNavButton="true"
+			navButtonPress=".onNavBack"
 			id="page">
 				<Table
 					id="logsTable"
@@ -25,7 +27,6 @@
 					</noData>
 					<headerToolbar>
 						<OverflowToolbar>
-							<Button icon="sap-icon://nav-back" press=".onNavBack" tooltip="{i18n>back}" />
 							<Title id="logsTableTitle" text="{i18n>logsHeader}" level="H2"/>
 							<ToolbarSpacer/>
 							<SearchField
