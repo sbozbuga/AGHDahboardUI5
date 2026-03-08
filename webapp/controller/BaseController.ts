@@ -267,7 +267,7 @@ export default class BaseController extends Controller {
         let str = String(value);
 
         // Prevent Formula Injection
-        if (/^[ \t\r]*[=+\-@\t\r]/.test(str)) {
+        if (/^[ \t\n\r]*[=+\-@\t\n\r]/.test(str)) {
             str = "'" + str;
         }
 
