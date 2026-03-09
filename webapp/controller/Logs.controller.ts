@@ -259,6 +259,11 @@ export default class Logs extends BaseController {
 				// Type conversion
 				if (f.column === Constants.ColumnIds.ElapsedMs) {
 					value = parseFloat(f.value);
+				} else if (f.column === Constants.ColumnIds.Blocked) {
+					const sVal = String(f.value).toLowerCase();
+					value = sVal === "true" || sVal === "1" || sVal === "yes";
+				} else if (f.column === Constants.ColumnIds.FilterId) {
+					value = parseInt(String(f.value), 10);
 				}
 
 				if (f.value !== "") {

@@ -18,8 +18,14 @@ export const Constants = {
     ColumnIds: {
         ElapsedMs: "elapsedMs",
         QuestionName: "question/name",
+        QuestionType: "question/type",
         Client: "client",
-        Status: "status"
+        Status: "status",
+        Blocked: "blocked",
+        FilterId: "filterId",
+        Rule: "rule",
+        Upstream: "upstream",
+        Reason: "reason"
     },
     Routes: {
         Dashboard: "dashboard",
