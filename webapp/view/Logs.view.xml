@@ -61,7 +61,7 @@
 					<columns>
 						<Column width="11rem" id="colTime">
 							<header>
-								<Button text="{i18n>time}" press=".onSort" type="Transparent">
+								<Button text="{i18n>time}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>time'}], formatter: '.formatter.formatMessage'}">
 									<customData>
 										<core:CustomData key="key" value="time" />
 									</customData>
@@ -75,7 +75,7 @@
 						</Column>
 						<Column width="16rem" demandPopin="true" minScreenWidth="Tablet" id="colClient">
 							<header>
-								<Button text="{i18n>client}" press=".onSort" type="Transparent">
+								<Button text="{i18n>client}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>client'}], formatter: '.formatter.formatMessage'}">
 									<customData>
 										<core:CustomData key="key" value="client" />
 									</customData>
@@ -84,7 +84,7 @@
 						</Column>
 						<Column id="colQuestion">
 							<header>
-								<Button text="{i18n>question}" press=".onSort" type="Transparent">
+								<Button text="{i18n>question}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>question'}], formatter: '.formatter.formatMessage'}">
 									<customData>
 										<core:CustomData key="key" value="question/name" />
 									</customData>
@@ -93,7 +93,7 @@
 						</Column>
 						<Column width="6rem" demandPopin="true" minScreenWidth="Tablet" id="colStatus">
 							<header>
-								<Button text="{i18n>status}" press=".onSort" type="Transparent">
+								<Button text="{i18n>status}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>status'}], formatter: '.formatter.formatMessage'}">
 									<customData>
 										<core:CustomData key="key" value="status" />
 									</customData>
@@ -107,7 +107,7 @@
 						</Column>
 						<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" hAlign="End" id="colElapsed">
 							<header>
-								<Button text="{i18n>elapsedMs}" press=".onSort" type="Transparent">
+								<Button text="{i18n>elapsedMs}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>elapsedMs'}], formatter: '.formatter.formatMessage'}">
 									<customData>
 										<core:CustomData key="key" value="elapsedMs" />
 									</customData>
@@ -116,7 +116,7 @@
 						</Column>
 						<Column width="22rem" demandPopin="true" minScreenWidth="Desktop" id="colUpstream">
 							<header>
-								<Button text="{i18n>upstream}" press=".onSort" type="Transparent">
+								<Button text="{i18n>upstream}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>upstream'}], formatter: '.formatter.formatMessage'}">
 									<customData>
 										<core:CustomData key="key" value="upstream" />
 									</customData>
@@ -125,7 +125,7 @@
 						</Column>
 						<Column width="10rem" demandPopin="true" minScreenWidth="Desktop" id="colReason">
 							<header>
-								<Button text="{i18n>reason}" press=".onSort" type="Transparent">
+								<Button text="{i18n>reason}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>reason'}], formatter: '.formatter.formatMessage'}">
 									<customData>
 										<core:CustomData key="key" value="reason" />
 									</customData>
@@ -134,7 +134,7 @@
 						</Column>
 						<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" id="colFilterId">
 							<header>
-								<Button text="{i18n>filterId}" press=".onSort" type="Transparent">
+								<Button text="{i18n>filterId}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>filterId'}], formatter: '.formatter.formatMessage'}">
 									<customData>
 										<core:CustomData key="key" value="filterId" />
 									</customData>
@@ -143,7 +143,7 @@
 						</Column>
 						<Column demandPopin="true" minScreenWidth="Desktop" id="colRule">
 							<header>
-								<Button text="{i18n>rule}" press=".onSort" type="Transparent">
+								<Button text="{i18n>rule}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>rule'}], formatter: '.formatter.formatMessage'}">
 									<customData>
 										<core:CustomData key="key" value="rule" />
 									</customData>
