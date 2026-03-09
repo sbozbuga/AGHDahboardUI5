@@ -3,6 +3,7 @@ import Storage from "sap/ui/util/Storage";
 export default class SettingsService {
     private static instance: SettingsService;
     private storage: Storage;
+    private secureStorage: Storage;
     private readonly STORAGE_KEY_API_KEY = "gemini_api_key";
     private readonly STORAGE_KEY_MODEL = "gemini_model";
     private readonly STORAGE_KEY_CONTEXT = "gemini_system_context";
@@ -20,6 +21,12 @@ export default class SettingsService {
 
     private constructor() {
         this.storage = new Storage(Storage.Type.local, "aghd_settings");
+        this.secureStorage = new Storage(Storage.Type.session, "aghd_secure_settings");
+
+        // Security Migration: Clear legacy API key from persistent local storage
+        if (this.storage.get(this.STORAGE_KEY_API_KEY)) {
+            this.storage.remove(this.STORAGE_KEY_API_KEY);
+        }
     }
 
     public static getInstance(): SettingsService {
@@ -33,7 +40,7 @@ export default class SettingsService {
         if (this._apiKey !== null) {
             return this._apiKey;
         }
-        this._apiKey = (this.storage.get(this.STORAGE_KEY_API_KEY) as string) || "";
+        this._apiKey = (this.secureStorage.get(this.STORAGE_KEY_API_KEY) as string) || "";
         return this._apiKey;
     }
 
@@ -42,7 +49,7 @@ export default class SettingsService {
             throw new Error("API Key too long (max 255 chars).");
         }
         this._apiKey = key;
-        this.storage.put(this.STORAGE_KEY_API_KEY, key);
+        this.secureStorage.put(this.STORAGE_KEY_API_KEY, key);
     }
 
     public hasApiKey(): boolean {
@@ -137,7 +144,8 @@ export default class SettingsService {
         this._model = null;
         this._context = null;
         // Do not clear Base URL on logout, as it's a system config
-        this.storage.remove(this.STORAGE_KEY_API_KEY);
+        this.secureStorage.remove(this.STORAGE_KEY_API_KEY);
+        this.storage.remove(this.STORAGE_KEY_API_KEY); // Also ensure legacy is cleared
         this.storage.remove(this.STORAGE_KEY_MODEL);
         this.storage.remove(this.STORAGE_KEY_CONTEXT);
     }
