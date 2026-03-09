@@ -45,7 +45,6 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1"
   },
-
   "overrides": {
     "serialize-javascript": "^7.0.2",
     "tar": "^7.5.0"
