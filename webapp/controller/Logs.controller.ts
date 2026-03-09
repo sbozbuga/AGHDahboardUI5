@@ -509,7 +509,7 @@ export default class Logs extends BaseController {
 		const data = model.getProperty("/data") as LogEntry[];
 
 		if (data && data.length > 0) {
-			const header = "Time,Client,Domain,Type,Status,Elapsed(ms),Reason";
+			const header = "Time,Client,Domain,Type,Status,Blocked,Elapsed(ms),Upstream,Reason,FilterId,Rule";
 			const rows = data.map(log => {
 				const timeStr = log.time instanceof Date ? log.time.toISOString() : log.time;
 				const time = this.escapeCsvField(timeStr);
@@ -517,9 +517,13 @@ export default class Logs extends BaseController {
 				const domain = this.escapeCsvField(log.question?.name);
 				const type = this.escapeCsvField(log.question?.type);
 				const status = this.escapeCsvField(log.status);
+				const blocked = this.escapeCsvField(log.blocked ? "true" : "false");
 				const elapsed = this.escapeCsvField(log.elapsedMs);
+				const upstream = this.escapeCsvField(log.upstream);
 				const reason = this.escapeCsvField(log.reason);
-				return `${time},${client},${domain},${type},${status},${elapsed},${reason}`;
+				const filterId = this.escapeCsvField(log.filterId);
+				const rule = this.escapeCsvField(log.rule);
+				return `${time},${client},${domain},${type},${status},${blocked},${elapsed},${upstream},${reason},${filterId},${rule}`;
 			}).join("\n");
 
 			const csvContent = `${header}\n${rows}`;
