@@ -431,8 +431,8 @@ export default class Logs extends BaseController {
 		const viewModel = this.getViewModel("view");
 		const filters = viewModel.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
 
-		filters.push({ column: Constants.ColumnIds.ElapsedMs, operator: "GT", value: "" });
-		viewModel.setProperty(Constants.ModelProperties.AdvancedFilters, filters);
+		const newFilters = [...filters, { column: Constants.ColumnIds.ElapsedMs, operator: "GT", value: "" }];
+		viewModel.setProperty(Constants.ModelProperties.AdvancedFilters, newFilters);
 	}
 
 	public onRemoveFilterRow(event: Event): void {
@@ -448,8 +448,9 @@ export default class Logs extends BaseController {
 		const viewModel = this.getViewModel("view");
 		const filters = viewModel.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
 
-		filters.splice(index, 1);
-		viewModel.setProperty(Constants.ModelProperties.AdvancedFilters, filters);
+		const newFilters = [...filters];
+		newFilters.splice(index, 1);
+		viewModel.setProperty(Constants.ModelProperties.AdvancedFilters, newFilters);
 	}
 
 	public onConfirmAdvancedFilter(): void {
