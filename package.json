@@ -9,7 +9,7 @@
     "build:opt": "ui5 build self-contained --clean-dest --all",
     "start": "ui5 serve --port 8080 -o index.html",
     "start-coverage": "ui5 serve --port 8080 --config ui5-coverage.yaml",
-    "start:dist": "ui5 serve  --port 8080 -o index.html --config ui5-dist.yaml",
+    "start:dist": "ui5 serve --port 8080 -o index.html --config ui5-dist.yaml",
     "ts-typecheck": "tsc --noEmit",
     "lint": "eslint webapp",
     "test-runner": "ui5-test-runner --url http://localhost:8080/test/testsuite.qunit.html",
@@ -24,25 +24,30 @@
     "url": "https://github.com/sbozbuga/AGHDahboardUI5.git"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.10.0",
     "@playwright/test": "^1.58.2",
     "@types/openui5": "1.145.0",
-    "@ui5/cli": "^4.0.46",
+    "@ui5/cli": "^4.0.47",
     "@ui5/linter": "^1.5.0",
     "babel-plugin-istanbul": "^7.0.0",
-    "eslint": "^10.0.0",
-    "globals": "^17.2.0",
+    "eslint": "^9.10.0",
+    "globals": "^15.9.0",
     "playwright": "^1.58.2",
     "prettier": "^3.8.1",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.18.1",
+    "typescript-eslint": "^8.5.0",
     "ui5-middleware-livereload": "^3",
     "ui5-middleware-simpleproxy": "^3",
     "ui5-test-runner": "^5.4.3",
-    "ui5-tooling-modules": "^3.9.1",
+    "ui5-tooling-modules": "^3.3.5",
     "ui5-tooling-transpile": "^3"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1"
+  },
+
+  "overrides": {
+    "serialize-javascript": "^7.0.2",
+    "tar": "^7.5.0"
   }
 }
