@@ -162,24 +162,36 @@ QUnit.test("onCopyAllLogs escapes malicious CSV content", function (assert) {
             client: "192.168.1.1",
             question: { name: "=cmd|' /C calc'!A0", type: "A" },
             status: "OK",
+            blocked: false,
             elapsedMs: 10,
-            reason: "None"
+            upstream: "8.8.8.8",
+            reason: "None",
+            filterId: 0,
+            rule: ""
         },
         {
             time: "2023-01-01T12:01:00Z",
             client: "10.0.0.1",
             question: { name: "safe.com", type: "A" },
             status: "Blocked",
+            blocked: true,
             elapsedMs: 5,
-            reason: 'Filter "My Filter"' // Contains double quotes
+            upstream: "",
+            reason: 'Filter "My Filter"', // Contains double quotes
+            filterId: 1,
+            rule: "||safe.com^"
         },
         {
             time: "2023-01-01T12:02:00Z",
             client: "10.0.0.2",
             question: { name: "comma,domain.com", type: "A" }, // Contains comma
             status: "OK",
+            blocked: false,
             elapsedMs: 2,
-            reason: "None"
+            upstream: "1.1.1.1",
+            reason: "None",
+            filterId: 0,
+            rule: ""
         }
     ];
 
