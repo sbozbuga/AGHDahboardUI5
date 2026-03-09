@@ -2,6 +2,7 @@ import SettingsService from "./SettingsService";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import MessageBox from "sap/m/MessageBox";
 import UI5Object from "sap/ui/base/Object";
+import EventBus from "sap/ui/core/EventBus";
 
 export class ApiError extends Error {
     constructor(
@@ -23,6 +24,11 @@ export default class BaseApiService extends UI5Object {
     protected _resourceBundle: ResourceBundle | null = null;
     protected _isLoginDialogOpen = false;
     protected static readonly REQUEST_TIMEOUT = 10000;
+    protected static _eventBus: EventBus | null = null;
+
+    public static setGlobalEventBus(bus: EventBus): void {
+        BaseApiService._eventBus = bus;
+    }
 
     public setResourceBundle(bundle: ResourceBundle): void {
         this._resourceBundle = bundle;
@@ -103,8 +109,7 @@ export default class BaseApiService extends UI5Object {
                 onClose: (sAction: string | null) => {
                     this._isLoginDialogOpen = false;
                     if (sAction === openSettingsText) {
-                        const bus = sap.ui.getCore().getEventBus();
-                        bus.publish("ui5.aghd", "openSettings");
+                        BaseApiService._eventBus?.publish("ui5.aghd", "openSettings");
                     }
                 }
             });

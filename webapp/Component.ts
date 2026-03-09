@@ -4,6 +4,7 @@ import AuthService from "./service/AuthService";
 import StatsService from "./service/StatsService";
 import GeminiService from "./service/GeminiService";
 import ResourceModel from "sap/ui/model/resource/ResourceModel";
+import BaseApiService from "./service/BaseApiService";
 
 /**
  * @namespace ui5.aghd
@@ -23,6 +24,9 @@ export default class Component extends UIComponent {
 
 		// enable routing
 		this.getRouter().initialize();
+
+		// set up event bus for services
+		BaseApiService.setGlobalEventBus(this.getEventBus());
 
 		// Inject Resource Bundle into Services
 		const i18nModel = this.getModel("i18n") as ResourceModel;

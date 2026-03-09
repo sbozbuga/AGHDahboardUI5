@@ -1,6 +1,8 @@
 <mvc:View
 	controllerName="ui5.aghd.controller.Dashboard"
 	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	core:require="{ DateTime: 'sap/ui/model/type/DateTime' }"
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns:f="sap.f"
 	xmlns:card="sap.f.cards"
@@ -253,7 +255,7 @@
 		</content>
 		<footer>
 			<OverflowToolbar>
-				<Text text="{i18n>lastUpdated} {path: '/lastUpdated', type: 'sap.ui.model.type.DateTime', formatOptions: { style: 'medium' }}" visible="{= !!${/lastUpdated} }" class="sapUiTinyMarginBegin" />
+				<Text text="{i18n>lastUpdated} {path: '/lastUpdated', type: 'DateTime', formatOptions: { style: 'medium' }}" visible="{= !!${/lastUpdated} }" class="sapUiTinyMarginBegin" />
 				<Button icon="sap-icon://refresh" type="Transparent" press=".onManualRefresh" tooltip="{i18n>refreshData}" class="sapUiTinyMarginBegin" />
 				<ToolbarSpacer />
 				<Button text="{i18n>viewLogs}" press=".onPressLogs" type="Emphasized" />

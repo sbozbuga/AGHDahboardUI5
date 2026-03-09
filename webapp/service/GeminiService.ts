@@ -123,7 +123,6 @@ export default class GeminiService {
             const msg = error instanceof Error ? error.message : String(error);
             const safeMsg = this._redactApiKey(msg, apiKey);
             console.error("Gemini API Error:", safeMsg);
-            // eslint-disable-next-line preserve-caught-error
             throw new Error(this._getText("failedToGenerateInsights"), { cause: { message: safeMsg } });
         }
     }
@@ -210,7 +209,7 @@ export default class GeminiService {
             // "192.168.1.5" -> lastIndexOf(".") is 9 -> substring(0, 9) is "192.168.1"
             const lastDotIndex = client.lastIndexOf(".");
             if (lastDotIndex > 0) {
-                 return client.substring(0, lastDotIndex) + ".xxx";
+                return client.substring(0, lastDotIndex) + ".xxx";
             }
         }
 
