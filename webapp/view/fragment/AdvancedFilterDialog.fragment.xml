@@ -44,10 +44,14 @@
 								<core:Item key="time" text="Time" />
 								<core:Item key="client" text="Client" />
 								<core:Item key="question/name" text="Question" />
+								<core:Item key="question/type" text="Type" />
 								<core:Item key="status" text="Status" />
+								<core:Item key="blocked" text="Blocked" />
 								<core:Item key="elapsedMs" text="Elapsed (ms)" />
 								<core:Item key="upstream" text="Upstream" />
 								<core:Item key="reason" text="Reason" />
+								<core:Item key="filterId" text="Filter ID" />
+								<core:Item key="rule" text="Rule" />
 							</ComboBox>
 							<ComboBox tooltip="{i18n>operator}" selectedKey="{view>operator}" width="100%">
 								<core:Item key="EQ" text="Equals" />
