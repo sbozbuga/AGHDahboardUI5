@@ -12,13 +12,14 @@
 		<content>
 			<Table
 				id="filterTable"
+				ariaLabelledBy="advancedFilterTitle"
 				items="{view>/advancedFilters}"
 				mode="None"
 				growing="false"
 				width="100%">
 				<headerToolbar>
 					<OverflowToolbar>
-						<Title text="Conditions ({= ${view>/advancedFilters} ? ${view>/advancedFilters}.length : 0 })" level="H4"/>
+						<Title id="advancedFilterTitle" text="Conditions ({= ${view>/advancedFilters} ? ${view>/advancedFilters}.length : 0 })" level="H4"/>
 						<ToolbarSpacer/>
 						<Button icon="sap-icon://add" text="{i18n>addCondition}" press=".onAddFilterRow" type="Ghost"/>
 					</OverflowToolbar>
