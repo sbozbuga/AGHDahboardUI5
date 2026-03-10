@@ -366,7 +366,12 @@ export default class Dashboard extends BaseController {
         const queries = data.slowest_queries || [];
 
         if (queries.length > 0) {
-            const text = queries.map(q => this.escapeCsvField(q.domain)).join("\n");
+            const len = queries.length;
+            const arr = new Array(len) as string[];
+            for (let i = 0; i < len; i++) {
+                arr[i] = this.escapeCsvField(queries[i].domain);
+            }
+            const text = arr.join("\n");
             this._copyList(text, source, "slowestQueriesListCopied");
         }
     }
