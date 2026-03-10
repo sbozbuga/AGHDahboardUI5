@@ -11,7 +11,6 @@ import Sorter from "sap/ui/model/Sorter";
 import LogService from "../service/LogService";
 import Dialog from "sap/m/Dialog";
 import Button from "sap/m/Button";
-import Column from "sap/m/Column";
 import Table from "sap/m/Table";
 import SettingsService from "../service/SettingsService";
 import GeminiService from "../service/GeminiService";
@@ -252,7 +251,7 @@ export default class Logs extends BaseController {
 		const advancedFilters = viewModel.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
 
 		if (advancedFilters && advancedFilters.length > 0) {
-			advancedFilters.forEach(f => {
+			for (const f of advancedFilters) {
 				let value: string | number | boolean = f.value;
 				const operator = f.operator as FilterOperator;
 
@@ -269,7 +268,7 @@ export default class Logs extends BaseController {
 				if (f.value !== "") {
 					aFilters.push(new Filter(f.column, operator, value));
 				}
-			});
+			}
 		}
 
 		binding.filter(aFilters);
@@ -309,10 +308,10 @@ export default class Logs extends BaseController {
 
 		const dialogFilters: Filter[] = [];
 		if (params.filterItems) {
-			params.filterItems.forEach((item: ViewSettingsItem) => {
+			for (const item of params.filterItems) {
 				const key = item.getKey();
 				dialogFilters.push(new Filter(Constants.ColumnIds.Status, FilterOperator.EQ, key));
-			});
+			}
 		}
 
 		this._aViewSettingsFilters = dialogFilters;
@@ -350,13 +349,14 @@ export default class Logs extends BaseController {
 		if (!view) return;
 
 		const table = this.getControl<Table>("logsTable");
-		table.getColumns().forEach((col: Column) => {
+		const columns = table.getColumns();
+		for (const col of columns) {
 			const header = col.getHeader();
 			if (header && header !== activeButton && header instanceof Button) {
 				header.setIcon("");
 				header.setTooltip(header.getText());
 			}
-		});
+		}
 	}
 
 	public async onAnalyzeLogs(): Promise<void> {
