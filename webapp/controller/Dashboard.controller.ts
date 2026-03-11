@@ -323,8 +323,13 @@ export default class Dashboard extends BaseController {
         const data = model.getData() as AdGuardStats;
         const clients = data.top_clients || [];
 
-        if (clients.length > 0) {
-            const text = clients.map(c => this.escapeCsvField(c.name)).join("\n");
+        const len = clients.length;
+        if (len > 0) {
+            const arr = new Array<string>(len);
+            for (let i = 0; i < len; i++) {
+                arr[i] = this.escapeCsvField(clients[i].name);
+            }
+            const text = arr.join("\n");
             this._copyList(text, source, "clientsListCopied");
         }
     }
@@ -337,8 +342,13 @@ export default class Dashboard extends BaseController {
         const data = model.getData() as AdGuardStats;
         const domains = data.top_queried_domains || [];
 
-        if (domains.length > 0) {
-            const text = domains.map(d => this.escapeCsvField(d.name)).join("\n");
+        const len = domains.length;
+        if (len > 0) {
+            const arr = new Array<string>(len);
+            for (let i = 0; i < len; i++) {
+                arr[i] = this.escapeCsvField(domains[i].name);
+            }
+            const text = arr.join("\n");
             this._copyList(text, source, "domainsListCopied");
         }
     }
@@ -351,8 +361,13 @@ export default class Dashboard extends BaseController {
         const data = model.getData() as AdGuardStats;
         const domains = data.top_blocked_domains || [];
 
-        if (domains.length > 0) {
-            const text = domains.map(d => this.escapeCsvField(d.name)).join("\n");
+        const len = domains.length;
+        if (len > 0) {
+            const arr = new Array<string>(len);
+            for (let i = 0; i < len; i++) {
+                arr[i] = this.escapeCsvField(domains[i].name);
+            }
+            const text = arr.join("\n");
             this._copyList(text, source, "blockedDomainsListCopied");
         }
     }
@@ -365,8 +380,13 @@ export default class Dashboard extends BaseController {
         const data = model.getData() as AdGuardStats & { slowest_queries: { domain: string }[] };
         const queries = data.slowest_queries || [];
 
-        if (queries.length > 0) {
-            const text = queries.map(q => this.escapeCsvField(q.domain)).join("\n");
+        const len = queries.length;
+        if (len > 0) {
+            const arr = new Array<string>(len);
+            for (let i = 0; i < len; i++) {
+                arr[i] = this.escapeCsvField(queries[i].domain);
+            }
+            const text = arr.join("\n");
             this._copyList(text, source, "slowestQueriesListCopied");
         }
     }
