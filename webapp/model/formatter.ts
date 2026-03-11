@@ -69,7 +69,12 @@ export default {
             return "";
         }
         // Occurrences are already sorted descending by AdGuardService.
-        return occurrences.map(t => `${t.toFixed(3)} ms`).join("\n");
+        const len = occurrences.length;
+        const result = new Array(len) as string[];
+        for (let i = 0; i < len; i++) {
+            result[i] = `${occurrences[i].toFixed(3)} ms`;
+        }
+        return result.join("\n");
     },
 
     /**
