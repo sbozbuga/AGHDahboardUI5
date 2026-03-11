@@ -323,14 +323,13 @@ export default class Dashboard extends BaseController {
         const data = model.getData() as AdGuardStats;
         const clients = data.top_clients || [];
 
-        const len = clients.length;
-        if (len > 0) {
-            const arr = new Array<string>(len);
+        if (clients.length > 0) {
+            const len = clients.length;
+            const arr = new Array(len) as string[];
             for (let i = 0; i < len; i++) {
                 arr[i] = this.escapeCsvField(clients[i].name);
             }
-            const text = arr.join("\n");
-            this._copyList(text, source, "clientsListCopied");
+            this._copyList(arr.join("\n"), source, "clientsListCopied");
         }
     }
 
@@ -342,14 +341,13 @@ export default class Dashboard extends BaseController {
         const data = model.getData() as AdGuardStats;
         const domains = data.top_queried_domains || [];
 
-        const len = domains.length;
-        if (len > 0) {
-            const arr = new Array<string>(len);
+        if (domains.length > 0) {
+            const len = domains.length;
+            const arr = new Array(len) as string[];
             for (let i = 0; i < len; i++) {
                 arr[i] = this.escapeCsvField(domains[i].name);
             }
-            const text = arr.join("\n");
-            this._copyList(text, source, "domainsListCopied");
+            this._copyList(arr.join("\n"), source, "domainsListCopied");
         }
     }
 
@@ -361,14 +359,13 @@ export default class Dashboard extends BaseController {
         const data = model.getData() as AdGuardStats;
         const domains = data.top_blocked_domains || [];
 
-        const len = domains.length;
-        if (len > 0) {
-            const arr = new Array<string>(len);
+        if (domains.length > 0) {
+            const len = domains.length;
+            const arr = new Array(len) as string[];
             for (let i = 0; i < len; i++) {
                 arr[i] = this.escapeCsvField(domains[i].name);
             }
-            const text = arr.join("\n");
-            this._copyList(text, source, "blockedDomainsListCopied");
+            this._copyList(arr.join("\n"), source, "blockedDomainsListCopied");
         }
     }
 
@@ -380,14 +377,13 @@ export default class Dashboard extends BaseController {
         const data = model.getData() as AdGuardStats & { slowest_queries: { domain: string }[] };
         const queries = data.slowest_queries || [];
 
-        const len = queries.length;
-        if (len > 0) {
-            const arr = new Array<string>(len);
+        if (queries.length > 0) {
+            const len = queries.length;
+            const arr = new Array(len) as string[];
             for (let i = 0; i < len; i++) {
                 arr[i] = this.escapeCsvField(queries[i].domain);
             }
-            const text = arr.join("\n");
-            this._copyList(text, source, "slowestQueriesListCopied");
+            this._copyList(arr.join("\n"), source, "slowestQueriesListCopied");
         }
     }
 
