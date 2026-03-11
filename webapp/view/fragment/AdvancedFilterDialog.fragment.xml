@@ -17,6 +17,9 @@
 				mode="None"
 				growing="false"
 				width="100%">
+				<noData>
+					<IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noFilterConditions}" description="{i18n>noFilterConditionsDesc}" />
+				</noData>
 				<headerToolbar>
 					<OverflowToolbar>
 						<Title id="advancedFilterTitle" text="Conditions ({= ${view>/advancedFilters} ? ${view>/advancedFilters}.length : 0 })" level="H4"/>
