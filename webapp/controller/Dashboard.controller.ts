@@ -324,8 +324,12 @@ export default class Dashboard extends BaseController {
         const clients = data.top_clients || [];
 
         if (clients.length > 0) {
-            const text = clients.map(c => this.escapeCsvField(c.name)).join("\n");
-            this._copyList(text, source, "clientsListCopied");
+            const len = clients.length;
+            const arr = new Array(len) as string[];
+            for (let i = 0; i < len; i++) {
+                arr[i] = this.escapeCsvField(clients[i].name);
+            }
+            this._copyList(arr.join("\n"), source, "clientsListCopied");
         }
     }
 
@@ -338,8 +342,12 @@ export default class Dashboard extends BaseController {
         const domains = data.top_queried_domains || [];
 
         if (domains.length > 0) {
-            const text = domains.map(d => this.escapeCsvField(d.name)).join("\n");
-            this._copyList(text, source, "domainsListCopied");
+            const len = domains.length;
+            const arr = new Array(len) as string[];
+            for (let i = 0; i < len; i++) {
+                arr[i] = this.escapeCsvField(domains[i].name);
+            }
+            this._copyList(arr.join("\n"), source, "domainsListCopied");
         }
     }
 
@@ -352,8 +360,12 @@ export default class Dashboard extends BaseController {
         const domains = data.top_blocked_domains || [];
 
         if (domains.length > 0) {
-            const text = domains.map(d => this.escapeCsvField(d.name)).join("\n");
-            this._copyList(text, source, "blockedDomainsListCopied");
+            const len = domains.length;
+            const arr = new Array(len) as string[];
+            for (let i = 0; i < len; i++) {
+                arr[i] = this.escapeCsvField(domains[i].name);
+            }
+            this._copyList(arr.join("\n"), source, "blockedDomainsListCopied");
         }
     }
 
