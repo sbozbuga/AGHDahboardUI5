@@ -515,7 +515,10 @@ export default class Logs extends BaseController {
 
 		if (data && data.length > 0) {
 			const header = "Time,Client,Domain,Type,Status,Blocked,Elapsed(ms),Upstream,Reason,FilterId,Rule";
-			const rows = data.map(log => {
+			const len = data.length;
+			const rowsArr = new Array(len) as string[];
+			for (let i = 0; i < len; i++) {
+				const log = data[i];
 				const timeStr = log.time instanceof Date ? log.time.toISOString() : log.time;
 				const time = this.escapeCsvField(timeStr);
 				const client = this.escapeCsvField(log.client);
@@ -528,8 +531,9 @@ export default class Logs extends BaseController {
 				const reason = this.escapeCsvField(log.reason);
 				const filterId = this.escapeCsvField(log.filterId);
 				const rule = this.escapeCsvField(log.rule);
-				return `${time},${client},${domain},${type},${status},${blocked},${elapsed},${upstream},${reason},${filterId},${rule}`;
-			}).join("\n");
+				rowsArr[i] = `${time},${client},${domain},${type},${status},${blocked},${elapsed},${upstream},${reason},${filterId},${rule}`;
+			}
+			const rows = rowsArr.join("\n");
 
 			const csvContent = `${header}\n${rows}`;
 
