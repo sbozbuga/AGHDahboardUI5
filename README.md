@@ -2,6 +2,9 @@
 
 This repository manages a high-performance network gateway, DNS security stack, and system monitoring hub running on a Raspberry Pi 5. The system is optimized for an external SSK 512GB SSD and uses a centralized Docker/Git-based infrastructure.
 
+## Preview
+![AdGuard Home UI5 Dashboard](./AGHD.png)
+
 | Component | Responsibility | Technology |
 | :--- | :--- | :--- |
 | **OS** | Raspberry Pi OS (64-bit) | Linux Kernel 6.12+ |
