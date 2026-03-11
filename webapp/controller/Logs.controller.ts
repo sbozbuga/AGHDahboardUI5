@@ -11,7 +11,6 @@ import Sorter from "sap/ui/model/Sorter";
 import LogService from "../service/LogService";
 import Dialog from "sap/m/Dialog";
 import Button from "sap/m/Button";
-import Column from "sap/m/Column";
 import Table from "sap/m/Table";
 import SettingsService from "../service/SettingsService";
 import GeminiService from "../service/GeminiService";
@@ -252,7 +251,7 @@ export default class Logs extends BaseController {
 		const advancedFilters = viewModel.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
 
 		if (advancedFilters && advancedFilters.length > 0) {
-			advancedFilters.forEach(f => {
+			for (const f of advancedFilters) {
 				let value: string | number | boolean = f.value;
 				const operator = f.operator as FilterOperator;
 
@@ -269,7 +268,7 @@ export default class Logs extends BaseController {
 				if (f.value !== "") {
 					aFilters.push(new Filter(f.column, operator, value));
 				}
-			});
+			}
 		}
 
 		binding.filter(aFilters);
@@ -309,10 +308,10 @@ export default class Logs extends BaseController {
 
 		const dialogFilters: Filter[] = [];
 		if (params.filterItems) {
-			params.filterItems.forEach((item: ViewSettingsItem) => {
+			for (const item of params.filterItems) {
 				const key = item.getKey();
 				dialogFilters.push(new Filter(Constants.ColumnIds.Status, FilterOperator.EQ, key));
-			});
+			}
 		}
 
 		this._aViewSettingsFilters = dialogFilters;
@@ -350,13 +349,13 @@ export default class Logs extends BaseController {
 		if (!view) return;
 
 		const table = this.getControl<Table>("logsTable");
-		table.getColumns().forEach((col: Column) => {
+		for (const col of table.getColumns()) {
 			const header = col.getHeader();
 			if (header && header !== activeButton && header instanceof Button) {
 				header.setIcon("");
 				header.setTooltip(header.getText());
 			}
-		});
+		}
 	}
 
 	public async onAnalyzeLogs(): Promise<void> {
@@ -516,7 +515,10 @@ export default class Logs extends BaseController {
 
 		if (data && data.length > 0) {
 			const header = "Time,Client,Domain,Type,Status,Blocked,Elapsed(ms),Upstream,Reason,FilterId,Rule";
-			const rows = data.map(log => {
+			const len = data.length;
+			const rowsArr = new Array(len) as string[];
+			for (let i = 0; i < len; i++) {
+				const log = data[i];
 				const timeStr = log.time instanceof Date ? log.time.toISOString() : log.time;
 				const time = this.escapeCsvField(timeStr);
 				const client = this.escapeCsvField(log.client);
@@ -529,8 +531,9 @@ export default class Logs extends BaseController {
 				const reason = this.escapeCsvField(log.reason);
 				const filterId = this.escapeCsvField(log.filterId);
 				const rule = this.escapeCsvField(log.rule);
-				return `${time},${client},${domain},${type},${status},${blocked},${elapsed},${upstream},${reason},${filterId},${rule}`;
-			}).join("\n");
+				rowsArr[i] = `${time},${client},${domain},${type},${status},${blocked},${elapsed},${upstream},${reason},${filterId},${rule}`;
+			}
+			const rows = rowsArr.join("\n");
 
 			const csvContent = `${header}\n${rows}`;
 
