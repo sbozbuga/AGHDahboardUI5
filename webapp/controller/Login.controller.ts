@@ -97,12 +97,13 @@ export default class Login extends BaseController {
             const router = UIComponent.getRouterFor(this);
             router.navTo(Constants.Routes.Dashboard);
 
-            // Clear password
-            model.setProperty("/password", "");
-
         } catch {
             MessageBox.error("Login failed. Please check your credentials.");
         } finally {
+            // Security Enhancement: Always clear password from the model
+            // regardless of login success or failure to avoid leaving
+            // sensitive credentials in memory or UI state.
+            model.setProperty("/password", "");
             view.setBusy(false);
         }
     }
