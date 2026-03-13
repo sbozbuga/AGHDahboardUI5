@@ -11,6 +11,7 @@
 				<Input
 					id="baseUrlInput"
 					value="{/baseUrl}"
+					showClearIcon="true"
 					placeholder="e.g. http://192.168.1.50 or http://192.168.1.50/agh"
 					width="100%"
 					ariaDescribedBy="baseUrlHelpText" />
@@ -20,6 +21,7 @@
 				<Input
 					id="apiKeyInput"
 					value="{/apiKey}"
+					showClearIcon="true"
 					placeholder="Enter your Gemini API Key"
 					type="Password"
 					showValueHelp="true"
