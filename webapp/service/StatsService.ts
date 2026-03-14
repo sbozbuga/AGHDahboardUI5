@@ -128,7 +128,7 @@ export default class StatsService extends BaseApiService {
 
             return top10;
         } catch (error) {
-            console.error("Failed to fetch slowest queries", error);
+            console.error("Failed to fetch slowest queries", (error as Error).message || "Unknown error");
             return [];
         }
     }
