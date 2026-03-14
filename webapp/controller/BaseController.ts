@@ -257,6 +257,10 @@ export default class BaseController extends Controller {
         document.body.removeChild(textArea);
     }
 
+    private static readonly CSV_FORMULA_INJECTION_REGEX = /^[ \t\n\r]*[=+\-@\t\n\r]/;
+    private static readonly CSV_QUOTES_NEEDED_REGEX = /[",\n\r]/;
+    private static readonly CSV_QUOTE_REPLACE_REGEX = /"/g;
+
     /**
      * Escapes a value to prevent CSV Formula Injection and properly quote it.
      */
@@ -267,13 +271,13 @@ export default class BaseController extends Controller {
         let str = String(value);
 
         // Prevent Formula Injection
-        if (/^[ \t\n\r]*[=+\-@\t\n\r]/.test(str)) {
+        if (BaseController.CSV_FORMULA_INJECTION_REGEX.test(str)) {
             str = "'" + str;
         }
 
         // Quote if necessary
-        if (/[",\n\r]/.test(str)) {
-            str = '"' + str.replace(/"/g, '""') + '"';
+        if (BaseController.CSV_QUOTES_NEEDED_REGEX.test(str)) {
+            str = '"' + str.replace(BaseController.CSV_QUOTE_REPLACE_REGEX, '""') + '"';
         }
 
         return str;
