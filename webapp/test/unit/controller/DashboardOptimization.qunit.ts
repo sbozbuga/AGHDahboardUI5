@@ -22,14 +22,14 @@ QUnit.module("Dashboard Controller Copy Methods Performance Optimization", {
         })) as unknown as typeof Dashboard.prototype.getView;
 
         // Mock getViewModel
-        this.controller.getViewModel = () => this.model;
+        (this.controller as unknown as { getViewModel: () => JSONModel }).getViewModel = () => this.model;
 
         // Mock escapeCsvField
-        this.controller.escapeCsvField = (v: string | number | boolean | null | undefined) => String(v);
+        (this.controller as unknown as { escapeCsvField: (v: string | number | boolean | null | undefined) => string }).escapeCsvField = (v: string | number | boolean | null | undefined) => String(v);
 
         // Mock copyToClipboard
-        this.controller.copyToClipboard = () => {};
-        this.controller.getText = () => "Copied";
+        (this.controller as unknown as { copyToClipboard: () => void }).copyToClipboard = () => {};
+        (this.controller as unknown as { getText: () => string }).getText = () => "Copied";
     },
     afterEach: function (this: TestContext) {
         this.controller.destroy();
