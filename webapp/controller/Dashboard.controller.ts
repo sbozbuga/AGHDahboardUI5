@@ -181,7 +181,7 @@ export default class Dashboard extends BaseController {
             if (!silent) {
                 MessageBox.error((error as Error).message);
             }
-            console.error("Failed to fetch stats", error);
+            console.error("Failed to fetch stats", (error as Error).message || "Unknown error");
         } finally {
             if (!silent) {
                 this.getView()?.setBusy(false);
