@@ -25,3 +25,11 @@
 ## 2026-03-09 - String Prefix Checking in Hot Loops
 **Learning:** In tight parsing loops iterating over thousands of items, extracting object properties to local variables and using strict equality (`===`) combined with `.indexOf("...") === 0` is measurably faster (~25-30%) than using the modern `.startsWith()` method due to reduced V8 function invocation overhead. Checking the most likely or fastest path (strict equality) first also improves short-circuiting.
 **Action:** When evaluating string prefixes on large arrays in high-frequency paths, assign properties to local variables and prioritize `===` followed by `.indexOf("...") === 0` over `.startsWith()`.
+
+## 2026-03-15 - Array Mapping vs Static Regex for Structured Strings
+**Learning:** For checking structured strings like IP addresses against specific patterns (e.g., private IP ranges), using a pre-compiled, static Regular Expression is significantly faster and more memory-efficient than splitting the string into arrays and mapping over them (e.g., `.split('.').map(Number)`). The array-based approach incurs heavy overhead from intermediate array allocations and multiple callback invocations.
+**Action:** When validating structured strings or checking specific segments (like IP octets), avoid `.split().map()` chains and instead use a well-crafted, static regular expression.
+
+## 2026-03-15 - Security Implications of Regex for IP Validation
+**Learning:** While static regular expressions can be faster than array splitting and mapping for checking structured strings like IP addresses, they can introduce severe security vulnerabilities (like SSRF bypasses) when used for validation. The original `.map(Number)` approach correctly parsed hexadecimal obfuscated IPs (e.g., `0x0a.0.0.1` becomes `10.0.0.1` because `Number("0x0a") === 10`). A standard regex only checks for base-10 representations, allowing hex-encoded private IPs to bypass the check.
+**Action:** Do not use string-matching regexes for security-critical validation of network addresses where standard parsing functions (like `Number()` or native URL parsers) provide robust handling of obfuscation techniques. Revert this optimization as it sacrifices correctness and security for a false micro-optimization.
