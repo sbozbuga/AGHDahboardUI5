@@ -270,6 +270,12 @@ export default class Dashboard extends BaseController {
             actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
             onClose: (action: string | null) => {
                 if (action === MessageBox.Action.OK) {
+                    const model = this.getViewModel();
+                    // Security Enhancement: Clear sensitive data from the UI model
+                    // before the async logout and reload happen to prevent temporary exposure
+                    if (model) {
+                        model.setData({});
+                    }
                     void (async () => {
                         await AuthService.getInstance().logout();
                         MessageBox.success(this.getText("loggedOut"), {
