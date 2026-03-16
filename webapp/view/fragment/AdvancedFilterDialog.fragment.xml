@@ -68,7 +68,7 @@
 								<core:Item key="StartsWith" text="Starts With" />
 								<core:Item key="EndsWith" text="Ends With" />
 							</ComboBox>
-							<Input tooltip="{i18n>value}" value="{view>value}" width="100%" placeholder="{i18n>value}" submit=".onConfirmAdvancedFilter" maxLength="200" />
+							<Input tooltip="{i18n>value}" value="{view>value}" width="100%" placeholder="{i18n>value}" submit=".onConfirmAdvancedFilter" maxLength="200" showClearIcon="true" />
 							<Button icon="sap-icon://delete" type="Transparent" press=".onRemoveFilterRow" tooltip="{i18n>removeCondition}" />
 						</cells>
 					</ColumnListItem>
