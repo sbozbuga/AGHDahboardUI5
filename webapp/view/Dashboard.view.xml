@@ -75,7 +75,10 @@
                     <f:content>
                         <VBox height="100%" renderType="Bare">
                             <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllClients" tooltip="{parts:[{path:'i18n>copyAllClients'}, {path:'/top_clients', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table ariaLabelledBy="cardHeaderClients" items="{/top_clients}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noActiveClients}">
+                            <Table ariaLabelledBy="cardHeaderClients" items="{/top_clients}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true">
+                                <noData>
+                                    <IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noActiveClients}" />
+                                </noData>
                                 <columns>
                                     <Column><Text text="{i18n>client}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -115,7 +118,10 @@
                      <f:content>
                         <VBox height="100%" renderType="Bare">
                             <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllDomains" tooltip="{parts:[{path:'i18n>copyAllDomains'}, {path:'/top_queried_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table ariaLabelledBy="cardHeaderDomains" items="{/top_queried_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noQueriesRecorded}">
+                            <Table ariaLabelledBy="cardHeaderDomains" items="{/top_queried_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true">
+                                <noData>
+                                    <IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noQueriesRecorded}" />
+                                </noData>
                                 <columns>
                                     <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -155,7 +161,10 @@
                      <f:content>
                         <VBox height="100%" renderType="Bare">
                             <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllBlockedDomains" tooltip="{parts:[{path:'i18n>copyAllBlockedDomains'}, {path:'/top_blocked_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table ariaLabelledBy="cardHeaderBlockedDomains" items="{/top_blocked_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noBlockedDomains}">
+                            <Table ariaLabelledBy="cardHeaderBlockedDomains" items="{/top_blocked_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true">
+                                <noData>
+                                    <IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noBlockedDomains}" />
+                                </noData>
                                 <columns>
                                     <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
@@ -195,7 +204,10 @@
                      <f:content>
                         <VBox height="100%" renderType="Bare">
                             <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllSlowestQueries" tooltip="{parts:[{path:'i18n>copyAllSlowestQueries'}, {path:'/slowest_queries', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table ariaLabelledBy="cardHeaderSlowestQueries" items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true" noDataText="{i18n>noPerformanceData}">
+                            <Table ariaLabelledBy="cardHeaderSlowestQueries" items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true">
+                                <noData>
+                                    <IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noPerformanceData}" />
+                                </noData>
                                 <columns>
                                     <Column><Text text="{i18n>domain}" /></Column>
                                 <Column hAlign="End" width="30%"><Text text="{i18n>elapsedMs}" /></Column>
