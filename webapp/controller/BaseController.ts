@@ -247,11 +247,11 @@ export default class BaseController extends Controller {
                     this.animateCopyButton(button);
                 }
             } else {
-                MessageBox.error(this.getText("clipboardUnavailable", [text]));
+                MessageBox.error(this.getText("clipboardUnavailable"));
             }
         } catch (err) {
             console.error("Fallback copy failed", err);
-            MessageBox.error(this.getText("clipboardUnavailable", [text]));
+            MessageBox.error(this.getText("clipboardUnavailable"));
         }
 
         document.body.removeChild(textArea);
