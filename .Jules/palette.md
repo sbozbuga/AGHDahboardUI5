@@ -32,3 +32,6 @@
 ## 2026-03-08 - SAP Fiori Navigation Consistency
 **Learning:** Placing page-level navigation controls (like "Back" buttons) inside specific component toolbars (e.g., a Table's `headerToolbar`) clutters the component's action space and violates standard SAP Fiori/UI5 navigation patterns. Users expect primary navigation controls to be consistently located at the top-left of the application shell/page.
 **Action:** Always utilize the built-in navigation properties of container controls like `sap.m.Page` (`showNavButton="true"` and `navButtonPress`) instead of manually rendering navigation buttons within content blocks, ensuring a familiar and accessible UX for UI5 users.
+## 2026-03-18 - Keyboard Submit for UI5 Inputs
+**Learning:** Users naturally expect to submit simple forms or dialogs (like Settings) by pressing 'Enter' within an input field. By default, `sap.m.Input` does not trigger the primary action button.
+**Action:** Always map the `submit` event property on `sap.m.Input` components (e.g., `submit=".onSaveSettings"`) to the corresponding controller method to enhance keyboard accessibility and provide a seamless micro-UX.
