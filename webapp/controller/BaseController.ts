@@ -214,7 +214,7 @@ export default class BaseController extends Controller {
                     this.animateCopyButton(button);
                 }
             }).catch((err) => {
-                console.warn("Clipboard API failed, falling back to execCommand", err);
+                console.warn("Clipboard API failed, falling back to execCommand", (err as Error).message || "Unknown error");
                 this.fallbackCopy(text, successMessage, button);
             });
         } else {
@@ -250,7 +250,7 @@ export default class BaseController extends Controller {
                 MessageBox.error(this.getText("clipboardUnavailable"));
             }
         } catch (err) {
-            console.error("Fallback copy failed", err);
+            console.error("Fallback copy failed", (err as Error).message || "Unknown error");
             MessageBox.error(this.getText("clipboardUnavailable"));
         }
 

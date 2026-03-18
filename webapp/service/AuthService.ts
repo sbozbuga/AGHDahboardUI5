@@ -184,7 +184,7 @@ export default class AuthService extends BaseApiService {
                 method: "POST"
             });
         } catch (error) {
-            console.warn("Server logout failed, clearing local credentials anyway", error);
+            console.warn("Server logout failed, clearing local credentials anyway", (error as Error).message || "Unknown error");
         } finally {
             SettingsService.getInstance().clearCredentials();
         }
