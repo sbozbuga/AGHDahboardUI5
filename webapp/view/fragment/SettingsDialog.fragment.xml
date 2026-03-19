@@ -4,7 +4,8 @@
 	<Dialog
 		id="settingsDialog"
 		title="Settings"
-		contentWidth="400px">
+		contentWidth="400px"
+		initialFocus="baseUrlInput">
 		<content>
 			<VBox class="sapUiSmallMargin">
 				<Label text="AdGuard Home Base URL" labelFor="baseUrlInput" />
