@@ -8,7 +8,8 @@
 		title="Advanced Filter"
 		contentWidth="600px"
 		resizable="true"
-		draggable="true">
+		draggable="true"
+		initialFocus="btnAddCondition">
 		<content>
 			<Table
 				id="filterTable"
@@ -24,7 +25,7 @@
 					<OverflowToolbar>
 						<Title id="advancedFilterTitle" text="Conditions ({= ${view>/advancedFilters} ? ${view>/advancedFilters}.length : 0 })" level="H4"/>
 						<ToolbarSpacer/>
-						<Button icon="sap-icon://add" text="{i18n>addCondition}" press=".onAddFilterRow" type="Ghost"/>
+						<Button id="btnAddCondition" icon="sap-icon://add" text="{i18n>addCondition}" press=".onAddFilterRow" type="Ghost"/>
 					</OverflowToolbar>
 				</headerToolbar>
 				<columns>
