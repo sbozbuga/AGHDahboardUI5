@@ -169,6 +169,29 @@ export default class AuthService extends BaseApiService {
     }
 
     public async login(name: string, password: string): Promise<void> {
+        const baseUrl = SettingsService.getInstance().getBaseUrl();
+        const targetUrl = baseUrl || window.location.origin;
+
+        try {
+            // Note: If targetUrl is relative, URL constructor might fail unless a base is provided
+            // However, targetUrl is either absolute or starts with a valid protocol if not relative.
+            // If targetUrl comes from window.location.origin, it's absolute.
+            const parsedUrl = new URL(targetUrl, window.location.origin);
+
+            // Security Enhancement: Prevent sending plaintext credentials over unencrypted HTTP
+            // Allow localhost or private network IPs, but block remote HTTP connections.
+            if (parsedUrl.protocol === "http:" && !this._isSafeUrl(targetUrl)) {
+                 throw new Error("Security Policy: Cannot transmit credentials over unencrypted HTTP connection. Please use HTTPS or a local network address.");
+            }
+        } catch (error) {
+            // Re-throw the explicit security error if it occurred
+            if (error instanceof Error && error.message.includes("Security Policy")) {
+                throw error;
+            }
+            // URL parsing errors or _isSafeUrl errors are ignored, assuming the URL might be relative
+            // and handled correctly by fetch. But relative URLs inherit the secure status of the page.
+        }
+
         await this._request(Constants.ApiEndpoints.Login, {
             method: "POST",
             headers: {
