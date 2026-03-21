@@ -16,6 +16,7 @@ import Button from "sap/m/Button";
 import ResourceModel from "sap/ui/model/resource/ResourceModel";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import Control from "sap/ui/core/Control";
+import encodeXML from "sap/base/security/encodeXML";
 
 /**
  * @namespace ui5.aghd.controller
@@ -173,8 +174,20 @@ export default class BaseController extends Controller {
                 }
             });
         } catch (error) {
-            MessageBox.error((error as Error).message);
+            this.showError(error);
         }
+    }
+
+    /**
+     * Safely displays an error message to the user, truncating and escaping
+     * the text to prevent UI thread denial of service and potential XSS vectors.
+     * @param error The error object or string
+     */
+    protected showError(error: unknown): void {
+        const msg = error instanceof Error ? error.message : String(error);
+        const truncatedMsg = msg.substring(0, 1000);
+        const safeMsg = encodeXML(truncatedMsg);
+        MessageBox.error(safeMsg);
     }
 
     public onCancelSettings(): void {
