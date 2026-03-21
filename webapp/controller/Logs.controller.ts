@@ -159,7 +159,7 @@ export default class Logs extends BaseController {
 			}
 
 		} catch (error) {
-			MessageBox.error((error as Error).message);
+			this.showError(error);
 		} finally {
 			view.setBusy(false);
 		}
@@ -381,7 +381,7 @@ export default class Logs extends BaseController {
 			viewModel.setProperty("/analysisText", insights);
 			void this.onOpenInsights();
 		} catch (error) {
-			MessageBox.error((error as Error).message);
+			this.showError(error);
 		} finally {
 			view.setBusy(false);
 		}
