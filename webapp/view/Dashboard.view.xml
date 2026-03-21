@@ -271,7 +271,7 @@
 				<Button icon="sap-icon://refresh" type="Transparent" press=".onManualRefresh" tooltip="{i18n>refreshData}" class="sapUiTinyMarginBegin" />
 				<ToolbarSpacer />
 				<Button text="{i18n>viewLogs}" press=".onPressLogs" type="Emphasized" />
-				<Button icon="sap-icon://action-settings" tooltip="{i18n>settings}" press=".onOpenSettings" />
+				<Button icon="sap-icon://action-settings" tooltip="{i18n>settings}" press=".onOpenSettings" ariaHasPopup="Dialog" />
                 <Button icon="sap-icon://log" tooltip="{i18n>logout}" press=".onLogoutPress" />
 			</OverflowToolbar>
 		</footer>
