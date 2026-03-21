@@ -179,7 +179,7 @@ export default class Dashboard extends BaseController {
             }
             // Suppress errors during silent refresh to avoid popup span
             if (!silent) {
-                MessageBox.error((error as Error).message);
+                this.showError(error);
             }
             console.error("Failed to fetch stats", (error as Error).message || "Unknown error");
         } finally {
