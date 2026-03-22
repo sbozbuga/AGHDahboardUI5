@@ -35,3 +35,7 @@
 ## 2026-03-18 - Keyboard Submit for UI5 Inputs
 **Learning:** Users naturally expect to submit simple forms or dialogs (like Settings) by pressing 'Enter' within an input field. By default, `sap.m.Input` does not trigger the primary action button.
 **Action:** Always map the `submit` event property on `sap.m.Input` components (e.g., `submit=".onSaveSettings"`) to the corresponding controller method to enhance keyboard accessibility and provide a seamless micro-UX.
+
+## 2026-03-19 - Identifying Implicit Dialog Triggers
+**Learning:** Buttons that trigger UI5 `MessageBox.confirm` (or similar utility dialogs like the logout button) are often overlooked for the `ariaHasPopup="Dialog"` attribute compared to custom `sap.m.Dialog` fragments. Screen readers rely on this attribute to proactively announce that a dialog will open.
+**Action:** Always verify if utility methods like `MessageBox.confirm` are being called by a button's `press` handler, and explicitly add `ariaHasPopup="Dialog"` to those buttons in the XML view to ensure consistent micro-UX and accessibility.
