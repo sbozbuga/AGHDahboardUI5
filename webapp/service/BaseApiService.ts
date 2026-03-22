@@ -57,6 +57,7 @@ export default class BaseApiService extends UI5Object {
         }
 
         const config: RequestInit = {
+            cache: "no-store", // Security Enhancement: Prevent caching of sensitive API data
             ...options,
             signal: controller.signal
         };
