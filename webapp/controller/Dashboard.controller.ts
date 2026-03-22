@@ -27,9 +27,17 @@ export default class Dashboard extends BaseController {
     private areStatsEqual(a: StatsEntry[], b: StatsEntry[]): boolean {
         if (a === b) return true;
         if (!a || !b) return false;
-        if (a.length !== b.length) return false;
-        for (let i = 0; i < a.length; i++) {
-            if (a[i].name !== b[i].name || a[i].count !== b[i].count) {
+
+        // Optimization: Cache array length to avoid repeated property access in loop condition
+        const len = a.length;
+        if (len !== b.length) return false;
+
+        for (let i = 0; i < len; i++) {
+            const itemA = a[i];
+            const itemB = b[i];
+            // Optimization: Compare numbers (count) before strings (name) as it is faster to evaluate,
+            // acting as a cheaper early exit condition for mis-matched entries.
+            if (itemA.count !== itemB.count || itemA.name !== itemB.name) {
                 return false;
             }
         }
