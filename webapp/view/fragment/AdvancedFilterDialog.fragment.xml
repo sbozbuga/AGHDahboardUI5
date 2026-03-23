@@ -8,7 +8,8 @@
 		title="Advanced Filter"
 		contentWidth="600px"
 		resizable="true"
-		draggable="true">
+		draggable="true"
+		initialFocus="btnAddCondition">
 		<content>
 			<Table
 				id="filterTable"
@@ -24,7 +25,7 @@
 					<OverflowToolbar>
 						<Title id="advancedFilterTitle" text="Conditions ({= ${view>/advancedFilters} ? ${view>/advancedFilters}.length : 0 })" level="H4"/>
 						<ToolbarSpacer/>
-						<Button icon="sap-icon://add" text="{i18n>addCondition}" press=".onAddFilterRow" type="Ghost"/>
+						<Button id="btnAddCondition" icon="sap-icon://add" text="{i18n>addCondition}" press=".onAddFilterRow" type="Ghost"/>
 					</OverflowToolbar>
 				</headerToolbar>
 				<columns>
@@ -68,7 +69,7 @@
 								<core:Item key="StartsWith" text="Starts With" />
 								<core:Item key="EndsWith" text="Ends With" />
 							</ComboBox>
-							<Input tooltip="{i18n>value}" value="{view>value}" width="100%" placeholder="{i18n>value}" submit=".onConfirmAdvancedFilter" maxLength="200" />
+							<Input tooltip="{i18n>value}" value="{view>value}" width="100%" placeholder="{i18n>value}" submit=".onConfirmAdvancedFilter" maxLength="200" showClearIcon="true" />
 							<Button icon="sap-icon://delete" type="Transparent" press=".onRemoveFilterRow" tooltip="{i18n>removeCondition}" />
 						</cells>
 					</ColumnListItem>

@@ -3,6 +3,7 @@ import MessageBox from "sap/m/MessageBox";
 import MessageToast from "sap/m/MessageToast";
 import BaseApiService from "./BaseApiService";
 import { Constants } from "../model/Constants";
+import encodeXML from "sap/base/security/encodeXML";
 
 /**
  * Service for handling AdGuard Home Authentication.
@@ -156,7 +157,8 @@ export default class AuthService extends BaseApiService {
         if (this._isSafeUrl(targetUrl)) {
             performOpen();
         } else {
-            MessageBox.confirm(this._getText("externalUrlWarning", [targetUrl]), {
+            const safeTargetUrl = encodeXML(targetUrl.substring(0, 1000));
+            MessageBox.confirm(this._getText("externalUrlWarning", [safeTargetUrl]), {
                 onClose: (sAction: string | null) => {
                     if (sAction === MessageBox.Action.OK) {
                         performOpen();
@@ -169,6 +171,29 @@ export default class AuthService extends BaseApiService {
     }
 
     public async login(name: string, password: string): Promise<void> {
+        const baseUrl = SettingsService.getInstance().getBaseUrl();
+        const targetUrl = baseUrl || window.location.origin;
+
+        try {
+            // Note: If targetUrl is relative, URL constructor might fail unless a base is provided
+            // However, targetUrl is either absolute or starts with a valid protocol if not relative.
+            // If targetUrl comes from window.location.origin, it's absolute.
+            const parsedUrl = new URL(targetUrl, window.location.origin);
+
+            // Security Enhancement: Prevent sending plaintext credentials over unencrypted HTTP
+            // Allow localhost or private network IPs, but block remote HTTP connections.
+            if (parsedUrl.protocol === "http:" && !this._isSafeUrl(targetUrl)) {
+                 throw new Error("Security Policy: Cannot transmit credentials over unencrypted HTTP connection. Please use HTTPS or a local network address.");
+            }
+        } catch (error) {
+            // Re-throw the explicit security error if it occurred
+            if (error instanceof Error && error.message.includes("Security Policy")) {
+                throw error;
+            }
+            // URL parsing errors or _isSafeUrl errors are ignored, assuming the URL might be relative
+            // and handled correctly by fetch. But relative URLs inherit the secure status of the page.
+        }
+
         await this._request(Constants.ApiEndpoints.Login, {
             method: "POST",
             headers: {
@@ -184,7 +209,7 @@ export default class AuthService extends BaseApiService {
                 method: "POST"
             });
         } catch (error) {
-            console.warn("Server logout failed, clearing local credentials anyway", error);
+            console.warn("Server logout failed, clearing local credentials anyway", (error as Error).message || "Unknown error");
         } finally {
             SettingsService.getInstance().clearCredentials();
         }
