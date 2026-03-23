@@ -3,6 +3,7 @@ import MessageBox from "sap/m/MessageBox";
 import MessageToast from "sap/m/MessageToast";
 import BaseApiService from "./BaseApiService";
 import { Constants } from "../model/Constants";
+import encodeXML from "sap/base/security/encodeXML";
 
 /**
  * Service for handling AdGuard Home Authentication.
@@ -156,7 +157,8 @@ export default class AuthService extends BaseApiService {
         if (this._isSafeUrl(targetUrl)) {
             performOpen();
         } else {
-            MessageBox.confirm(this._getText("externalUrlWarning", [targetUrl]), {
+            const safeTargetUrl = encodeXML(targetUrl.substring(0, 1000));
+            MessageBox.confirm(this._getText("externalUrlWarning", [safeTargetUrl]), {
                 onClose: (sAction: string | null) => {
                     if (sAction === MessageBox.Action.OK) {
                         performOpen();
