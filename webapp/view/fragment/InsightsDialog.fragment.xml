@@ -6,17 +6,18 @@
 		title="AdGuard AI Insights"
 		contentWidth="600px"
 		contentHeight="500px"
-		resizable="true">
+		resizable="true"
+		initialFocus="btnCloseInsights">
 		<content>
 			<VBox class="sapUiSmallMargin">
                 <Text text="Analysis based on recent logs:" class="sapUiSmallMarginBottom" />
                 <!-- HTML content takes formatting (strong headers, breaks) -->
-                <core:HTML content="{view>/analysisHtml}" preferDOM="false" />
+                <FormattedText htmlText="{view>/analysisHtml}" />
 			</VBox>
 		</content>
 		<buttons>
-			<Button text="{i18n>copyAction}" icon="sap-icon://copy" press=".onCopyInsights" tooltip="{i18n>copyAnalysis}" />
-			<Button text="{i18n>closeAction}" press=".onCloseInsights" />
+			<Button id="btnCopyInsights" text="{i18n>copyAction}" icon="sap-icon://copy" press=".onCopyInsights" tooltip="{i18n>copyAnalysis}" />
+			<Button id="btnCloseInsights" text="{i18n>closeAction}" press=".onCloseInsights" />
 		</buttons>
 	</Dialog>
 </core:FragmentDefinition>

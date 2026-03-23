@@ -16,6 +16,7 @@ import Button from "sap/m/Button";
 import ResourceModel from "sap/ui/model/resource/ResourceModel";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import Control from "sap/ui/core/Control";
+import encodeXML from "sap/base/security/encodeXML";
 
 /**
  * @namespace ui5.aghd.controller
@@ -173,8 +174,20 @@ export default class BaseController extends Controller {
                 }
             });
         } catch (error) {
-            MessageBox.error((error as Error).message);
+            this.showError(error);
         }
+    }
+
+    /**
+     * Safely displays an error message to the user, truncating and escaping
+     * the text to prevent UI thread denial of service and potential XSS vectors.
+     * @param error The error object or string
+     */
+    protected showError(error: unknown): void {
+        const msg = error instanceof Error ? error.message : String(error);
+        const truncatedMsg = msg.substring(0, 1000);
+        const safeMsg = encodeXML(truncatedMsg);
+        MessageBox.error(safeMsg);
     }
 
     public onCancelSettings(): void {
@@ -214,7 +227,7 @@ export default class BaseController extends Controller {
                     this.animateCopyButton(button);
                 }
             }).catch((err) => {
-                console.warn("Clipboard API failed, falling back to execCommand", err);
+                console.warn("Clipboard API failed, falling back to execCommand", (err as Error).message || "Unknown error");
                 this.fallbackCopy(text, successMessage, button);
             });
         } else {
@@ -247,11 +260,11 @@ export default class BaseController extends Controller {
                     this.animateCopyButton(button);
                 }
             } else {
-                MessageBox.error(this.getText("clipboardUnavailable", [text]));
+                MessageBox.error(this.getText("clipboardUnavailable"));
             }
         } catch (err) {
-            console.error("Fallback copy failed", err);
-            MessageBox.error(this.getText("clipboardUnavailable", [text]));
+            console.error("Fallback copy failed", (err as Error).message || "Unknown error");
+            MessageBox.error(this.getText("clipboardUnavailable"));
         }
 
         document.body.removeChild(textArea);
