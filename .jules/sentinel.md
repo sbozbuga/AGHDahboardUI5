@@ -1,4 +1,4 @@
-## 2024-05-24 - Prevent Information Leakage in Browser Console
-**Vulnerability:** Raw error objects were being logged directly to the browser console (e.g., `console.error(error)`).
-**Learning:** This exposes internal structure and stack traces, violating the "Fail securely" principle and potentially leaking sensitive data.
-**Prevention:** Always log the `(error as Error).message || 'Unknown error'` property instead of the raw `error` object when writing to the console.
+## 2025-03-22 - XSS via Unescaped Confirmation Dialog
+**Vulnerability:** The Base URL configured by the user (or attacker) was being passed directly to `MessageBox.confirm` in the external URL warning without proper encoding. Although the `URL` constructor checks validated the protocol, it did not prevent embedded tags within the URL string from being rendered as HTML by the UI5 component.
+**Learning:** `sap.m.MessageBox` instances may render HTML depending on internal configurations or specific characters. Even when a URL has passed basic parsing (like ensuring `http://` protocol), the raw input string may contain tags like `<script>` that node's `URL` constructor canonicalizes but original raw strings retain.
+**Prevention:** Always sanitize or encode ANY user-supplied or user-configurable string using `sap/base/security/encodeXML` before displaying it in dialogs, error messages, or warnings, even if the string has passed domain-specific validation (like URL parsing).
