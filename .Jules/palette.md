@@ -39,3 +39,7 @@
 ## 2026-03-19 - Identifying Implicit Dialog Triggers
 **Learning:** Buttons that trigger UI5 `MessageBox.confirm` (or similar utility dialogs like the logout button) are often overlooked for the `ariaHasPopup="Dialog"` attribute compared to custom `sap.m.Dialog` fragments. Screen readers rely on this attribute to proactively announce that a dialog will open.
 **Action:** Always verify if utility methods like `MessageBox.confirm` are being called by a button's `press` handler, and explicitly add `ariaHasPopup="Dialog"` to those buttons in the XML view to ensure consistent micro-UX and accessibility.
+
+## 2026-03-24 - Immediate Feedback for Async Actions
+**Learning:** By default, UI5 delays the display of the busy indicator by 1000ms. For standard network requests taking 300-900ms, the user receives no visual feedback, causing the application to feel unresponsive or frozen during critical operations like data fetching or form submission.
+**Action:** Set the `busyIndicatorDelay="0"` property on root `<mvc:View>` or `<App>` tags to guarantee immediate visual feedback for application-level async operations, significantly improving perceived performance and micro-UX.

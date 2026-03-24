@@ -6,7 +6,8 @@
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns:f="sap.f"
 	xmlns:card="sap.f.cards"
-	displayBlock="true">
+	displayBlock="true"
+	busyIndicatorDelay="0">
 
 	<Page title="{i18n>appTitle}">
 		<content>
