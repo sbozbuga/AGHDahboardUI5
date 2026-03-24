@@ -1,6 +1,7 @@
 <mvc:View
 	controllerName="ui5.aghd.controller.Logs"
 	displayBlock="true"
+	busyIndicatorDelay="0"
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns:core="sap.ui.core">
