@@ -2,7 +2,8 @@
     controllerName="ui5.aghd.controller.Login"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    displayBlock="true">
+    displayBlock="true"
+    busyIndicatorDelay="0">
     <App>
         <Page title="AdGuard Home Login">
             <VBox class="sapUiSmallMargin" justifyContent="Center" alignItems="Center" height="100%">
