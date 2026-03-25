@@ -21,3 +21,4 @@ import "unit/controller/DashboardSecurity.qunit";
 import './service/GeminiServiceIpv6Benchmark.qunit';
 import "unit/controller/DashboardOptimization.qunit";
 import "unit/controller/LogsForEachOptimization.qunit";
+import "unit/model/formatterBenchmark.qunit";

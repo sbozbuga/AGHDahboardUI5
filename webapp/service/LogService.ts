@@ -30,7 +30,8 @@ export default class LogService extends BaseApiService {
         for (const entry of processedList) {
             const rawElapsed = (entry as unknown as { elapsedMs: number | string }).elapsedMs;
 
-            const elapsedMs = typeof rawElapsed === "number" ? rawElapsed : (parseFloat(rawElapsed) || 0);
+            // Optimization: Native Number() is faster than typeof check + parseFloat
+            const elapsedMs = Number(rawElapsed) || 0;
             const reason = entry.reason;
             // Optimization: indexOf === 0 is ~25% faster than startsWith in hot loops.
             // SafeBrowsing check comes first as strict equality is fastest.
