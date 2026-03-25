@@ -76,7 +76,8 @@ export default class StatsService extends BaseApiService {
 
             for (const e of data.data) {
                 const rawElapsed = e.elapsedMs;
-                const val = typeof rawElapsed === "number" ? rawElapsed : (parseFloat(rawElapsed as unknown as string) || 0);
+                // Optimization: Native Number() is faster than typeof check + parseFloat
+                const val = Number(rawElapsed) || 0;
 
                 if (val <= 0) continue;
 

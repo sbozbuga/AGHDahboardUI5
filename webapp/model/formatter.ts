@@ -27,10 +27,11 @@ export default {
      * @returns Formatted string (e.g. "1,234") or "0"
      */
     formatNumber: function (value: number | string | null | undefined): string {
-        if (value === null || value === undefined) {
+        if (value == null) {
             return "0";
         }
-        const num = typeof value === 'number' ? value : parseFloat(value);
+        // Optimization: Native Number() constructor is faster than typeof + parseFloat for numeric conversion
+        const num = Number(value);
         if (isNaN(num)) {
             return "0";
         }
@@ -83,10 +84,11 @@ export default {
      * @returns "Error" | "Warning" | "None"
      */
     formatElapsedState: function (ms: number | string | null | undefined): string {
-        if (ms === null || ms === undefined) {
+        if (ms == null) {
             return "None";
         }
-        const val = typeof ms === 'number' ? ms : parseFloat(ms);
+        // Optimization: Native Number() constructor is faster than typeof + parseFloat
+        const val = Number(ms);
 
         if (val > 500) {
             return "Error";
@@ -103,10 +105,11 @@ export default {
      * @returns "Critical (> 500ms)" | "Warning (> 200ms)" | "Good (< 200ms)"
      */
     formatElapsedStateText: function (ms: number | string | null | undefined): string {
-        if (ms === null || ms === undefined) {
+        if (ms == null) {
             return "None";
         }
-        const val = typeof ms === 'number' ? ms : parseFloat(ms);
+        // Optimization: Native Number() constructor is faster than typeof + parseFloat
+        const val = Number(ms);
 
         if (val > 500) {
             return "Critical (> 500ms)";
@@ -123,10 +126,11 @@ export default {
      * @returns "Good" | "Critical" | "Error" | "Neutral"
      */
     formatElapsedColor: function (ms: number | string | null | undefined): string {
-        if (ms === null || ms === undefined) {
+        if (ms == null) {
             return "Neutral";
         }
-        const val = typeof ms === 'number' ? ms : parseFloat(ms);
+        // Optimization: Native Number() constructor is faster than typeof + parseFloat
+        const val = Number(ms);
 
         if (val > 500) {
             return "Error";
