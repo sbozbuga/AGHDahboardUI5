@@ -11,19 +11,46 @@
 >
 	<Page title="{i18n>appTitle}">
 		<headerContent>
-			<Select
-				id="timeFilterSelect"
-				change=".onTimeFilterChange"
-				selectedKey="{view>/selectedTimePeriod}"
-				tooltip="{i18n>selectTimePeriod}"
-			>
-				<core:Item key="all" text="{i18n>allTime}" />
-				<core:Item key="24h" text="{i18n>last24Hours}" />
-				<core:Item key="today" text="{i18n>today}" />
-				<core:Item key="yesterday" text="{i18n>yesterday}" />
-				<core:Item key="7d" text="{i18n>last7Days}" />
-				<core:Item key="week" text="{i18n>thisWeek}" />
-			</Select>
+			<HBox alignItems="Center" class="sapUiTinyMarginEnd">
+				<Label text="{i18n>period}:" labelFor="timeFilterSelect" class="sapUiTinyMarginEnd" />
+				<Select
+					id="timeFilterSelect"
+					change=".onTimeFilterChange"
+					selectedKey="{view>/selectedTimePeriod}"
+					tooltip="{i18n>selectTimePeriod}"
+					class="sapUiTinyMarginEnd"
+				>
+					<core:Item key="all" text="{i18n>allTime}" />
+					<core:Item key="24h" text="{i18n>last24Hours}" />
+					<core:Item key="today" text="{i18n>today}" />
+					<core:Item key="yesterday" text="{i18n>yesterday}" />
+					<core:Item key="7d" text="{i18n>last7Days}" />
+					<core:Item key="week" text="{i18n>thisWeek}" />
+				</Select>
+
+				<Label
+					text="{i18n>scanDepthAbbr}:"
+					labelFor="scanDepthSelect"
+					class="sapUiTinyMarginEnd sapUiSmallMarginBegin"
+				/>
+				<Select
+					id="scanDepthSelect"
+					change=".onScanDepthChange"
+					selectedKey="{view>/scanDepth}"
+					tooltip="{i18n>dashboardScanDepth}"
+				>
+					<core:Item key="500" text="500" />
+					<core:Item key="1000" text="1,000" />
+					<core:Item key="1500" text="1,500" />
+					<core:Item key="2000" text="2,000" />
+					<core:Item key="3000" text="3,000" />
+					<core:Item key="4000" text="4,000" />
+					<core:Item key="5000" text="5,000" />
+					<core:Item key="10000" text="10,000" />
+					<core:Item key="20000" text="20,000" />
+					<core:Item key="50000" text="50,000" />
+				</Select>
+			</HBox>
 		</headerContent>
 		<content>
 			<GenericTile

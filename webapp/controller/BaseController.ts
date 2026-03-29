@@ -129,7 +129,6 @@ export default class BaseController extends Controller {
 		model.setProperty("/selectedModel", currentModel);
 		model.setProperty("/baseUrl", baseUrl);
 		model.setProperty("/systemContext", SettingsService.getInstance().getSystemContext());
-		model.setProperty("/scanDepth", SettingsService.getInstance().getDashboardScanDepth());
 		model.setProperty("/availableModels", []);
 
 		dialog.open();
@@ -169,9 +168,6 @@ export default class BaseController extends Controller {
 			}
 
 			SettingsService.getInstance().setBaseUrl(baseUrl);
-
-			const scanDepth = model.getProperty("/scanDepth");
-			SettingsService.getInstance().setDashboardScanDepth(Number(scanDepth));
 
 			(view.byId("settingsDialog") as Dialog).close();
 			MessageBox.success(this.getText("settingsSaved"), {

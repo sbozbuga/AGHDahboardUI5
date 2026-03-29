@@ -2,6 +2,7 @@ import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import AuthService from "../service/AuthService";
 import StatsService from "../service/StatsService";
+import SettingsService from "../service/SettingsService";
 import LogService from "../service/LogService";
 // formatter imported in BaseController
 import MessageBox from "sap/m/MessageBox";
@@ -28,7 +29,8 @@ export default class Dashboard extends BaseController {
 		view?.setModel(
 			new JSONModel({
 				selectedTimePeriod: "all",
-				selectedTimePeriodText: this.getText("allTime")
+				selectedTimePeriodText: this.getText("allTime"),
+				scanDepth: String(SettingsService.getInstance().getDashboardScanDepth())
 			}),
 			"view"
 		);
@@ -112,6 +114,17 @@ export default class Dashboard extends BaseController {
 		viewModel.setProperty("/selectedTimePeriodText", textMap[period] || textMap.all);
 
 		// Stop polling to prevent conflicts, then refresh immediately
+		this.stopPolling();
+		void this.onRefreshStats(false).then(() => {
+			this.startPolling();
+		});
+	}
+
+	public onScanDepthChange(): void {
+		const viewModel = this.getViewModel("view");
+		const depth = Number(viewModel.getProperty("/scanDepth"));
+		SettingsService.getInstance().setDashboardScanDepth(depth);
+
 		this.stopPolling();
 		void this.onRefreshStats(false).then(() => {
 			this.startPolling();
