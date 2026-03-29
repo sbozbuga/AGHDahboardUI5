@@ -32,7 +32,6 @@ interface ViewSettingsEventParams {
 	filterItems?: ViewSettingsItem[];
 }
 
-
 /**
  * @namespace ui5.aghd.controller
  */
@@ -399,7 +398,6 @@ export default class Logs extends BaseController {
 		const btn = source instanceof Button ? source : undefined;
 		this.copyToClipboard(text, this.getText("listCopied"), btn);
 	}
-
 
 	public async onOpenInsights(): Promise<void> {
 		const dialog = await this._openDialog(Constants.Fragments.InsightsDialog);

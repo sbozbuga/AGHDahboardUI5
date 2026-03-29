@@ -23,7 +23,6 @@ export default class Dashboard extends BaseController {
 	private static readonly REFRESH_INTERVAL = 15000;
 	private static readonly SLOWEST_QUERY_INTERVAL = 60000; // 1 minute throttle for heavy queries
 
-
 	public onInit(): void {
 		this.getView()?.setModel(new JSONModel());
 		void this.onRefreshStats();
@@ -278,7 +277,6 @@ export default class Dashboard extends BaseController {
 			this.copyToClipboard(this.escapeCsvField(textToCopy), this.getText("domainCopied"), source);
 		}
 	}
-
 
 	public onCopyClient(event: Event): void {
 		const source = event.getSource();

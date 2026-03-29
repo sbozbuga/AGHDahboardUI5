@@ -1,0 +1,34 @@
+
+> ui5-agh-dashboard@1.0.0 health
+> npm run format:check && npm run lint && npm run ui5lint && npm run ts-typecheck
+
+
+> ui5-agh-dashboard@1.0.0 format:check
+> prettier --check "webapp/**/*.{ts,js,json,xml,css,md}"
+
+Checking formatting...
+[error] webapp/view/Dashboard.view.xml: SyntaxError: Opening tag ":f:button" not terminated. (122:13)
+[error]   120 | 													</layoutData>
+[error]   121 | 												</Text>
+[error] > 122 | 												<button
+[error]       | 												^^^^^^^
+[error] > 123 | 													icon="sap-icon://copy"
+[error]       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[error] > 124 | 													type="Transparent"
+[error]       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[error] > 125 | 													press=".onCopyClient"
+[error]       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[error] > 126 | 													tooltip="{parts:[{path:'i18n>copyClientName'}, {path:'name'}], formatter: '.formatter.formatMessage'}"
+[error]       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[error] > 127 | 													class="copyButton"
+[error]       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[error] > 128 | 						<VBox class="sapUiTinyMargin">
+[error]       | ^^^^^^^
+[error]   129 | 							<Table id="topClientsTable" items="{/top_clients}" inset="false">
+[error]   130 | 								<noData>
+[error]   131 | 									<Text text="{i18n>noData}" />
+[warn] webapp/view/fragment/AdvancedFilterDialog.fragment.xml
+[warn] webapp/view/fragment/InsightsDialog.fragment.xml
+[warn] webapp/view/fragment/SettingsDialog.fragment.xml
+[warn] webapp/view/Login.view.xml
+Error occurred when checking code style in the above file.
