@@ -157,8 +157,8 @@ export default class SettingsService {
 	}
 
 	public setDashboardScanDepth(depth: number): void {
-		if (depth < 500 || depth > 5000) {
-			throw new Error("Scan depth must be between 500 and 5000.");
+		if (depth < 500 || depth > 50000) {
+			throw new Error("Scan depth must be between 500 and 50000.");
 		}
 		this._scanDepth = depth;
 		this.storage.put(this.STORAGE_KEY_SCAN_DEPTH, depth);
