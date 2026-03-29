@@ -1,9 +1,9 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-	<dialog id="settingsDialog" title="Settings" contentWidth="400px" initialFocus="baseUrlInput">
+	<Dialog id="settingsDialog" title="Settings" contentWidth="400px" initialFocus="baseUrlInput">
 		<content>
 			<VBox class="sapUiSmallMargin">
-				<label text="AdGuard Home Base URL" labelFor="baseUrlInput" />
-				<input
+				<Label text="AdGuard Home Base URL" labelFor="baseUrlInput" />
+				<Input
 					id="baseUrlInput"
 					value="{/baseUrl}"
 					showClearIcon="true"
@@ -18,8 +18,8 @@
 					class="sapUiTinyMarginBottom"
 				/>
 
-				<label text="Gemini API Key" labelFor="apiKeyInput" class="sapUiSmallMarginTop" />
-				<input
+				<Label text="Gemini API Key" labelFor="apiKeyInput" class="sapUiSmallMarginTop" />
+				<Input
 					id="apiKeyInput"
 					value="{/apiKey}"
 					showClearIcon="true"
@@ -34,20 +34,20 @@
 					ariaDescribedBy="apiKeyHelpText"
 				/>
 				<Text id="apiKeyHelpText" text="Your API key is stored locally in your browser." class="sapUiTinyMarginTop" />
-				<link
+				<Link
 					text="Get an API Key"
 					href="https://aistudio.google.com/app/apikey"
 					target="_blank"
 					class="sapUiSmallMarginBottom"
 				/>
 
-				<label text="Gemini Model" labelFor="modelSelect" class="sapUiSmallMarginTop" />
-				<select id="modelSelect" selectedKey="{/selectedModel}" items="{/availableModels}" width="100%">
+				<Label text="Gemini Model" labelFor="modelSelect" class="sapUiSmallMarginTop" />
+				<Select id="modelSelect" selectedKey="{/selectedModel}" items="{/availableModels}" width="100%">
 					<core:Item key="{key}" text="{text}" />
-				</select>
+				</Select>
 
-				<label text="System Context (Optional)" labelFor="contextInput" class="sapUiSmallMarginTop" />
-				<textarea
+				<Label text="System Context (Optional)" labelFor="contextInput" class="sapUiSmallMarginTop" />
+				<TextArea
 					id="contextInput"
 					value="{/systemContext}"
 					placeholder="Describe your network (e.g., Raspberry Pi 5, Unbound, IoT devices...)"
@@ -60,8 +60,8 @@
 			</VBox>
 		</content>
 		<buttons>
-			<button text="Save" press=".onSaveSettings" type="Emphasized" />
-			<button text="Cancel" press=".onCancelSettings" />
+			<Button text="Save" press=".onSaveSettings" type="Emphasized" />
+			<Button text="Cancel" press=".onCancelSettings" />
 		</buttons>
-	</dialog>
+	</Dialog>
 </core:FragmentDefinition>

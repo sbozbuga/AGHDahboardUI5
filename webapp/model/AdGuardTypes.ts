@@ -42,7 +42,7 @@ export interface AdGuardData {
 export interface StatsEntry {
 	name: string;
 	count: number;
-	[key: string]: any; // Allow for dynamic properties from different stats types
+	[key: string]: string | number | boolean | null | undefined; // Allow for dynamic properties from different stats types
 }
 
 export interface AdGuardStats {

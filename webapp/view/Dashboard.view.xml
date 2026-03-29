@@ -84,14 +84,14 @@
 					</f:header>
 					<f:content>
 						<VBox height="100%" renderType="Bare">
-							<button
+							<Button
 								icon="sap-icon://copy"
 								type="Transparent"
 								press=".onCopyAllClients"
 								tooltip="{parts:[{path:'i18n>copyAllClients'}, {path:'/top_clients', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 								class="floatingCopyBtn"
 							/>
-							<table
+							<Table
 								ariaLabelledBy="cardHeaderClients"
 								items="{/top_clients}"
 								inset="false"
@@ -119,7 +119,7 @@
 														<FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
 													</layoutData>
 												</Text>
-												<button
+												<Button
 													icon="sap-icon://copy"
 													type="Transparent"
 													press=".onCopyClient"
@@ -129,13 +129,13 @@
 													<layoutData>
 														<FlexItemData shrinkFactor="0" />
 													</layoutData>
-												</button>
+												</Button>
 											</HBox>
 											<Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
 										</cells>
 									</ColumnListItem>
 								</items>
-							</table>
+							</Table>
 						</VBox>
 					</f:content>
 				</f:Card>
@@ -150,14 +150,14 @@
 					</f:header>
 					<f:content>
 						<VBox height="100%" renderType="Bare">
-							<button
+							<Button
 								icon="sap-icon://copy"
 								type="Transparent"
 								press=".onCopyAllDomains"
 								tooltip="{parts:[{path:'i18n>copyAllDomains'}, {path:'/top_queried_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 								class="floatingCopyBtn"
 							/>
-							<table
+							<Table
 								ariaLabelledBy="cardHeaderDomains"
 								items="{/top_queried_domains}"
 								inset="false"
@@ -185,7 +185,7 @@
 														<FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
 													</layoutData>
 												</Text>
-												<button
+												<Button
 													icon="sap-icon://copy"
 													type="Transparent"
 													press=".onCopyDomain"
@@ -195,13 +195,13 @@
 													<layoutData>
 														<FlexItemData shrinkFactor="0" />
 													</layoutData>
-												</button>
+												</Button>
 											</HBox>
 											<Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
 										</cells>
 									</ColumnListItem>
 								</items>
-							</table>
+							</Table>
 						</VBox>
 					</f:content>
 				</f:Card>
@@ -216,14 +216,14 @@
 					</f:header>
 					<f:content>
 						<VBox height="100%" renderType="Bare">
-							<button
+							<Button
 								icon="sap-icon://copy"
 								type="Transparent"
 								press=".onCopyAllBlockedDomains"
 								tooltip="{parts:[{path:'i18n>copyAllBlockedDomains'}, {path:'/top_blocked_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 								class="floatingCopyBtn"
 							/>
-							<table
+							<Table
 								ariaLabelledBy="cardHeaderBlockedDomains"
 								items="{/top_blocked_domains}"
 								inset="false"
@@ -251,7 +251,7 @@
 														<FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
 													</layoutData>
 												</Text>
-												<button
+												<Button
 													icon="sap-icon://copy"
 													type="Transparent"
 													press=".onCopyDomain"
@@ -261,13 +261,13 @@
 													<layoutData>
 														<FlexItemData shrinkFactor="0" />
 													</layoutData>
-												</button>
+												</Button>
 											</HBox>
 											<Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
 										</cells>
 									</ColumnListItem>
 								</items>
-							</table>
+							</Table>
 						</VBox>
 					</f:content>
 				</f:Card>
@@ -286,14 +286,14 @@
 					</f:header>
 					<f:content>
 						<VBox height="100%" renderType="Bare">
-							<button
+							<Button
 								icon="sap-icon://copy"
 								type="Transparent"
 								press=".onCopySlowestQueries"
 								tooltip="{parts:[{path:'i18n>copyAllDomains'}, {path:'/slowest_queries', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 								class="floatingCopyBtn"
 							/>
-							<table
+							<Table
 								ariaLabelledBy="cardHeaderSlowestQueries"
 								items="{/slowest_queries}"
 								inset="false"
@@ -334,7 +334,7 @@
 														<FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
 													</layoutData>
 												</Text>
-												<button
+												<Button
 													icon="sap-icon://copy"
 													type="Transparent"
 													press=".onCopyDomain"
@@ -344,7 +344,7 @@
 													<layoutData>
 														<FlexItemData shrinkFactor="0" />
 													</layoutData>
-												</button>
+												</Button>
 											</HBox>
 											<ObjectNumber
 												number="{
@@ -363,7 +363,7 @@
 										</cells>
 									</ColumnListItem>
 								</items>
-							</table>
+							</Table>
 						</VBox>
 					</f:content>
 				</f:Card>
@@ -376,7 +376,7 @@
 					visible="{= !!${/lastUpdated} }"
 					class="sapUiTinyMarginBegin"
 				/>
-				<button
+				<Button
 					icon="sap-icon://refresh"
 					type="Transparent"
 					press=".onManualRefresh"
@@ -384,14 +384,14 @@
 					class="sapUiTinyMarginBegin"
 				/>
 				<ToolbarSpacer />
-				<button text="{i18n>viewLogs}" press=".onPressLogs" type="Emphasized" />
-				<button
+				<Button text="{i18n>viewLogs}" press=".onPressLogs" type="Emphasized" />
+				<Button
 					icon="sap-icon://action-settings"
 					tooltip="{i18n>settings}"
 					press=".onOpenSettings"
 					ariaHasPopup="Dialog"
 				/>
-				<button icon="sap-icon://log" tooltip="{i18n>logout}" press=".onLogoutPress" ariaHasPopup="Dialog" />
+				<Button icon="sap-icon://log" tooltip="{i18n>logout}" press=".onLogoutPress" ariaHasPopup="Dialog" />
 			</OverflowToolbar>
 		</footer>
 	</Page>

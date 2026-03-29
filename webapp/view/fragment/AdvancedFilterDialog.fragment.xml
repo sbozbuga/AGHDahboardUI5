@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form">
-	<dialog
+	<Dialog
 		id="advancedFilterDialog"
 		title="Advanced Filter"
 		contentWidth="600px"
@@ -8,7 +8,7 @@
 		initialFocus="btnAddCondition"
 	>
 		<content>
-			<table
+			<Table
 				id="filterTable"
 				ariaLabelledBy="advancedFilterTitle"
 				items="{view>/advancedFilters}"
@@ -25,13 +25,13 @@
 				</noData>
 				<headerToolbar>
 					<OverflowToolbar>
-						<title
+						<Title
 							id="advancedFilterTitle"
 							text="Conditions ({= ${view>/advancedFilters} ? ${view>/advancedFilters}.length : 0 })"
 							level="H4"
 						/>
 						<ToolbarSpacer />
-						<button
+						<Button
 							id="btnAddCondition"
 							icon="sap-icon://add"
 							text="{i18n>addCondition}"
@@ -81,7 +81,7 @@
 								<core:Item key="StartsWith" text="Starts With" />
 								<core:Item key="EndsWith" text="Ends With" />
 							</ComboBox>
-							<input
+							<Input
 								tooltip="{i18n>value}"
 								value="{view>value}"
 								width="100%"
@@ -90,7 +90,7 @@
 								maxlength="200"
 								showClearIcon="true"
 							/>
-							<button
+							<Button
 								icon="sap-icon://delete"
 								type="Transparent"
 								press=".onRemoveFilterRow"
@@ -99,12 +99,12 @@
 						</cells>
 					</ColumnListItem>
 				</items>
-			</table>
+			</Table>
 		</content>
 		<buttons>
-			<button text="{i18n>clearAllAction}" press=".onClearAdvancedFilters" type="Transparent" />
-			<button text="{i18n>applyAction}" press=".onConfirmAdvancedFilter" type="Emphasized" />
-			<button text="{i18n>cancelAction}" press=".onCancelAdvancedFilter" />
+			<Button text="{i18n>clearAllAction}" press=".onClearAdvancedFilters" type="Transparent" />
+			<Button text="{i18n>applyAction}" press=".onConfirmAdvancedFilter" type="Emphasized" />
+			<Button text="{i18n>cancelAction}" press=".onCancelAdvancedFilter" />
 		</buttons>
-	</dialog>
+	</Dialog>
 </core:FragmentDefinition>

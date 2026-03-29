@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-	<dialog
+	<Dialog
 		id="insightsDialog"
 		title="AdGuard AI Insights"
 		contentWidth="600px"
@@ -15,14 +15,14 @@
 			</VBox>
 		</content>
 		<buttons>
-			<button
+			<Button
 				id="btnCopyInsights"
 				text="{i18n>copyAction}"
 				icon="sap-icon://copy"
 				press=".onCopyInsights"
 				tooltip="{i18n>copyAnalysis}"
 			/>
-			<button id="btnCloseInsights" text="{i18n>closeAction}" press=".onCloseInsights" />
+			<Button id="btnCloseInsights" text="{i18n>closeAction}" press=".onCloseInsights" />
 		</buttons>
-	</dialog>
+	</Dialog>
 </core:FragmentDefinition>

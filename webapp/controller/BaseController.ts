@@ -329,8 +329,8 @@ export default class BaseController extends Controller {
 		const arr = new Array(len) as string[];
 		for (let i = 0; i < len; i++) {
 			// Optimization: Directly access property via bracket notation
-			const val = (items[i] as Record<string, any>)[field];
-			arr[i] = this.escapeCsvField(val);
+			const val = (items[i] as Record<string, unknown>)[field];
+			arr[i] = this.escapeCsvField(val as string | number | boolean | null | undefined);
 		}
 		const text = arr.join("\n");
 		this.copyToClipboard(text, this.getText(successMessageKey), button);

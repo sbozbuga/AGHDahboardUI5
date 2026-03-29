@@ -8,7 +8,7 @@
 >
 	<App id="app">
 		<Page title="{i18n>logsTitle}" showNavButton="true" navButtonPress=".onNavBack" id="page">
-			<table
+			<Table
 				id="logsTable"
 				ariaLabelledBy="logsTableTitle"
 				items="{/data}"
@@ -29,7 +29,7 @@
 				</noData>
 				<headerToolbar>
 					<OverflowToolbar>
-						<title id="logsTableTitle" text="{i18n>logsHeader}" level="H2" />
+						<Title id="logsTableTitle" text="{i18n>logsHeader}" level="H2" />
 						<ToolbarSpacer />
 						<SearchField
 							id="searchField"
@@ -49,30 +49,29 @@
 								/>
 							</layoutData>
 						</SearchField>
-						<button
+						<Button
 							id="btnViewSettings"
 							icon="sap-icon://sort"
 							press=".onOpenViewSettings"
 							tooltip="{i18n>sortFilter}"
 							ariaHasPopup="Dialog"
 						/>
-						<button icon="sap-icon://refresh" press=".onRefreshLogs" tooltip="{i18n>refresh}" />
-						<button
+						<Button icon="sap-icon://refresh" press=".onRefreshLogs" tooltip="{i18n>refresh}" />
+						<Button
 							icon="sap-icon://copy"
 							press=".onCopyAllLogs"
 							tooltip="{parts:[{path:'i18n>copyAll'}, {path:'/data', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 						/>
 						<ToolbarSeparator />
-						<button
+						<Button
 							text="{i18n>smartAnalysis}"
 							icon="sap-icon://lightbulb"
 							press=".onAnalyzeLogs"
 							type="Emphasized"
 							tooltip="{i18n>generateAIInsights}"
 							ariaHasPopup="Dialog"
-							ariaHasPopup="Dialog"
 						/>
-						<button
+						<Button
 							id="btnFilter"
 							icon="sap-icon://filter"
 							press=".onOpenAdvancedFilter"
@@ -86,8 +85,8 @@
 									visible="true"
 								/>
 							</customData>
-						</button>
-						<button
+						</Button>
+						<Button
 							icon="sap-icon://action-settings"
 							press=".onOpenSettings"
 							tooltip="{i18n>settings}"
@@ -98,7 +97,7 @@
 				<columns>
 					<Column width="11rem" id="colTime">
 						<header>
-							<button
+							<Button
 								text="{i18n>time}"
 								press=".onSort"
 								type="Transparent"
@@ -107,7 +106,7 @@
 								<customData>
 									<core:CustomData key="key" value="time" />
 								</customData>
-							</button>
+							</Button>
 						</header>
 					</Column>
 					<Column width="4rem" hAlign="Center" id="colSource">
@@ -117,7 +116,7 @@
 					</Column>
 					<Column width="16rem" demandPopin="true" minScreenWidth="Tablet" id="colClient">
 						<header>
-							<button
+							<Button
 								text="{i18n>client}"
 								press=".onSort"
 								type="Transparent"
@@ -126,12 +125,12 @@
 								<customData>
 									<core:CustomData key="key" value="client" />
 								</customData>
-							</button>
+							</Button>
 						</header>
 					</Column>
 					<Column id="colQuestion">
 						<header>
-							<button
+							<Button
 								text="{i18n>question}"
 								press=".onSort"
 								type="Transparent"
@@ -140,12 +139,12 @@
 								<customData>
 									<core:CustomData key="key" value="question/name" />
 								</customData>
-							</button>
+							</Button>
 						</header>
 					</Column>
 					<Column width="6rem" demandPopin="true" minScreenWidth="Tablet" id="colStatus">
 						<header>
-							<button
+							<Button
 								text="{i18n>status}"
 								press=".onSort"
 								type="Transparent"
@@ -154,7 +153,7 @@
 								<customData>
 									<core:CustomData key="key" value="status" />
 								</customData>
-							</button>
+							</Button>
 						</header>
 					</Column>
 					<Column width="5rem" demandPopin="true" minScreenWidth="Tablet" id="colBlocked" hAlign="Center">
@@ -164,7 +163,7 @@
 					</Column>
 					<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" hAlign="End" id="colElapsed">
 						<header>
-							<button
+							<Button
 								text="{i18n>elapsedMs}"
 								press=".onSort"
 								type="Transparent"
@@ -173,12 +172,12 @@
 								<customData>
 									<core:CustomData key="key" value="elapsedMs" />
 								</customData>
-							</button>
+							</Button>
 						</header>
 					</Column>
 					<Column width="22rem" demandPopin="true" minScreenWidth="Desktop" id="colUpstream">
 						<header>
-							<button
+							<Button
 								text="{i18n>upstream}"
 								press=".onSort"
 								type="Transparent"
@@ -187,12 +186,12 @@
 								<customData>
 									<core:CustomData key="key" value="upstream" />
 								</customData>
-							</button>
+							</Button>
 						</header>
 					</Column>
 					<Column width="10rem" demandPopin="true" minScreenWidth="Desktop" id="colReason">
 						<header>
-							<button
+							<Button
 								text="{i18n>reason}"
 								press=".onSort"
 								type="Transparent"
@@ -201,12 +200,12 @@
 								<customData>
 									<core:CustomData key="key" value="reason" />
 								</customData>
-							</button>
+							</Button>
 						</header>
 					</Column>
 					<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" id="colFilterId">
 						<header>
-							<button
+							<Button
 								text="{i18n>filterId}"
 								press=".onSort"
 								type="Transparent"
@@ -215,12 +214,12 @@
 								<customData>
 									<core:CustomData key="key" value="filterId" />
 								</customData>
-							</button>
+							</Button>
 						</header>
 					</Column>
 					<Column demandPopin="true" minScreenWidth="Desktop" id="colRule">
 						<header>
-							<button
+							<Button
 								text="{i18n>rule}"
 								press=".onSort"
 								type="Transparent"
@@ -229,7 +228,7 @@
 								<customData>
 									<core:CustomData key="key" value="rule" />
 								</customData>
-							</button>
+							</Button>
 						</header>
 					</Column>
 				</columns>
@@ -252,7 +251,7 @@
 							/>
 							<HBox alignItems="Center" wrap="Wrap">
 								<Text text="{client}" class="sapUiTinyMarginEnd" />
-								<button
+								<Button
 									icon="sap-icon://copy"
 									type="Transparent"
 									press=".onCopyClient"
@@ -267,7 +266,7 @@
 									maxLines="2"
 									class="sapUiTinyMarginEnd"
 								/>
-								<button
+								<Button
 									icon="sap-icon://copy"
 									type="Transparent"
 									press=".onCopyDomain"
@@ -305,7 +304,7 @@
 						</cells>
 					</ColumnListItem>
 				</items>
-			</table>
+			</Table>
 		</Page>
 	</App>
 </mvc:View>
