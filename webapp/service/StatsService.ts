@@ -2,6 +2,7 @@ import BaseApiService from "./BaseApiService";
 import { RawAdGuardStats, AdGuardStats, RawAdGuardData, StatsEntry } from "../model/AdGuardTypes";
 import { Constants } from "../model/Constants";
 import FilteringService from "./FilteringService";
+import SettingsService from "./SettingsService";
 
 export interface SlowestQueryEntry {
 	domain: string;
@@ -41,7 +42,11 @@ export default class StatsService extends BaseApiService {
 		this._slowestQueriesCacheDepth = 0;
 	}
 
-	public async getStats(): Promise<AdGuardStats> {
+	public async getStats(period: string = "all"): Promise<AdGuardStats> {
+		if (period !== "all") {
+			return this._getStatsFromLogs(period);
+		}
+
 		const rawData = await this._request<RawAdGuardStats>(Constants.ApiEndpoints.Stats);
 
 		const block_percentage =
@@ -51,14 +56,20 @@ export default class StatsService extends BaseApiService {
 		await filteringService.getFilters();
 
 		const rawTopFilters = rawData.top_filters || rawData.top_blocked_filters || [];
-		const topFilters = this.transformList(rawTopFilters, "id", StatsService.TOP_LIST_LIMIT);
-		// Resolve names for filters
-		topFilters.forEach((f) => {
-			const filterId = Number(f.name);
-			if (!isNaN(filterId)) {
-				f.name = filteringService.getFilterNameSync(filterId) || `Filter ${filterId}`;
-			}
-		});
+		let topFilters = this.transformList(rawTopFilters, "id", StatsService.TOP_LIST_LIMIT);
+
+		// Fallback: If API returns no filter stats, aggregate from recent logs
+		if (topFilters.length === 0) {
+			topFilters = await this._getTopFiltersFromLogs();
+		} else {
+			// Resolve names for filters from API (they usually only have IDs)
+			topFilters.forEach((f) => {
+				const filterId = Number(f.name);
+				if (!isNaN(filterId)) {
+					f.name = filteringService.getFilterNameSync(filterId) || `Filter ${filterId}`;
+				}
+			});
+		}
 
 		return {
 			num_dns_queries: rawData.num_dns_queries,
@@ -72,7 +83,10 @@ export default class StatsService extends BaseApiService {
 		};
 	}
 
-	public async getSlowestQueries(scanDepth: number = StatsService.DEFAULT_SCAN_DEPTH): Promise<SlowestQueryEntry[]> {
+	public async getSlowestQueries(scanDepth?: number): Promise<SlowestQueryEntry[]> {
+		if (!scanDepth) {
+			scanDepth = SettingsService.getInstance().getDashboardScanDepth();
+		}
 		// Cache Optimization check
 		if (
 			this._slowestQueriesCache &&
@@ -146,6 +160,154 @@ export default class StatsService extends BaseApiService {
 			return top10;
 		} catch (error) {
 			console.error("Failed to fetch slowest queries", (error as Error).message || "Unknown error");
+			return [];
+		}
+	}
+
+	private async _getStatsFromLogs(period: string): Promise<AdGuardStats> {
+		const scanDepth = SettingsService.getInstance().getDashboardScanDepth();
+		const startTime = this._getStartTimeForPeriod(period);
+		const endTime = period === "yesterday" ? this._getEndTimeForYesterday() : undefined;
+
+		try {
+			const url = `${Constants.ApiEndpoints.QueryLog}?limit=${scanDepth}&offset=0`;
+			const data = await this._request<RawAdGuardData>(url);
+			const filteringService = FilteringService.getInstance();
+
+			let total = 0;
+			let blocked = 0;
+			let totalProcessingTime = 0;
+			const domains = new Map<string, number>();
+			const blockedDomains = new Map<string, number>();
+			const clients = new Map<string, number>();
+			const filters = new Map<number, number>();
+
+			for (const e of data.data) {
+				const logTime = new Date(e.time);
+				if (startTime && logTime < startTime) continue;
+				if (endTime && logTime > endTime) continue;
+
+				total++;
+				const isBlocked = !!(e.filterId && e.filterId > 0) || e.reason === "FilteredBlockedService";
+				if (isBlocked) {
+					blocked++;
+					const domain = e.question.name;
+					blockedDomains.set(domain, (blockedDomains.get(domain) || 0) + 1);
+
+					if (e.filterId && e.filterId > 0) {
+						filters.set(e.filterId, (filters.get(e.filterId) || 0) + 1);
+					}
+				}
+
+				const domain = e.question.name;
+				domains.set(domain, (domains.get(domain) || 0) + 1);
+				clients.set(e.client, (clients.get(e.client) || 0) + 1);
+
+				const procTime = Number(e.elapsedMs) || 0;
+				totalProcessingTime += procTime;
+			}
+
+			const topDomains = Array.from(domains.entries())
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, StatsService.TOP_LIST_LIMIT)
+				.map(([name, count]) => ({ name, count }));
+
+			const topBlockedDomains = Array.from(blockedDomains.entries())
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, StatsService.TOP_LIST_LIMIT)
+				.map(([name, count]) => ({ name, count }));
+
+			const topClients = Array.from(clients.entries())
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, StatsService.TOP_LIST_LIMIT)
+				.map(([name, count]) => ({ name, count }));
+
+			const topFilters = Array.from(filters.entries())
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, StatsService.TOP_LIST_LIMIT)
+				.map(([id, count]) => ({
+					name: filteringService.getFilterNameSync(id) || `Filter ${id}`,
+					count
+				}));
+
+			return {
+				num_dns_queries: total,
+				num_blocked_filtering: blocked,
+				avg_processing_time: total > 0 ? Math.round((totalProcessingTime / total) * 100) / 100 : 0,
+				block_percentage: total > 0 ? Math.round((blocked / total) * 10000) / 100 : 0,
+				top_queried_domains: topDomains,
+				top_blocked_domains: topBlockedDomains,
+				top_clients: topClients,
+				top_filters: topFilters,
+				lastUpdated: new Date()
+			};
+		} catch (error) {
+			console.error("Failed to aggregate stats from logs", error);
+			throw error;
+		}
+	}
+
+	private _getStartTimeForPeriod(period: string): Date | undefined {
+		const now = new Date();
+		switch (period) {
+			case "24h":
+				return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+			case "today":
+				return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+			case "yesterday":
+				return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+			case "7d":
+				return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+			case "week": {
+				const day = now.getDay();
+				const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday
+				const start = new Date(now);
+				start.setDate(diff);
+				start.setHours(0, 0, 0, 0);
+				return start;
+			}
+			default:
+				return undefined;
+		}
+	}
+
+	private _getEndTimeForYesterday(): Date {
+		const now = new Date();
+		const end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+		end.setMilliseconds(-1);
+		return end;
+	}
+
+	private async _getTopFiltersFromLogs(scanDepth?: number): Promise<StatsEntry[]> {
+		if (!scanDepth) {
+			scanDepth = SettingsService.getInstance().getDashboardScanDepth();
+		}
+		try {
+			const url = `${Constants.ApiEndpoints.QueryLog}?limit=${scanDepth}&offset=0`;
+			const data = await this._request<RawAdGuardData>(url);
+			const filteringService = FilteringService.getInstance();
+
+			const filterCounts = new Map<number, number>();
+
+			for (const e of data.data) {
+				// AdGuard Home API uses 'reason' or 'status' to indicate filtering blocks.
+				// We check 'filterId' being non-zero as a reliable indicator of a list block.
+				if (e.filterId && e.filterId > 0) {
+					const count = filterCounts.get(e.filterId) || 0;
+					filterCounts.set(e.filterId, count + 1);
+				}
+			}
+
+			const result: StatsEntry[] = [];
+			for (const [id, count] of filterCounts.entries()) {
+				const name = filteringService.getFilterNameSync(id) || `Filter ${id}`;
+				result.push({ name, count });
+			}
+
+			// Sort by count descending and limit
+			return result.sort((a, b) => b.count - a.count).slice(0, StatsService.TOP_LIST_LIMIT);
+		} catch (error) {
+			console.error("Failed to aggregate top filters from logs", error);
 			return [];
 		}
 	}

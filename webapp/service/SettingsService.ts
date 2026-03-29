@@ -8,7 +8,9 @@ export default class SettingsService {
 	private readonly STORAGE_KEY_MODEL = "gemini_model";
 	private readonly STORAGE_KEY_CONTEXT = "gemini_system_context";
 	private readonly STORAGE_KEY_BASE_URL = "aghd_base_url";
+	private readonly STORAGE_KEY_SCAN_DEPTH = "dashboard_scan_depth";
 	private readonly DEFAULT_MODEL = "gemini-1.5-flash";
+	private readonly DEFAULT_SCAN_DEPTH = 1000;
 
 	private readonly MAX_API_KEY_LENGTH = 255;
 	private readonly MAX_CONTEXT_LENGTH = 1000;
@@ -18,6 +20,7 @@ export default class SettingsService {
 	private _model: string | null = null;
 	private _context: string | null = null;
 	private _baseUrl: string | null = null;
+	private _scanDepth: number | null = null;
 
 	private constructor() {
 		this.storage = new Storage(Storage.Type.local, "aghd_settings");
@@ -142,6 +145,23 @@ export default class SettingsService {
 
 		this._baseUrl = cleanUrl;
 		this.storage.put(this.STORAGE_KEY_BASE_URL, cleanUrl);
+	}
+
+	public getDashboardScanDepth(): number {
+		if (this._scanDepth !== null) {
+			return this._scanDepth;
+		}
+		const val = this.storage.get(this.STORAGE_KEY_SCAN_DEPTH);
+		this._scanDepth = typeof val === "number" ? val : Number(val) || this.DEFAULT_SCAN_DEPTH;
+		return this._scanDepth;
+	}
+
+	public setDashboardScanDepth(depth: number): void {
+		if (depth < 500 || depth > 5000) {
+			throw new Error("Scan depth must be between 500 and 5000.");
+		}
+		this._scanDepth = depth;
+		this.storage.put(this.STORAGE_KEY_SCAN_DEPTH, depth);
 	}
 
 	public clearCredentials(): void {

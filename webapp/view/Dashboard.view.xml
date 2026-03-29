@@ -10,11 +10,26 @@
 	busyIndicatorDelay="0"
 >
 	<Page title="{i18n>appTitle}">
+		<headerContent>
+			<Select
+				id="timeFilterSelect"
+				change=".onTimeFilterChange"
+				selectedKey="{view>/selectedTimePeriod}"
+				tooltip="{i18n>selectTimePeriod}"
+			>
+				<core:Item key="all" text="{i18n>allTime}" />
+				<core:Item key="24h" text="{i18n>last24Hours}" />
+				<core:Item key="today" text="{i18n>today}" />
+				<core:Item key="yesterday" text="{i18n>yesterday}" />
+				<core:Item key="7d" text="{i18n>last7Days}" />
+				<core:Item key="week" text="{i18n>thisWeek}" />
+			</Select>
+		</headerContent>
 		<content>
 			<GenericTile
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
 				header="{i18n>totalQueries}"
-				subheader="{i18n>last24Hours}"
+				subheader="{view>/selectedTimePeriodText}"
 				press=".onPressLogs"
 				tooltip="{i18n>viewQueryLog}"
 			>
@@ -26,7 +41,7 @@
 			<GenericTile
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
 				header="{i18n>blockedQueries}"
-				subheader="{i18n>last24Hours}"
+				subheader="{view>/selectedTimePeriodText}"
 				press=".onPressBlockedLogs"
 				tooltip="{i18n>viewBlockedQueryLog}"
 			>
@@ -38,7 +53,7 @@
 			<GenericTile
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
 				header="{i18n>processingTime}"
-				subheader="{i18n>average}"
+				subheader="{i18n>average} ({view>/selectedTimePeriodText})"
 				frameType="OneByOne"
 				press=".onPressLogs"
 				tooltip="{i18n>viewQueryPerformanceLogs}"
@@ -56,7 +71,7 @@
 			<GenericTile
 				class="sapUiTinyMarginBegin sapUiTinyMarginTop"
 				header="{i18n>blockedPercentage}"
-				subheader="{i18n>efficiency}"
+				subheader="{i18n>efficiency} ({view>/selectedTimePeriodText})"
 				frameType="OneByOne"
 				press=".onPressBlockedLogs"
 				tooltip="{i18n>viewBlockedQueryLogs}"

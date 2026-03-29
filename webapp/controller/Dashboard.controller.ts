@@ -24,7 +24,15 @@ export default class Dashboard extends BaseController {
 	private static readonly SLOWEST_QUERY_INTERVAL = 60000; // 1 minute throttle for heavy queries
 
 	public onInit(): void {
-		this.getView()?.setModel(new JSONModel());
+		const view = this.getView();
+		view?.setModel(
+			new JSONModel({
+				selectedTimePeriod: "all",
+				selectedTimePeriodText: this.getText("allTime")
+			}),
+			"view"
+		);
+		view?.setModel(new JSONModel());
 		void this.onRefreshStats();
 
 		// Start Auto-Refresh
@@ -89,6 +97,27 @@ export default class Dashboard extends BaseController {
 		this.startPolling();
 	}
 
+	public onTimeFilterChange(): void {
+		// Update subheader text
+		const viewModel = this.getViewModel("view");
+		const period = viewModel.getProperty("/selectedTimePeriod") as string;
+		const textMap: Record<string, string> = {
+			all: this.getText("allTime"),
+			"24h": this.getText("last24Hours"),
+			today: this.getText("today"),
+			yesterday: this.getText("yesterday"),
+			"7d": this.getText("last7Days"),
+			week: this.getText("thisWeek")
+		};
+		viewModel.setProperty("/selectedTimePeriodText", textMap[period] || textMap.all);
+
+		// Stop polling to prevent conflicts, then refresh immediately
+		this.stopPolling();
+		void this.onRefreshStats(false).then(() => {
+			this.startPolling();
+		});
+	}
+
 	public async onRefreshStats(silent: boolean = false): Promise<void> {
 		const model = this.getViewModel();
 		if (!model) return;
@@ -98,10 +127,13 @@ export default class Dashboard extends BaseController {
 		}
 
 		try {
-			// Check for new logs before fetching heavy "slowest queries" list
-			// We fetch stats (lightweight) and the latest log entry (lightweight)
+			const viewModel = this.getViewModel("view");
+			const period = viewModel.getProperty("/selectedTimePeriod") as string;
+
+			// Check for new logs before fetching heavy metrics
+			// We fetch stats (lightweight if period is 'all') and the latest log entry (lightweight)
 			const [stats, latestLog] = await Promise.all([
-				StatsService.getInstance().getStats(),
+				StatsService.getInstance().getStats(period),
 				LogService.getInstance().getQueryLog(1, 0)
 			]);
 

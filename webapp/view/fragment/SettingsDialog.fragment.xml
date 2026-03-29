@@ -46,6 +46,18 @@
 					<core:Item key="{key}" text="{text}" />
 				</Select>
 
+				<Label text="{i18n>dashboardScanDepth}" labelFor="scanDepthInput" class="sapUiSmallMarginTop" />
+				<StepInput
+					id="scanDepthInput"
+					value="{/scanDepth}"
+					min="500"
+					max="5000"
+					step="500"
+					width="100%"
+					ariaDescribedBy="scanDepthHelpText"
+				/>
+				<Text id="scanDepthHelpText" text="{i18n>scanDepthHelpText}" class="sapUiTinyMarginTop" />
+
 				<Label text="System Context (Optional)" labelFor="contextInput" class="sapUiSmallMarginTop" />
 				<TextArea
 					id="contextInput"
