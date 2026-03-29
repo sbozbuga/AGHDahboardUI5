@@ -148,5 +148,22 @@ export default {
 	 */
 	getLength: function (list: unknown[] | null | undefined): number {
 		return list && Array.isArray(list) ? list.length : 0;
+	},
+
+	/**
+	 * Simple Markdown-like bold and newline to HTML formatter for AI insights.
+	 * @param text The raw markdown text from Gemini
+	 * @returns HTML string with <strong> and <br/> tags
+	 */
+	formatInsights: function (text: string): string {
+		if (!text) return "";
+		// Manual escape of HTML characters to avoid over-encoding markdown markers by encodeXML
+		let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+		const BOLD_REGEX = /\*\*(.*?)\*\*/g;
+		const NEWLINE_REGEX = /\n/g;
+
+		safeText = safeText.replace(BOLD_REGEX, "<strong>$1</strong>").replace(NEWLINE_REGEX, "<br/>");
+		return safeText;
 	}
 };

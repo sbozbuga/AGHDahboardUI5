@@ -28,6 +28,7 @@ export interface RawLogEntry {
 export interface LogEntry extends Omit<RawLogEntry, "time" | "elapsedMs"> {
 	time: string | Date;
 	elapsedMs: number;
+	blocked: boolean;
 }
 
 export interface RawAdGuardData {
@@ -41,7 +42,7 @@ export interface AdGuardData {
 export interface StatsEntry {
 	name: string;
 	count: number;
-	[key: string]: string | number | undefined;
+	[key: string]: any; // Allow for dynamic properties from different stats types
 }
 
 export interface AdGuardStats {
@@ -52,15 +53,16 @@ export interface AdGuardStats {
 	top_queried_domains: StatsEntry[];
 	top_blocked_domains: StatsEntry[];
 	top_clients: StatsEntry[];
+	lastUpdated?: Date;
 }
 
 export interface RawAdGuardStats {
 	num_dns_queries: number;
 	num_blocked_filtering: number;
 	avg_processing_time: number;
-	top_queried_domains: unknown[];
-	top_blocked_domains: unknown[];
-	top_clients: unknown[];
+	top_queried_domains: Record<string, number>[];
+	top_blocked_domains: Record<string, number>[];
+	top_clients: Record<string, number>[];
 }
 
 export interface AdvancedFilterRule {

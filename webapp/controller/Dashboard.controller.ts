@@ -1,6 +1,5 @@
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import UIComponent from "sap/ui/core/UIComponent";
 import AuthService from "../service/AuthService";
 import StatsService from "../service/StatsService";
 import LogService from "../service/LogService";
@@ -24,25 +23,6 @@ export default class Dashboard extends BaseController {
 	private static readonly REFRESH_INTERVAL = 15000;
 	private static readonly SLOWEST_QUERY_INTERVAL = 60000; // 1 minute throttle for heavy queries
 
-	private areStatsEqual(a: StatsEntry[], b: StatsEntry[]): boolean {
-		if (a === b) return true;
-		if (!a || !b) return false;
-
-		// Optimization: Cache array length to avoid repeated property access in loop condition
-		const len = a.length;
-		if (len !== b.length) return false;
-
-		for (let i = 0; i < len; i++) {
-			const itemA = a[i];
-			const itemB = b[i];
-			// Optimization: Compare numbers (count) before strings (name) as it is faster to evaluate,
-			// acting as a cheaper early exit condition for mis-matched entries.
-			if (itemA.count !== itemB.count || itemA.name !== itemB.name) {
-				return false;
-			}
-		}
-		return true;
-	}
 
 	public onInit(): void {
 		this.getView()?.setModel(new JSONModel());
@@ -199,16 +179,12 @@ export default class Dashboard extends BaseController {
 	}
 
 	public onPressLogs(): void {
-		const router = UIComponent.getRouterFor(this);
-		router.navTo(Constants.Routes.Logs);
+		this.navToLogs();
 	}
 
 	public onPressBlockedLogs(): void {
-		const router = UIComponent.getRouterFor(this);
-		router.navTo(Constants.Routes.Logs, {
-			query: {
-				status: "Blocked"
-			}
+		this.navToLogs({
+			status: Constants.LogStatus.Blocked
 		});
 	}
 
@@ -219,11 +195,8 @@ export default class Dashboard extends BaseController {
 		if (!context) return;
 		const entry = context.getObject() as StatsEntry;
 
-		const router = UIComponent.getRouterFor(this);
-		router.navTo(Constants.Routes.Logs, {
-			query: {
-				search: entry.name
-			}
+		this.navToLogs({
+			search: entry.name
 		});
 	}
 
@@ -234,11 +207,8 @@ export default class Dashboard extends BaseController {
 		if (!context) return;
 		const entry = context.getObject() as StatsEntry;
 
-		const router = UIComponent.getRouterFor(this);
-		router.navTo(Constants.Routes.Logs, {
-			query: {
-				search: entry.name
-			}
+		this.navToLogs({
+			search: entry.name
 		});
 	}
 
@@ -249,12 +219,9 @@ export default class Dashboard extends BaseController {
 		if (!context) return;
 		const entry = context.getObject() as StatsEntry;
 
-		const router = UIComponent.getRouterFor(this);
-		router.navTo(Constants.Routes.Logs, {
-			query: {
-				status: "Blocked",
-				search: entry.name
-			}
+		this.navToLogs({
+			status: Constants.LogStatus.Blocked,
+			search: entry.name
 		});
 	}
 
@@ -265,11 +232,8 @@ export default class Dashboard extends BaseController {
 		if (!context) return;
 		const entry = context.getObject() as { domain: string };
 
-		const router = UIComponent.getRouterFor(this);
-		router.navTo(Constants.Routes.Logs, {
-			query: {
-				search: entry.domain
-			}
+		this.navToLogs({
+			search: entry.domain
 		});
 	}
 
@@ -315,6 +279,7 @@ export default class Dashboard extends BaseController {
 		}
 	}
 
+
 	public onCopyClient(event: Event): void {
 		const source = event.getSource();
 		if (!(source instanceof Button)) return;
@@ -336,17 +301,7 @@ export default class Dashboard extends BaseController {
 
 		const model = this.getViewModel();
 		const data = model.getData() as AdGuardStats;
-		const clients = data.top_clients || [];
-
-		if (clients.length > 0) {
-			const len = clients.length;
-			const arr = new Array(len) as string[];
-			for (let i = 0; i < len; i++) {
-				arr[i] = this.escapeCsvField(clients[i].name);
-			}
-			const text = arr.join("\n");
-			this._copyList(text, source, "clientsListCopied");
-		}
+		this.copyListToClipboard(data.top_clients, "name", "clientsListCopied", source);
 	}
 
 	public onCopyAllDomains(event: Event): void {
@@ -355,17 +310,7 @@ export default class Dashboard extends BaseController {
 
 		const model = this.getViewModel();
 		const data = model.getData() as AdGuardStats;
-		const domains = data.top_queried_domains || [];
-
-		if (domains.length > 0) {
-			const len = domains.length;
-			const arr = new Array(len) as string[];
-			for (let i = 0; i < len; i++) {
-				arr[i] = this.escapeCsvField(domains[i].name);
-			}
-			const text = arr.join("\n");
-			this._copyList(text, source, "domainsListCopied");
-		}
+		this.copyListToClipboard(data.top_queried_domains, "name", "domainsListCopied", source);
 	}
 
 	public onCopyAllBlockedDomains(event: Event): void {
@@ -374,17 +319,7 @@ export default class Dashboard extends BaseController {
 
 		const model = this.getViewModel();
 		const data = model.getData() as AdGuardStats;
-		const domains = data.top_blocked_domains || [];
-
-		if (domains.length > 0) {
-			const len = domains.length;
-			const arr = new Array(len) as string[];
-			for (let i = 0; i < len; i++) {
-				arr[i] = this.escapeCsvField(domains[i].name);
-			}
-			const text = arr.join("\n");
-			this._copyList(text, source, "blockedDomainsListCopied");
-		}
+		this.copyListToClipboard(data.top_blocked_domains, "name", "blockedDomainsListCopied", source);
 	}
 
 	public onCopyAllSlowestQueries(event: Event): void {
@@ -393,20 +328,6 @@ export default class Dashboard extends BaseController {
 
 		const model = this.getViewModel();
 		const data = model.getData() as AdGuardStats & { slowest_queries: { domain: string }[] };
-		const queries = data.slowest_queries || [];
-
-		if (queries.length > 0) {
-			const len = queries.length;
-			const arr = new Array(len) as string[];
-			for (let i = 0; i < len; i++) {
-				arr[i] = this.escapeCsvField(queries[i].domain);
-			}
-			const text = arr.join("\n");
-			this._copyList(text, source, "slowestQueriesListCopied");
-		}
-	}
-
-	private _copyList(text: string, source: Button, messageKey: string): void {
-		this.copyToClipboard(text, this.getText(messageKey), source);
+		this.copyListToClipboard(data.slowest_queries, "domain", "slowestQueriesListCopied", source);
 	}
 }

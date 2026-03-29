@@ -25,21 +25,19 @@ export default class LogService extends BaseApiService {
 		}
 
 		const data = await this._request<RawAdGuardData>(url);
-		const processedList = (data.data || []) as unknown as LogEntry[];
+		const rawList = data.data || [];
+		const processedList: LogEntry[] = [];
 
-		for (const entry of processedList) {
-			const rawElapsed = (entry as unknown as { elapsedMs: number | string }).elapsedMs;
-
-			// Optimization: Native Number() is faster than typeof check + parseFloat
-			const elapsedMs = Number(rawElapsed) || 0;
-			const reason = entry.reason;
-			// Optimization: indexOf === 0 is ~25% faster than startsWith in hot loops.
-			// SafeBrowsing check comes first as strict equality is fastest.
+		for (const rawEntry of rawList) {
+			const elapsedMs = Number(rawEntry.elapsedMs) || 0;
+			const reason = rawEntry.reason;
 			const isBlocked = reason === "SafeBrowsing" || (reason && reason.indexOf("Filtered") === 0);
 
-			// Avoid recreating date obj strings during parsing loop
-			entry.elapsedMs = elapsedMs;
-			entry.blocked = !!isBlocked;
+			processedList.push({
+				...rawEntry,
+				elapsedMs,
+				blocked: !!isBlocked
+			});
 		}
 
 		return { data: processedList };

@@ -32,8 +32,6 @@ interface ViewSettingsEventParams {
 	filterItems?: ViewSettingsItem[];
 }
 
-const BOLD_REGEX = /\*\*(.*?)\*\*/g;
-const NEWLINE_REGEX = /\n/g;
 
 /**
  * @namespace ui5.aghd.controller
@@ -214,14 +212,20 @@ export default class Logs extends BaseController {
 	}
 
 	private _applyFilters(): void {
-		const view = this.getView();
-		if (!view) return;
 		const table = this.getControl<Table>("logsTable");
 		const binding = table.getBinding("items") as ListBinding;
+		if (!binding) return;
 
 		const aFilters: Filter[] = [];
 
-		// 1. Search Query Filters
+		this._addSearchFilters(aFilters);
+		this._addViewSettingsFilters(aFilters);
+		this._addAdvancedFilters(aFilters);
+
+		binding.filter(aFilters);
+	}
+
+	private _addSearchFilters(aFilters: Filter[]): void {
 		if (this._sSearchQuery && this._sSearchQuery.length > 0) {
 			aFilters.push(
 				new Filter({
@@ -233,38 +237,38 @@ export default class Logs extends BaseController {
 				})
 			);
 		}
+	}
 
-		// 2. View Settings Filters (Status)
+	private _addViewSettingsFilters(aFilters: Filter[]): void {
 		if (this._aViewSettingsFilters && this._aViewSettingsFilters.length > 0) {
 			aFilters.push(...this._aViewSettingsFilters);
 		}
+	}
 
-		// 3. Advanced Filters
+	private _addAdvancedFilters(aFilters: Filter[]): void {
 		const viewModel = this.getViewModel("view");
 		const advancedFilters = viewModel.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
 
-		if (advancedFilters && advancedFilters.length > 0) {
-			for (const f of advancedFilters) {
-				let value: string | number | boolean = f.value;
-				const operator = f.operator as FilterOperator;
+		if (!advancedFilters || advancedFilters.length === 0) return;
 
-				// Type conversion
-				if (f.column === Constants.ColumnIds.ElapsedMs) {
-					value = parseFloat(f.value);
-				} else if (f.column === Constants.ColumnIds.Blocked) {
-					const sVal = String(f.value).toLowerCase();
-					value = sVal === "true" || sVal === "1" || sVal === "yes";
-				} else if (f.column === Constants.ColumnIds.FilterId) {
-					value = parseInt(String(f.value), 10);
-				}
+		for (const f of advancedFilters) {
+			if (f.value === "") continue;
 
-				if (f.value !== "") {
-					aFilters.push(new Filter(f.column, operator, value));
-				}
+			let value: string | number | boolean = f.value;
+			const operator = f.operator as FilterOperator;
+
+			// Type conversion for numeric/boolean columns
+			if (f.column === Constants.ColumnIds.ElapsedMs) {
+				value = parseFloat(f.value);
+			} else if (f.column === Constants.ColumnIds.Blocked) {
+				const sVal = String(f.value).toLowerCase();
+				value = sVal === "true" || sVal === "1" || sVal === "yes";
+			} else if (f.column === Constants.ColumnIds.FilterId) {
+				value = parseInt(String(f.value), 10);
 			}
-		}
 
-		binding.filter(aFilters);
+			aFilters.push(new Filter(f.column, operator, value));
+		}
 	}
 
 	public onNavBack(): void {
@@ -370,7 +374,7 @@ export default class Logs extends BaseController {
 
 		try {
 			const insights = await GeminiService.getInstance().generateInsights(logs);
-			const html = this.formatInsights(insights);
+			const html = this.formatter.formatInsights(insights);
 
 			// We put these on the view model so they don't pollute the data model
 			const viewModel = this.getViewModel("view");
@@ -396,14 +400,6 @@ export default class Logs extends BaseController {
 		this.copyToClipboard(text, this.getText("listCopied"), btn);
 	}
 
-	public formatInsights(text: string): string {
-		if (!text) return "";
-		// Manual escape of HTML characters to avoid over-encoding markdown markers by encodeXML
-		let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-		safeText = safeText.replace(BOLD_REGEX, "<strong>$1</strong>").replace(NEWLINE_REGEX, "<br/>");
-		return safeText;
-	}
 
 	public async onOpenInsights(): Promise<void> {
 		const dialog = await this._openDialog(Constants.Fragments.InsightsDialog);
@@ -507,27 +503,26 @@ export default class Logs extends BaseController {
 			const header = "Time,Client,Domain,Type,Status,Blocked,Elapsed(ms),Upstream,Reason,FilterId,Rule";
 			const len = data.length;
 			const rowsArr = new Array(len) as string[];
+
 			for (let i = 0; i < len; i++) {
 				const log = data[i];
 				const timeStr = log.time instanceof Date ? log.time.toISOString() : log.time;
-				const time = this.escapeCsvField(timeStr);
-				const client = this.escapeCsvField(log.client);
-				const domain = this.escapeCsvField(log.question?.name);
-				const type = this.escapeCsvField(log.question?.type);
-				const status = this.escapeCsvField(log.status);
-				const blocked = this.escapeCsvField(log.blocked ? "true" : "false");
-				const elapsed = this.escapeCsvField(log.elapsedMs);
-				const upstream = this.escapeCsvField(log.upstream);
-				const reason = this.escapeCsvField(log.reason);
-				const filterId = this.escapeCsvField(log.filterId);
-				const rule = this.escapeCsvField(log.rule);
-				rowsArr[i] =
-					`${time},${client},${domain},${type},${status},${blocked},${elapsed},${upstream},${reason},${filterId},${rule}`;
+				rowsArr[i] = [
+					this.escapeCsvField(timeStr),
+					this.escapeCsvField(log.client),
+					this.escapeCsvField(log.question?.name),
+					this.escapeCsvField(log.question?.type),
+					this.escapeCsvField(log.status),
+					this.escapeCsvField(log.blocked ? "true" : "false"),
+					this.escapeCsvField(log.elapsedMs),
+					this.escapeCsvField(log.upstream),
+					this.escapeCsvField(log.reason),
+					this.escapeCsvField(log.filterId),
+					this.escapeCsvField(log.rule)
+				].join(",");
 			}
-			const rows = rowsArr.join("\n");
 
-			const csvContent = `${header}\n${rows}`;
-
+			const csvContent = `${header}\n${rowsArr.join("\n")}`;
 			this.copyToClipboard(csvContent, this.getText("listCopied"), source);
 		}
 	}

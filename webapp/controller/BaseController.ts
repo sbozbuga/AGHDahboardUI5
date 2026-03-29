@@ -16,7 +16,9 @@ import Button from "sap/m/Button";
 import ResourceModel from "sap/ui/model/resource/ResourceModel";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import Control from "sap/ui/core/Control";
+import UIComponent from "sap/ui/core/UIComponent";
 import encodeXML from "sap/base/security/encodeXML";
+import { StatsEntry } from "../model/AdGuardTypes";
 
 /**
  * @namespace ui5.aghd.controller
@@ -280,6 +282,9 @@ export default class BaseController extends Controller {
 	/**
 	 * Escapes a value to prevent CSV Formula Injection and properly quote it.
 	 */
+	/**
+	 * Escapes a value to prevent CSV Formula Injection and properly quote it.
+	 */
 	protected escapeCsvField(value: string | number | boolean | null | undefined): string {
 		if (value === null || value === undefined) {
 			return "";
@@ -297,5 +302,61 @@ export default class BaseController extends Controller {
 		}
 
 		return str;
+	}
+
+	/**
+	 * Centralized navigation to the Query Log with optional filter parameters.
+	 * @param query Optional query parameters (search, status)
+	 */
+	protected navToLogs(query?: object): void {
+		const router = UIComponent.getRouterFor(this);
+		router.navTo(Constants.Routes.Logs, {
+			query: query
+		});
+	}
+
+	/**
+	 * Copies a list of items to the clipboard by extracting a specific field.
+	 * @param items Array of data items
+	 * @param field The field name to extract from each item
+	 * @param successMessageKey I18n key for the success message
+	 * @param button Optional button to animate
+	 */
+	protected copyListToClipboard(items: object[], field: string, successMessageKey: string, button?: Button): void {
+		if (!items || items.length === 0) return;
+
+		const len = items.length;
+		const arr = new Array(len) as string[];
+		for (let i = 0; i < len; i++) {
+			// Optimization: Directly access property via bracket notation
+			const val = (items[i] as Record<string, any>)[field];
+			arr[i] = this.escapeCsvField(val);
+		}
+		const text = arr.join("\n");
+		this.copyToClipboard(text, this.getText(successMessageKey), button);
+	}
+
+	/**
+	 * Deep equality check for statistics lists to optimize model updates.
+	 * @param a First list
+	 * @param b Second list
+	 * @returns True if contents are identical
+	 */
+	protected areStatsEqual(a: StatsEntry[], b: StatsEntry[]): boolean {
+		if (a === b) return true;
+		if (!a || !b) return false;
+
+		const len = a.length;
+		if (len !== b.length) return false;
+
+		for (let i = 0; i < len; i++) {
+			const itemA = a[i];
+			const itemB = b[i];
+			// Optimization: Numerical comparison first
+			if (itemA.count !== itemB.count || itemA.name !== itemB.name) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

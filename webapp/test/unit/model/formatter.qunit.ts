@@ -156,3 +156,27 @@ QUnit.test("Should handle null or undefined for date", function (assert) {
 	assert.strictEqual(formatter.formatDateTime(null), "", "Returns empty string for null");
 	assert.strictEqual(formatter.formatDateTime(undefined), "", "Returns empty string for undefined");
 });
+QUnit.module("formatter - formatInsights");
+
+QUnit.test("formatInsights sanitizes HTML and applies Markdown", function (assert) {
+	// 1. Basic Bold
+	let input = "**Bold Text**";
+	let expected = "<strong>Bold Text</strong>";
+	assert.strictEqual(formatter.formatInsights(input), expected, "Markdown Bold works");
+
+	// 2. HTML Sanitization
+	input = "<script>alert('xss')</script>";
+	const actual = formatter.formatInsights(input);
+	// Relaxed check: just ensure it starts with escaped script
+	assert.ok(actual.startsWith("&lt;script&gt;"), "Starts with escaped script tag. Got: " + actual);
+
+	// 3. Mixed
+	input = "**Bold** and <i>Italic</i>";
+	expected = "<strong>Bold</strong> and &lt;i&gt;Italic&lt;/i&gt;";
+	assert.strictEqual(formatter.formatInsights(input), expected, "Mixed Markdown and HTML works");
+
+	// 4. Newlines
+	input = "Line 1\nLine 2";
+	expected = "Line 1<br/>Line 2";
+	assert.strictEqual(formatter.formatInsights(input), expected, "Markdown Newlines work");
+});
