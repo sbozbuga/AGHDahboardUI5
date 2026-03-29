@@ -9,6 +9,7 @@ export default class SettingsService {
 	private readonly STORAGE_KEY_CONTEXT = "gemini_system_context";
 	private readonly STORAGE_KEY_BASE_URL = "aghd_base_url";
 	private readonly STORAGE_KEY_SCAN_DEPTH = "dashboard_scan_depth";
+	private readonly STORAGE_KEY_CUSTOM_CLIENTS = "aghd_custom_clients";
 	private readonly DEFAULT_MODEL = "gemini-1.5-flash";
 	private readonly DEFAULT_SCAN_DEPTH = 1000;
 
@@ -21,6 +22,7 @@ export default class SettingsService {
 	private _context: string | null = null;
 	private _baseUrl: string | null = null;
 	private _scanDepth: number | null = null;
+	private _customClients: string | null = null;
 
 	private constructor() {
 		this.storage = new Storage(Storage.Type.local, "aghd_settings");
@@ -162,6 +164,20 @@ export default class SettingsService {
 		}
 		this._scanDepth = depth;
 		this.storage.put(this.STORAGE_KEY_SCAN_DEPTH, depth);
+	}
+
+	public getCustomClients(): string {
+		if (this._customClients !== null) {
+			return this._customClients;
+		}
+		const val = this.storage.get(this.STORAGE_KEY_CUSTOM_CLIENTS);
+		this._customClients = typeof val === "string" ? val : "";
+		return this._customClients;
+	}
+
+	public setCustomClients(list: string): void {
+		this._customClients = list;
+		this.storage.put(this.STORAGE_KEY_CUSTOM_CLIENTS, list);
 	}
 
 	public clearCredentials(): void {

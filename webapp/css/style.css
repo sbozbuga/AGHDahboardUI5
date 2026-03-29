@@ -41,3 +41,8 @@
 .sap-touch .floatingCopyBtn {
 	opacity: 1;
 }
+
+.secondaryText {
+	font-size: 0.75rem;
+	color: #666;
+}

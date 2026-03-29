@@ -248,7 +248,18 @@
 								alt="{reason}"
 							/>
 							<HBox alignItems="Center" wrap="Wrap">
-								<Text text="{client}" class="sapUiTinyMarginEnd" />
+								<VBox>
+									<Text
+										text="{path: 'client', formatter: '.formatter.formatClientName'}"
+										wrapping="false"
+										class="sapUiTinyMarginEnd"
+									/>
+									<Text
+										text="{client}"
+										visible="{= ${path: 'client', formatter: '.formatter.formatClientName'} !== ${client} }"
+										class="sapUiTinyMarginEnd secondaryText"
+									/>
+								</VBox>
 								<Button
 									icon="sap-icon://copy"
 									type="Transparent"

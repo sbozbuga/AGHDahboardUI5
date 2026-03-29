@@ -1,6 +1,7 @@
 import formatMessage from "sap/base/strings/formatMessage";
 import DateFormat from "sap/ui/core/format/DateFormat";
 import NumberFormat from "sap/ui/core/format/NumberFormat";
+import ClientService from "../service/ClientService";
 
 const oDateTimeFormat = DateFormat.getDateTimeInstance({ pattern: "yyyy-MM-dd HH:mm:ss.SSS" });
 const oIntegerFormat = NumberFormat.getIntegerInstance({ groupingEnabled: true });
@@ -30,12 +31,16 @@ export default {
 		if (value == null) {
 			return "0";
 		}
-		// Optimization: Native Number() constructor is faster than typeof + parseFloat for numeric conversion
+		// Optimization: Number() is faster than parseFloat
 		const num = Number(value);
 		if (isNaN(num)) {
 			return "0";
 		}
 		return oIntegerFormat.format(num);
+	},
+
+	formatClientName: function (id: string): string {
+		return id ? ClientService.getInstance().getName(id) : "";
 	},
 
 	/**

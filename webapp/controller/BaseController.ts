@@ -129,6 +129,7 @@ export default class BaseController extends Controller {
 		model.setProperty("/selectedModel", currentModel);
 		model.setProperty("/baseUrl", baseUrl);
 		model.setProperty("/systemContext", SettingsService.getInstance().getSystemContext());
+		model.setProperty("/customClients", SettingsService.getInstance().getCustomClients());
 		model.setProperty("/availableModels", []);
 
 		dialog.open();
@@ -168,6 +169,9 @@ export default class BaseController extends Controller {
 			}
 
 			SettingsService.getInstance().setBaseUrl(baseUrl);
+
+			const customClients = model.getProperty("/customClients") as string;
+			SettingsService.getInstance().setCustomClients(customClients);
 
 			(view.byId("settingsDialog") as Dialog).close();
 			MessageBox.success(this.getText("settingsSaved"), {

@@ -2,6 +2,7 @@ import BaseApiService from "./BaseApiService";
 import { RawAdGuardStats, AdGuardStats, RawAdGuardData, StatsEntry } from "../model/AdGuardTypes";
 import { Constants } from "../model/Constants";
 import FilteringService from "./FilteringService";
+import ClientService from "./ClientService";
 import SettingsService from "./SettingsService";
 
 export interface SlowestQueryEntry {
@@ -53,7 +54,8 @@ export default class StatsService extends BaseApiService {
 			rawData.num_dns_queries > 0 ? (rawData.num_blocked_filtering / rawData.num_dns_queries) * 100 : 0;
 
 		const filteringService = FilteringService.getInstance();
-		await filteringService.getFilters();
+		const clientService = ClientService.getInstance();
+		await Promise.all([filteringService.getFilters(), clientService.getClients()]);
 
 		const rawTopFilters = rawData.top_filters || rawData.top_blocked_filters || [];
 		let topFilters = this.transformList(rawTopFilters, "id", StatsService.TOP_LIST_LIMIT);
@@ -71,6 +73,11 @@ export default class StatsService extends BaseApiService {
 			});
 		}
 
+		const topClients = this.transformList(rawData.top_clients, "ip", StatsService.TOP_LIST_LIMIT);
+		topClients.forEach((c) => {
+			c.name = clientService.getName(c.name);
+		});
+
 		return {
 			num_dns_queries: rawData.num_dns_queries,
 			num_blocked_filtering: rawData.num_blocked_filtering,
@@ -78,7 +85,7 @@ export default class StatsService extends BaseApiService {
 			block_percentage: Math.round(block_percentage * 100) / 100,
 			top_queried_domains: this.transformList(rawData.top_queried_domains, "domain", StatsService.TOP_LIST_LIMIT),
 			top_blocked_domains: this.transformList(rawData.top_blocked_domains, "domain", StatsService.TOP_LIST_LIMIT),
-			top_clients: this.transformList(rawData.top_clients, "ip", StatsService.TOP_LIST_LIMIT),
+			top_clients: topClients,
 			top_filters: topFilters
 		};
 	}
@@ -173,6 +180,8 @@ export default class StatsService extends BaseApiService {
 			const url = `${Constants.ApiEndpoints.QueryLog}?limit=${scanDepth}&offset=0`;
 			const data = await this._request<RawAdGuardData>(url);
 			const filteringService = FilteringService.getInstance();
+			const clientService = ClientService.getInstance();
+			await clientService.getClients();
 
 			let total = 0;
 			let blocked = 0;
@@ -220,7 +229,10 @@ export default class StatsService extends BaseApiService {
 			const topClients = Array.from(clients.entries())
 				.sort((a, b) => b[1] - a[1])
 				.slice(0, StatsService.TOP_LIST_LIMIT)
-				.map(([name, count]) => ({ name, count }));
+				.map(([ip, count]) => ({
+					name: clientService.getName(ip),
+					count
+				}));
 
 			const topFilters = Array.from(filters.entries())
 				.sort((a, b) => b[1] - a[1])
