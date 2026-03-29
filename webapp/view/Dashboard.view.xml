@@ -284,6 +284,75 @@
 					</f:content>
 				</f:Card>
 
+				<!-- Top Blocking Filters Card -->
+				<f:Card class="hoverCopyCard">
+					<f:layoutData>
+						<f:GridContainerItemLayoutData columns="4" rows="6" />
+					</f:layoutData>
+					<f:header>
+						<card:Header id="cardHeaderFilters" title="{i18n>topBlockingFilters}" iconSrc="sap-icon://filter-facets" />
+					</f:header>
+					<f:content>
+						<VBox height="100%" renderType="Bare">
+							<Button
+								icon="sap-icon://copy"
+								type="Transparent"
+								press=".onCopyAllFilters"
+								tooltip="{parts:[{path:'i18n>copyAllFilters'}, {path:'/top_filters', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
+								class="floatingCopyBtn"
+							/>
+							<Table
+								ariaLabelledBy="cardHeaderFilters"
+								items="{/top_filters}"
+								inset="false"
+								fixedLayout="true"
+								class="sapUiSizeCompact"
+								alternateRowColors="true"
+							>
+								<noData>
+									<IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noFiltersActive}" />
+								</noData>
+								<columns>
+									<Column>
+										<Text text="{i18n>filter}" />
+									</Column>
+									<Column hAlign="End" width="30%">
+										<Text text="{i18n>count}" />
+									</Column>
+								</columns>
+								<items>
+									<ColumnListItem
+										type="Inactive"
+										tooltip="{parts:[{path:'i18n>filterStatsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}"
+									>
+										<cells>
+											<HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
+												<Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
+													<layoutData>
+														<FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
+													</layoutData>
+												</Text>
+												<Button
+													icon="sap-icon://copy"
+													type="Transparent"
+													press=".onCopyFilter"
+													tooltip="{parts:[{path:'i18n>copyFilterName'}, {path:'name'}], formatter: '.formatter.formatMessage'}"
+													class="copyButton"
+												>
+													<layoutData>
+														<FlexItemData shrinkFactor="0" />
+													</layoutData>
+												</Button>
+											</HBox>
+											<Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
+										</cells>
+									</ColumnListItem>
+								</items>
+							</Table>
+						</VBox>
+					</f:content>
+				</f:Card>
+
 				<!-- Slowest Queries Card -->
 				<f:Card class="hoverCopyCard">
 					<f:layoutData>

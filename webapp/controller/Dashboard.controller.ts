@@ -140,7 +140,8 @@ export default class Dashboard extends BaseController {
 					currentData.block_percentage === stats.block_percentage &&
 					this.areStatsEqual(currentData.top_queried_domains, stats.top_queried_domains) &&
 					this.areStatsEqual(currentData.top_blocked_domains, stats.top_blocked_domains) &&
-					this.areStatsEqual(currentData.top_clients, stats.top_clients);
+					this.areStatsEqual(currentData.top_clients, stats.top_clients) &&
+					this.areStatsEqual(currentData.top_filters, stats.top_filters);
 
 				if (statsUnchanged) {
 					// Even if stats are unchanged, update the "Last Updated" timestamp to show we checked
@@ -327,5 +328,27 @@ export default class Dashboard extends BaseController {
 		const model = this.getViewModel();
 		const data = model.getData() as AdGuardStats & { slowest_queries: { domain: string }[] };
 		this.copyListToClipboard(data.slowest_queries, "domain", "slowestQueriesListCopied", source);
+	}
+
+	public onCopyFilter(event: Event): void {
+		const source = event.getSource();
+		if (!(source instanceof Button)) return;
+
+		const context = source.getBindingContext();
+		if (!context) return;
+
+		const name = context.getProperty("name") as string;
+		if (name) {
+			this.copyToClipboard(this.escapeCsvField(name), this.getText("filterCopied"), source);
+		}
+	}
+
+	public onCopyAllFilters(event: Event): void {
+		const source = event.getSource();
+		if (!(source instanceof Button)) return;
+
+		const model = this.getViewModel();
+		const data = model.getData() as AdGuardStats;
+		this.copyListToClipboard(data.top_filters, "name", "filtersListCopied", source);
 	}
 }

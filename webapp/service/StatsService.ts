@@ -1,6 +1,7 @@
 import BaseApiService from "./BaseApiService";
 import { RawAdGuardStats, AdGuardStats, RawAdGuardData, StatsEntry } from "../model/AdGuardTypes";
 import { Constants } from "../model/Constants";
+import FilteringService from "./FilteringService";
 
 export interface SlowestQueryEntry {
 	domain: string;
@@ -46,6 +47,18 @@ export default class StatsService extends BaseApiService {
 		const block_percentage =
 			rawData.num_dns_queries > 0 ? (rawData.num_blocked_filtering / rawData.num_dns_queries) * 100 : 0;
 
+		const filteringService = FilteringService.getInstance();
+		await filteringService.getFilters();
+
+		const topFilters = this.transformList(rawData.top_filters || [], "id", StatsService.TOP_LIST_LIMIT);
+		// Resolve names for filters
+		topFilters.forEach((f) => {
+			const filterId = Number(f.name);
+			if (!isNaN(filterId)) {
+				f.name = filteringService.getFilterNameSync(filterId) || `Filter ${filterId}`;
+			}
+		});
+
 		return {
 			num_dns_queries: rawData.num_dns_queries,
 			num_blocked_filtering: rawData.num_blocked_filtering,
@@ -53,7 +66,8 @@ export default class StatsService extends BaseApiService {
 			block_percentage: Math.round(block_percentage * 100) / 100,
 			top_queried_domains: this.transformList(rawData.top_queried_domains, "domain", StatsService.TOP_LIST_LIMIT),
 			top_blocked_domains: this.transformList(rawData.top_blocked_domains, "domain", StatsService.TOP_LIST_LIMIT),
-			top_clients: this.transformList(rawData.top_clients, "ip", StatsService.TOP_LIST_LIMIT)
+			top_clients: this.transformList(rawData.top_clients, "ip", StatsService.TOP_LIST_LIMIT),
+			top_filters: topFilters
 		};
 	}
 

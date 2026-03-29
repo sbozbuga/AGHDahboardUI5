@@ -1,6 +1,7 @@
 import BaseApiService from "./BaseApiService";
 import { AdGuardData, RawAdGuardData, LogEntry } from "../model/AdGuardTypes";
 import { Constants } from "../model/Constants";
+import FilteringService from "./FilteringService";
 
 /**
  * Service to fetch, handle pagination, and normalize raw AdGuard logs
@@ -16,20 +17,6 @@ export default class LogService extends BaseApiService {
 		}
 		return LogService.instance;
 	}
-	private filterCache: Map<number, string> = new Map();
-
-	private async _fetchFilters(): Promise<void> {
-		try {
-			const data = await this._request<{ filters: { id: number; name: string }[] }>(
-				Constants.ApiEndpoints.FilteringStatus
-			);
-			if (data && data.filters) {
-				data.filters.forEach((f) => this.filterCache.set(f.id, f.name));
-			}
-		} catch (error) {
-			console.error("Failed to fetch filters", error);
-		}
-	}
 
 	public async getQueryLog(limit: number, offset: number, filterStatus?: string): Promise<AdGuardData> {
 		let url = `${Constants.ApiEndpoints.QueryLog}?limit=${limit}&offset=${offset}`;
@@ -42,9 +29,9 @@ export default class LogService extends BaseApiService {
 		const rawList = data.data || [];
 		const processedList: LogEntry[] = [];
 
-		if (this.filterCache.size === 0) {
-			await this._fetchFilters();
-		}
+		const filteringService = FilteringService.getInstance();
+		// Pre-load filters if we need mapping for blocked queries
+		await filteringService.getFilters();
 
 		for (const rawEntry of rawList) {
 			const elapsedMs = Number(rawEntry.elapsedMs) || 0;
@@ -53,7 +40,7 @@ export default class LogService extends BaseApiService {
 
 			if (isBlocked && !rawEntry.upstream) {
 				// Use filter name from cache or fallback
-				const filterName = this.filterCache.get(rawEntry.filterId);
+				const filterName = filteringService.getFilterNameSync(rawEntry.filterId);
 				rawEntry.upstream = filterName || rawEntry.rule || rawEntry.reason;
 			}
 

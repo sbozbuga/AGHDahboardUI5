@@ -53,6 +53,7 @@ export interface AdGuardStats {
 	top_queried_domains: StatsEntry[];
 	top_blocked_domains: StatsEntry[];
 	top_clients: StatsEntry[];
+	top_filters: StatsEntry[];
 	lastUpdated?: Date;
 }
 
@@ -63,6 +64,7 @@ export interface RawAdGuardStats {
 	top_queried_domains: Record<string, number | string>[];
 	top_blocked_domains: Record<string, number | string>[];
 	top_clients: Record<string, number | string>[];
+	top_filters?: Record<string, number | string>[];
 }
 
 export interface AdvancedFilterRule {
