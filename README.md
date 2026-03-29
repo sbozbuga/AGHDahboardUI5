@@ -55,10 +55,22 @@ npm run build:opt
 
 ### Code Quality
 
-**Linting & Type Checking**: Check the code formatting and type issues:
+**Unified Health Check**: A comprehensive command combining formatting checks, ESLint, UI5 linting, and TypeScript type checks:
 ```bash
-npm run lint
-npm run ts-typecheck
+npm run health
+```
+
+**Formatting**: Ensure consistent code style with Prettier:
+```bash
+npm run format        # Automatically fix formatting issues
+npm run format:check  # Check for formatting issues without fixing
+```
+
+**Linting & Type Checking**: 
+```bash
+npm run lint          # Run ESLint for JavaScript/TypeScript
+npm run ui5lint       # Run UI5-specific linter
+npm run ts-typecheck  # Run TypeScript static type checking
 ```
 
 **Testing**: 
@@ -67,6 +79,7 @@ Run unit tests (via UI5 Test Runner):
 npm run test
 ```
 Tests must maintain at least 80% coverage.
+
 Run end-to-end tests (via Playwright):
 ```bash
 npm run test:e2e

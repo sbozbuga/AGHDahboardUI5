@@ -103,8 +103,12 @@
 									<IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noActiveClients}" />
 								</noData>
 								<columns>
-									<Column><Text text="{i18n>client}" /></Column>
-									<Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
+									<Column>
+										<Text text="{i18n>client}" />
+									</Column>
+									<Column hAlign="End" width="30%">
+										<Text text="{i18n>count}" />
+									</Column>
 								</columns>
 								<items>
 									<ColumnListItem
@@ -169,8 +173,12 @@
 									<IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noQueriesRecorded}" />
 								</noData>
 								<columns>
-									<Column><Text text="{i18n>domain}" /></Column>
-									<Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
+									<Column>
+										<Text text="{i18n>domain}" />
+									</Column>
+									<Column hAlign="End" width="30%">
+										<Text text="{i18n>count}" />
+									</Column>
 								</columns>
 								<items>
 									<ColumnListItem
@@ -235,8 +243,12 @@
 									<IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noBlockedDomains}" />
 								</noData>
 								<columns>
-									<Column><Text text="{i18n>domain}" /></Column>
-									<Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
+									<Column>
+										<Text text="{i18n>domain}" />
+									</Column>
+									<Column hAlign="End" width="30%">
+										<Text text="{i18n>count}" />
+									</Column>
 								</columns>
 								<items>
 									<ColumnListItem
@@ -305,8 +317,12 @@
 									<IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noPerformanceData}" />
 								</noData>
 								<columns>
-									<Column><Text text="{i18n>domain}" /></Column>
-									<Column hAlign="End" width="30%"><Text text="{i18n>elapsedMs}" /></Column>
+									<Column>
+										<Text text="{i18n>domain}" />
+									</Column>
+									<Column hAlign="End" width="30%">
+										<Text text="{i18n>elapsedMs}" />
+									</Column>
 								</columns>
 								<items>
 									<ColumnListItem

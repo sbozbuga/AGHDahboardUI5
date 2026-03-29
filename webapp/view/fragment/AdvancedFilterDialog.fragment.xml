@@ -101,7 +101,7 @@
 				</items>
 			</Table>
 		</content>
-		<buttons>
+		<Buttons>
 			<Button text="{i18n>clearAllAction}" press=".onClearAdvancedFilters" type="Transparent" />
 			<Button text="{i18n>applyAction}" press=".onConfirmAdvancedFilter" type="Emphasized" />
 			<Button text="{i18n>cancelAction}" press=".onCancelAdvancedFilter" />

@@ -59,7 +59,7 @@
 				/>
 			</VBox>
 		</content>
-		<buttons>
+		<Buttons>
 			<Button text="Save" press=".onSaveSettings" type="Emphasized" />
 			<Button text="Cancel" press=".onCancelSettings" />
 		</buttons>

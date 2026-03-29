@@ -235,12 +235,10 @@
 				<items>
 					<ColumnListItem vAlign="Middle">
 						<cells>
-							<Text
-								text="{
+							<Text text="{
 									path: 'time',
 									formatter: '.formatter.formatDateTime'
-								}"
-							/>
+								}" />
 							<core:Icon
 								src="sap-icon://database"
 								color="Positive"

@@ -60,9 +60,9 @@ export interface RawAdGuardStats {
 	num_dns_queries: number;
 	num_blocked_filtering: number;
 	avg_processing_time: number;
-	top_queried_domains: Record<string, number>[];
-	top_blocked_domains: Record<string, number>[];
-	top_clients: Record<string, number>[];
+	top_queried_domains: Record<string, number | string>[];
+	top_blocked_domains: Record<string, number | string>[];
+	top_clients: Record<string, number | string>[];
 }
 
 export interface AdvancedFilterRule {
