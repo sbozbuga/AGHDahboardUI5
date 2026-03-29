@@ -14,7 +14,7 @@
 				<FormattedText htmlText="{view>/analysisHtml}" />
 			</VBox>
 		</content>
-		<Buttons>
+		<buttons>
 			<Button
 				id="btnCopyInsights"
 				text="{i18n>copyAction}"
