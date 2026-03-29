@@ -49,19 +49,24 @@
 				<Label
 					id="scanDepthLabel"
 					text="{i18n>dashboardScanDepth}"
-					labelFor="scanDepthInput"
+					labelFor="scanDepthSelect"
 					class="sapUiSmallMarginTop"
 				/>
-				<StepInput
-					id="scanDepthInput"
-					value="{/scanDepth}"
-					min="500"
-					max="5000"
-					step="500"
+				<Select
+					id="scanDepthSelect"
+					selectedKey="{/scanDepth}"
 					width="100%"
 					ariaLabelledBy="scanDepthLabel"
 					ariaDescribedBy="scanDepthHelpText"
-				/>
+				>
+					<core:Item key="500" text="500" />
+					<core:Item key="1000" text="1,000" />
+					<core:Item key="1500" text="1,500" />
+					<core:Item key="2000" text="2,000" />
+					<core:Item key="3000" text="3,000" />
+					<core:Item key="4000" text="4,000" />
+					<core:Item key="5000" text="5,000" />
+				</Select>
 				<Text id="scanDepthHelpText" text="{i18n>scanDepthHelpText}" class="sapUiTinyMarginTop" />
 
 				<Label text="System Context (Optional)" labelFor="contextInput" class="sapUiSmallMarginTop" />

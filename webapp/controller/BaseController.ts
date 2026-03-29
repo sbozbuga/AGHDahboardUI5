@@ -170,8 +170,8 @@ export default class BaseController extends Controller {
 
 			SettingsService.getInstance().setBaseUrl(baseUrl);
 
-			const scanDepth = model.getProperty("/scanDepth") as number;
-			SettingsService.getInstance().setDashboardScanDepth(scanDepth);
+			const scanDepth = model.getProperty("/scanDepth");
+			SettingsService.getInstance().setDashboardScanDepth(Number(scanDepth));
 
 			(view.byId("settingsDialog") as Dialog).close();
 			MessageBox.success(this.getText("settingsSaved"), {
