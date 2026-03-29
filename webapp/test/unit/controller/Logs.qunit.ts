@@ -125,7 +125,7 @@ QUnit.test("onInit sets model size limit to DEFAULT_LIMIT", function (assert) {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
 	const sizeLimit = model.iSizeLimit;
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-	const dataLimit = model.getProperty("/limit");
+	const dataLimit = viewModel.getProperty("/limit");
 
 	assert.strictEqual(dataLimit, 1000, "Model limit data should be 1000");
 	assert.strictEqual(sizeLimit, 1000, "Model size limit should be set to 1000");
