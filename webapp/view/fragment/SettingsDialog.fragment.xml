@@ -52,13 +52,7 @@
 					labelFor="scanDepthSelect"
 					class="sapUiSmallMarginTop"
 				/>
-				<Select
-					id="scanDepthSelect"
-					selectedKey="{/scanDepth}"
-					width="100%"
-					ariaLabelledBy="scanDepthLabel"
-					ariaDescribedBy="scanDepthHelpText"
-				>
+				<Select id="scanDepthSelect" selectedKey="{/scanDepth}" width="100%" ariaLabelledBy="scanDepthLabel">
 					<core:Item key="500" text="500" />
 					<core:Item key="1000" text="1,000" />
 					<core:Item key="1500" text="1,500" />
