@@ -19,7 +19,7 @@
 								placeholder="Enter your username"
 								submit=".onLoginPress"
 								liveChange=".onInputChange"
-								maxlength="50"
+								maxLength="50"
 								showClearIcon="true"
 							/>
 
@@ -32,7 +32,7 @@
 								placeholder="Enter your password"
 								submit=".onLoginPress"
 								liveChange=".onInputChange"
-								maxlength="100"
+								maxLength="100"
 								showValueHelp="true"
 								valueHelpIconSrc="sap-icon://show"
 								valueHelpRequest=".onShowPassword"

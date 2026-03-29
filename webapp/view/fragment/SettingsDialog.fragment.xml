@@ -29,7 +29,7 @@
 					valueHelpIconSrc="sap-icon://show"
 					valueHelpRequest=".onToggleApiKeyVisibility"
 					width="100%"
-					maxlength="100"
+					maxLength="100"
 					submit=".onSaveSettings"
 					ariaDescribedBy="apiKeyHelpText"
 				/>
@@ -65,7 +65,7 @@
 					placeholder="Describe your network (e.g., Raspberry Pi 5, Unbound, IoT devices...)"
 					rows="4"
 					width="100%"
-					maxlength="500"
+					maxLength="500"
 					showExceededText="true"
 					valueLiveUpdate="true"
 				/>

@@ -87,7 +87,7 @@
 								width="100%"
 								placeholder="{i18n>value}"
 								submit=".onConfirmAdvancedFilter"
-								maxlength="200"
+								maxLength="200"
 								showClearIcon="true"
 							/>
 							<Button
