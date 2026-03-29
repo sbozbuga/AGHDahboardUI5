@@ -13,98 +13,96 @@ import { Constants } from "../model/Constants";
  * @namespace ui5.aghd.controller
  */
 export default class Login extends BaseController {
+	public onInit(): void {
+		const model = new JSONModel({
+			username: "",
+			password: ""
+		});
+		this.getView()?.setModel(model);
+	}
 
-    public onInit(): void {
-        const model = new JSONModel({
-            username: "",
-            password: ""
-        });
-        this.getView()?.setModel(model);
-    }
+	public onAfterRendering(): void {
+		const usernameInput = this.getControl<Input>("usernameInput");
+		if (usernameInput) {
+			usernameInput.focus();
+		}
+	}
 
-    public onAfterRendering(): void {
-        const usernameInput = this.getControl<Input>("usernameInput");
-        if (usernameInput) {
-            usernameInput.focus();
-        }
-    }
+	public onInputChange(event: Event): void {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+		const input = event.getSource() as Input;
+		if (input.getValueState() === ValueState.Error) {
+			input.setValueState(ValueState.None);
+			input.setValueStateText("");
+		}
+	}
 
-    public onInputChange(event: Event): void {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        const input = event.getSource() as Input;
-        if (input.getValueState() === ValueState.Error) {
-            input.setValueState(ValueState.None);
-            input.setValueStateText("");
-        }
-    }
+	public onShowPassword(event: Event): void {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+		const input = event.getSource() as Input;
+		if (input.getType() === InputType.Password) {
+			input.setType(InputType.Text);
+			input.setValueHelpIconSrc("sap-icon://hide");
+		} else {
+			input.setType(InputType.Password);
+			input.setValueHelpIconSrc("sap-icon://show");
+		}
+	}
 
-    public onShowPassword(event: Event): void {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        const input = event.getSource() as Input;
-        if (input.getType() === InputType.Password) {
-            input.setType(InputType.Text);
-            input.setValueHelpIconSrc("sap-icon://hide");
-        } else {
-            input.setType(InputType.Password);
-            input.setValueHelpIconSrc("sap-icon://show");
-        }
-    }
+	public async onLoginPress(): Promise<void> {
+		const view = this.getView();
+		if (!view) return;
 
-    public async onLoginPress(): Promise<void> {
-        const view = this.getView();
-        if (!view) return;
+		const model = this.getViewModel();
+		const username = model.getProperty("/username") as string;
+		const password = model.getProperty("/password") as string;
 
-        const model = this.getViewModel();
-        const username = model.getProperty("/username") as string;
-        const password = model.getProperty("/password") as string;
+		const usernameInput = this.getControl<Input>("usernameInput");
+		const passwordInput = this.getControl<Input>("passwordInput");
+		let bValidationError = false;
 
-        const usernameInput = this.getControl<Input>("usernameInput");
-        const passwordInput = this.getControl<Input>("passwordInput");
-        let bValidationError = false;
+		if (!username) {
+			usernameInput.setValueState(ValueState.Error);
+			usernameInput.setValueStateText("Username is required");
+			if (!bValidationError) {
+				usernameInput.focus();
+			}
+			bValidationError = true;
+		} else {
+			usernameInput.setValueState(ValueState.None);
+		}
 
-        if (!username) {
-            usernameInput.setValueState(ValueState.Error);
-            usernameInput.setValueStateText("Username is required");
-            if (!bValidationError) {
-                usernameInput.focus();
-            }
-            bValidationError = true;
-        } else {
-            usernameInput.setValueState(ValueState.None);
-        }
+		if (!password) {
+			passwordInput.setValueState(ValueState.Error);
+			passwordInput.setValueStateText("Password is required");
+			if (!bValidationError) {
+				passwordInput.focus();
+			}
+			bValidationError = true;
+		} else {
+			passwordInput.setValueState(ValueState.None);
+		}
 
-        if (!password) {
-            passwordInput.setValueState(ValueState.Error);
-            passwordInput.setValueStateText("Password is required");
-            if (!bValidationError) {
-                passwordInput.focus();
-            }
-            bValidationError = true;
-        } else {
-            passwordInput.setValueState(ValueState.None);
-        }
+		if (bValidationError) {
+			return;
+		}
 
-        if (bValidationError) {
-            return;
-        }
+		view.setBusy(true);
 
-        view.setBusy(true);
+		try {
+			await AuthService.getInstance().login(username, password);
 
-        try {
-            await AuthService.getInstance().login(username, password);
-
-            // Navigate to Dashboard on success
-            const router = UIComponent.getRouterFor(this);
-            router.navTo(Constants.Routes.Dashboard);
-
-        } catch {
-            MessageBox.error("Login failed. Please check your credentials.");
-        } finally {
-            // Security Enhancement: Always clear password from the model
-            // regardless of login success or failure to avoid leaving
-            // sensitive credentials in memory or UI state.
-            model.setProperty("/password", "");
-            view.setBusy(false);
-        }
-    }
+			// Navigate to Dashboard on success
+			const router = UIComponent.getRouterFor(this);
+			router.navTo(Constants.Routes.Dashboard);
+		} catch {
+			MessageBox.error("Login failed. Please check your credentials.");
+		} finally {
+			// Security Enhancement: Always clear password from the model
+			// regardless of login success or failure to avoid leaving
+			// sensitive credentials in memory or UI state.
+			model.setProperty("/password", "");
+			view.setBusy(false);
+		}
+	}
 }

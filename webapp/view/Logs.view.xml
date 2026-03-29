@@ -4,201 +4,307 @@
 	busyIndicatorDelay="0"
 	xmlns="sap.m"
 	xmlns:mvc="sap.ui.core.mvc"
-	xmlns:core="sap.ui.core">
-
+	xmlns:core="sap.ui.core"
+>
 	<App id="app">
-		<Page
-			title="{i18n>logsTitle}"
-			showNavButton="true"
-			navButtonPress=".onNavBack"
-			id="page">
-				<Table
-					id="logsTable"
-					ariaLabelledBy="logsTableTitle"
-					items="{/data}"
-					inset="false"
-					growing="true"
-					growingThreshold="50"
-					growingScrollToLoad="true"
-					sticky="ColumnHeaders,HeaderToolbar"
-					alternateRowColors="true"
-					updateFinished=".onUpdateFinished">
-					<noData>
-						<IllustratedMessage illustrationType="sapIllus-NoSearchResults" title="{i18n>noLogsFoundTitle}" description="{i18n>noLogsFoundDescription}" />
-					</noData>
-					<headerToolbar>
-						<OverflowToolbar>
-							<Title id="logsTableTitle" text="{i18n>logsHeader}" level="H2"/>
-							<ToolbarSpacer/>
-							<SearchField
-								id="searchField"
-								width="auto"
-								search=".onSearch"
-								liveChange=".onSearch"
-								placeholder="{i18n>searchPlaceholder}"
-								tooltip="{i18n>searchPlaceholder}"
-								maxLength="200">
-								<layoutData>
-									<OverflowToolbarLayoutData
-										minWidth="200px"
-										maxWidth="300px"
-										shrinkable="true"
-										priority="NeverOverflow" />
-								</layoutData>
-							</SearchField>
-							<Button id="btnViewSettings" icon="sap-icon://sort" press=".onOpenViewSettings" tooltip="{i18n>sortFilter}" ariaHasPopup="Dialog"/>
-							<Button icon="sap-icon://refresh" press=".onRefreshLogs" tooltip="{i18n>refresh}"/>
-							<Button icon="sap-icon://copy" press=".onCopyAllLogs" tooltip="{parts:[{path:'i18n>copyAll'}, {path:'/data', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"/>
-                            <ToolbarSeparator />
-                            <Button text="{i18n>smartAnalysis}" icon="sap-icon://lightbulb" press=".onAnalyzeLogs" type="Emphasized" tooltip="{i18n>generateAIInsights}" ariaHasPopup="Dialog" />
-                            <Button id="btnFilter" icon="sap-icon://filter" press=".onOpenAdvancedFilter" tooltip="{i18n>advancedFilter}" ariaHasPopup="Dialog">
-                                <customData>
-                                    <BadgeCustomData key="badge" value="{= ${view>/advancedFilters}.length > 0 ? ${view>/advancedFilters}.length : '' }" visible="true" />
-                                </customData>
-                            </Button>
-                            <Button icon="sap-icon://action-settings" press=".onOpenSettings" tooltip="{i18n>settings}" ariaHasPopup="Dialog" />
-						</OverflowToolbar>
-					</headerToolbar>
-					<columns>
-						<Column width="11rem" id="colTime">
-							<header>
-								<Button text="{i18n>time}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>time'}], formatter: '.formatter.formatMessage'}">
-									<customData>
-										<core:CustomData key="key" value="time" />
-									</customData>
-								</Button>
-							</header>
-						</Column>
-						<Column width="4rem" hAlign="Center" id="colSource">
-							<header>
-								<Text text="{i18n>src}" />
-							</header>
-						</Column>
-						<Column width="16rem" demandPopin="true" minScreenWidth="Tablet" id="colClient">
-							<header>
-								<Button text="{i18n>client}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>client'}], formatter: '.formatter.formatMessage'}">
-									<customData>
-										<core:CustomData key="key" value="client" />
-									</customData>
-								</Button>
-							</header>
-						</Column>
-						<Column id="colQuestion">
-							<header>
-								<Button text="{i18n>question}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>question'}], formatter: '.formatter.formatMessage'}">
-									<customData>
-										<core:CustomData key="key" value="question/name" />
-									</customData>
-								</Button>
-							</header>
-						</Column>
-						<Column width="6rem" demandPopin="true" minScreenWidth="Tablet" id="colStatus">
-							<header>
-								<Button text="{i18n>status}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>status'}], formatter: '.formatter.formatMessage'}">
-									<customData>
-										<core:CustomData key="key" value="status" />
-									</customData>
-								</Button>
-							</header>
-						</Column>
-						<Column width="5rem" demandPopin="true" minScreenWidth="Tablet" id="colBlocked" hAlign="Center">
-							<header>
-								<Text text="{i18n>blocked}" />
-							</header>
-						</Column>
-						<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" hAlign="End" id="colElapsed">
-							<header>
-								<Button text="{i18n>elapsedMs}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>elapsedMs'}], formatter: '.formatter.formatMessage'}">
-									<customData>
-										<core:CustomData key="key" value="elapsedMs" />
-									</customData>
-								</Button>
-							</header>
-						</Column>
-						<Column width="22rem" demandPopin="true" minScreenWidth="Desktop" id="colUpstream">
-							<header>
-								<Button text="{i18n>upstream}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>upstream'}], formatter: '.formatter.formatMessage'}">
-									<customData>
-										<core:CustomData key="key" value="upstream" />
-									</customData>
-								</Button>
-							</header>
-						</Column>
-						<Column width="10rem" demandPopin="true" minScreenWidth="Desktop" id="colReason">
-							<header>
-								<Button text="{i18n>reason}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>reason'}], formatter: '.formatter.formatMessage'}">
-									<customData>
-										<core:CustomData key="key" value="reason" />
-									</customData>
-								</Button>
-							</header>
-						</Column>
-						<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" id="colFilterId">
-							<header>
-								<Button text="{i18n>filterId}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>filterId'}], formatter: '.formatter.formatMessage'}">
-									<customData>
-										<core:CustomData key="key" value="filterId" />
-									</customData>
-								</Button>
-							</header>
-						</Column>
-						<Column demandPopin="true" minScreenWidth="Desktop" id="colRule">
-							<header>
-								<Button text="{i18n>rule}" press=".onSort" type="Transparent" tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>rule'}], formatter: '.formatter.formatMessage'}">
-									<customData>
-										<core:CustomData key="key" value="rule" />
-									</customData>
-								</Button>
-							</header>
-						</Column>
-					</columns>
-					<items>
-						<ColumnListItem vAlign="Middle">
-							<cells>
-								<Text text="{
+		<Page title="{i18n>logsTitle}" showNavButton="true" navButtonPress=".onNavBack" id="page">
+			<table
+				id="logsTable"
+				ariaLabelledBy="logsTableTitle"
+				items="{/data}"
+				inset="false"
+				growing="true"
+				growingThreshold="50"
+				growingScrollToLoad="true"
+				sticky="ColumnHeaders,HeaderToolbar"
+				alternateRowColors="true"
+				updateFinished=".onUpdateFinished"
+			>
+				<noData>
+					<IllustratedMessage
+						illustrationType="sapIllus-NoSearchResults"
+						title="{i18n>noLogsFoundTitle}"
+						description="{i18n>noLogsFoundDescription}"
+					/>
+				</noData>
+				<headerToolbar>
+					<OverflowToolbar>
+						<title id="logsTableTitle" text="{i18n>logsHeader}" level="H2" />
+						<ToolbarSpacer />
+						<SearchField
+							id="searchField"
+							width="auto"
+							search=".onSearch"
+							liveChange=".onSearch"
+							placeholder="{i18n>searchPlaceholder}"
+							tooltip="{i18n>searchPlaceholder}"
+							maxLength="200"
+						>
+							<layoutData>
+								<OverflowToolbarLayoutData
+									minWidth="200px"
+									maxWidth="300px"
+									shrinkable="true"
+									priority="NeverOverflow"
+								/>
+							</layoutData>
+						</SearchField>
+						<button
+							id="btnViewSettings"
+							icon="sap-icon://sort"
+							press=".onOpenViewSettings"
+							tooltip="{i18n>sortFilter}"
+							ariaHasPopup="Dialog"
+						/>
+						<button icon="sap-icon://refresh" press=".onRefreshLogs" tooltip="{i18n>refresh}" />
+						<button
+							icon="sap-icon://copy"
+							press=".onCopyAllLogs"
+							tooltip="{parts:[{path:'i18n>copyAll'}, {path:'/data', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
+						/>
+						<ToolbarSeparator />
+						<button
+							text="{i18n>smartAnalysis}"
+							icon="sap-icon://lightbulb"
+							press=".onAnalyzeLogs"
+							type="Emphasized"
+							tooltip="{i18n>generateAIInsights}"
+							ariaHasPopup="Dialog"
+						/>
+						<button
+							id="btnFilter"
+							icon="sap-icon://filter"
+							press=".onOpenAdvancedFilter"
+							tooltip="{i18n>advancedFilter}"
+							ariaHasPopup="Dialog"
+						>
+							<customData>
+								<BadgeCustomData
+									key="badge"
+									value="{= ${view>/advancedFilters}.length > 0 ? ${view>/advancedFilters}.length : '' }"
+									visible="true"
+								/>
+							</customData>
+						</button>
+						<button
+							icon="sap-icon://action-settings"
+							press=".onOpenSettings"
+							tooltip="{i18n>settings}"
+							ariaHasPopup="Dialog"
+						/>
+					</OverflowToolbar>
+				</headerToolbar>
+				<columns>
+					<Column width="11rem" id="colTime">
+						<header>
+							<button
+								text="{i18n>time}"
+								press=".onSort"
+								type="Transparent"
+								tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>time'}], formatter: '.formatter.formatMessage'}"
+							>
+								<customData>
+									<core:CustomData key="key" value="time" />
+								</customData>
+							</button>
+						</header>
+					</Column>
+					<Column width="4rem" hAlign="Center" id="colSource">
+						<header>
+							<Text text="{i18n>src}" />
+						</header>
+					</Column>
+					<Column width="16rem" demandPopin="true" minScreenWidth="Tablet" id="colClient">
+						<header>
+							<button
+								text="{i18n>client}"
+								press=".onSort"
+								type="Transparent"
+								tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>client'}], formatter: '.formatter.formatMessage'}"
+							>
+								<customData>
+									<core:CustomData key="key" value="client" />
+								</customData>
+							</button>
+						</header>
+					</Column>
+					<Column id="colQuestion">
+						<header>
+							<button
+								text="{i18n>question}"
+								press=".onSort"
+								type="Transparent"
+								tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>question'}], formatter: '.formatter.formatMessage'}"
+							>
+								<customData>
+									<core:CustomData key="key" value="question/name" />
+								</customData>
+							</button>
+						</header>
+					</Column>
+					<Column width="6rem" demandPopin="true" minScreenWidth="Tablet" id="colStatus">
+						<header>
+							<button
+								text="{i18n>status}"
+								press=".onSort"
+								type="Transparent"
+								tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>status'}], formatter: '.formatter.formatMessage'}"
+							>
+								<customData>
+									<core:CustomData key="key" value="status" />
+								</customData>
+							</button>
+						</header>
+					</Column>
+					<Column width="5rem" demandPopin="true" minScreenWidth="Tablet" id="colBlocked" hAlign="Center">
+						<header>
+							<Text text="{i18n>blocked}" />
+						</header>
+					</Column>
+					<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" hAlign="End" id="colElapsed">
+						<header>
+							<button
+								text="{i18n>elapsedMs}"
+								press=".onSort"
+								type="Transparent"
+								tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>elapsedMs'}], formatter: '.formatter.formatMessage'}"
+							>
+								<customData>
+									<core:CustomData key="key" value="elapsedMs" />
+								</customData>
+							</button>
+						</header>
+					</Column>
+					<Column width="22rem" demandPopin="true" minScreenWidth="Desktop" id="colUpstream">
+						<header>
+							<button
+								text="{i18n>upstream}"
+								press=".onSort"
+								type="Transparent"
+								tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>upstream'}], formatter: '.formatter.formatMessage'}"
+							>
+								<customData>
+									<core:CustomData key="key" value="upstream" />
+								</customData>
+							</button>
+						</header>
+					</Column>
+					<Column width="10rem" demandPopin="true" minScreenWidth="Desktop" id="colReason">
+						<header>
+							<button
+								text="{i18n>reason}"
+								press=".onSort"
+								type="Transparent"
+								tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>reason'}], formatter: '.formatter.formatMessage'}"
+							>
+								<customData>
+									<core:CustomData key="key" value="reason" />
+								</customData>
+							</button>
+						</header>
+					</Column>
+					<Column width="6rem" demandPopin="true" minScreenWidth="Desktop" id="colFilterId">
+						<header>
+							<button
+								text="{i18n>filterId}"
+								press=".onSort"
+								type="Transparent"
+								tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>filterId'}], formatter: '.formatter.formatMessage'}"
+							>
+								<customData>
+									<core:CustomData key="key" value="filterId" />
+								</customData>
+							</button>
+						</header>
+					</Column>
+					<Column demandPopin="true" minScreenWidth="Desktop" id="colRule">
+						<header>
+							<button
+								text="{i18n>rule}"
+								press=".onSort"
+								type="Transparent"
+								tooltip="{parts:[{path:'i18n>sortBy'}, {path:'i18n>rule'}], formatter: '.formatter.formatMessage'}"
+							>
+								<customData>
+									<core:CustomData key="key" value="rule" />
+								</customData>
+							</button>
+						</header>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem vAlign="Middle">
+						<cells>
+							<Text
+								text="{
 									path: 'time',
 									formatter: '.formatter.formatDateTime'
-								}" />
-								<core:Icon src="sap-icon://database" 
-									color="Positive" 
-									visible="{= ${reason}.indexOf('served from cache') > -1 || ${reason} === 'Rewrite' }" 
-									tooltip="{reason}"
-									decorative="false"
-									alt="{reason}" />
-								<HBox alignItems="Center" wrap="Wrap">
-									<Text text="{client}" class="sapUiTinyMarginEnd" />
-									<Button icon="sap-icon://copy" type="Transparent" press=".onCopyClient" tooltip="{parts:[{path:'i18n>copyClientName'}, {path:'client'}], formatter: '.formatter.formatMessage'}" class="copyButton" />
-								</HBox>
-								<HBox alignItems="Center" wrap="Wrap">
-									<Text text="{question/name} ({question/type})" wrapping="true" maxLines="2" class="sapUiTinyMarginEnd" />
-									<Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{parts:[{path:'i18n>copyDomainName'}, {path:'question/name'}], formatter: '.formatter.formatMessage'}" class="copyButton" />
-								</HBox>
-								<ObjectStatus
-									text="{status}"
-									state="{= ${status} === 'OK' ? 'Success' : 'Error'}" />
-								<core:Icon src="sap-icon://decline" color="Negative" visible="{= ${blocked} === true }" tooltip="{i18n>requestBlocked}" alt="{i18n>requestBlocked}" decorative="false" />
-								<ObjectNumber
-									number="{
+								}"
+							/>
+							<core:Icon
+								src="sap-icon://database"
+								color="Positive"
+								visible="{= ${reason}.indexOf('served from cache') > -1 || ${reason} === 'Rewrite' }"
+								tooltip="{reason}"
+								decorative="false"
+								alt="{reason}"
+							/>
+							<HBox alignItems="Center" wrap="Wrap">
+								<Text text="{client}" class="sapUiTinyMarginEnd" />
+								<button
+									icon="sap-icon://copy"
+									type="Transparent"
+									press=".onCopyClient"
+									tooltip="{parts:[{path:'i18n>copyClientName'}, {path:'client'}], formatter: '.formatter.formatMessage'}"
+									class="copyButton"
+								/>
+							</HBox>
+							<HBox alignItems="Center" wrap="Wrap">
+								<Text
+									text="{question/name} ({question/type})"
+									wrapping="true"
+									maxLines="2"
+									class="sapUiTinyMarginEnd"
+								/>
+								<button
+									icon="sap-icon://copy"
+									type="Transparent"
+									press=".onCopyDomain"
+									tooltip="{parts:[{path:'i18n>copyDomainName'}, {path:'question/name'}], formatter: '.formatter.formatMessage'}"
+									class="copyButton"
+								/>
+							</HBox>
+							<ObjectStatus text="{status}" state="{= ${status} === 'OK' ? 'Success' : 'Error'}" />
+							<core:Icon
+								src="sap-icon://decline"
+								color="Negative"
+								visible="{= ${blocked} === true }"
+								tooltip="{i18n>requestBlocked}"
+								alt="{i18n>requestBlocked}"
+								decorative="false"
+							/>
+							<ObjectNumber
+								number="{
 										path: 'elapsedMs',
 										formatter: '.formatter.formatElapsed'
 									}"
-									state="{
+								state="{
 										path: 'elapsedMs',
 										formatter: '.formatter.formatElapsedState'
 									}"
-									tooltip="{
+								tooltip="{
 										path: 'elapsedMs',
 										formatter: '.formatter.formatElapsedStateText'
-									}" />
-								<Text text="{upstream}" wrapping="true" maxLines="2" />
-								<Text text="{reason}" wrapping="true" maxLines="2" />
-								<Text text="{filterId}" />
-								<Text text="{rule}" wrapping="true" maxLines="2" />
-							</cells>
-						</ColumnListItem>
-					</items>
-				</Table>
+									}"
+							/>
+							<Text text="{upstream}" wrapping="true" maxLines="2" />
+							<Text text="{reason}" wrapping="true" maxLines="2" />
+							<Text text="{filterId}" />
+							<Text text="{rule}" wrapping="true" maxLines="2" />
+						</cells>
+					</ColumnListItem>
+				</items>
+			</table>
 		</Page>
 	</App>
-
 </mvc:View>

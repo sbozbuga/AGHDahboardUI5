@@ -1,23 +1,28 @@
-<core:FragmentDefinition
-	xmlns="sap.m"
-	xmlns:core="sap.ui.core">
-	<Dialog
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+	<dialog
 		id="insightsDialog"
 		title="AdGuard AI Insights"
 		contentWidth="600px"
 		contentHeight="500px"
 		resizable="true"
-		initialFocus="btnCloseInsights">
+		initialFocus="btnCloseInsights"
+	>
 		<content>
 			<VBox class="sapUiSmallMargin">
-                <Text text="Analysis based on recent logs:" class="sapUiSmallMarginBottom" />
-                <!-- HTML content takes formatting (strong headers, breaks) -->
-                <FormattedText htmlText="{view>/analysisHtml}" />
+				<Text text="Analysis based on recent logs:" class="sapUiSmallMarginBottom" />
+				<!-- HTML content takes formatting (strong headers, breaks) -->
+				<FormattedText htmlText="{view>/analysisHtml}" />
 			</VBox>
 		</content>
 		<buttons>
-			<Button id="btnCopyInsights" text="{i18n>copyAction}" icon="sap-icon://copy" press=".onCopyInsights" tooltip="{i18n>copyAnalysis}" />
-			<Button id="btnCloseInsights" text="{i18n>closeAction}" press=".onCloseInsights" />
+			<button
+				id="btnCopyInsights"
+				text="{i18n>copyAction}"
+				icon="sap-icon://copy"
+				press=".onCopyInsights"
+				tooltip="{i18n>copyAnalysis}"
+			/>
+			<button id="btnCloseInsights" text="{i18n>closeAction}" press=".onCloseInsights" />
 		</buttons>
-	</Dialog>
+	</dialog>
 </core:FragmentDefinition>

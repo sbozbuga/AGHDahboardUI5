@@ -2,13 +2,13 @@
   "compilerOptions": {
     "target": "es2023",
     "module": "es2022",
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
+    "ignoreDeprecations": "5.0",
     "skipLibCheck": true,
     "allowJs": true,
     "strict": true,
     "strictPropertyInitialization": false,
     "rootDir": "./webapp",
-    "baseUrl": "./",
     "paths": {
       "ui5/aghd/*": [
         "./webapp/*"

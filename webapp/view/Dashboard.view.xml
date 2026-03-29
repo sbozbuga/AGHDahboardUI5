@@ -7,8 +7,8 @@
 	xmlns:f="sap.f"
 	xmlns:card="sap.f.cards"
 	displayBlock="true"
-	busyIndicatorDelay="0">
-
+	busyIndicatorDelay="0"
+>
 	<Page title="{i18n>appTitle}">
 		<content>
 			<GenericTile
@@ -16,7 +16,8 @@
 				header="{i18n>totalQueries}"
 				subheader="{i18n>last24Hours}"
 				press=".onPressLogs"
-				tooltip="{i18n>viewQueryLog}">
+				tooltip="{i18n>viewQueryLog}"
+			>
 				<TileContent>
 					<NumericContent value="{/num_dns_queries}" icon="sap-icon://line-chart" />
 				</TileContent>
@@ -27,7 +28,8 @@
 				header="{i18n>blockedQueries}"
 				subheader="{i18n>last24Hours}"
 				press=".onPressBlockedLogs"
-				tooltip="{i18n>viewBlockedQueryLog}">
+				tooltip="{i18n>viewBlockedQueryLog}"
+			>
 				<TileContent>
 					<NumericContent value="{/num_blocked_filtering}" icon="sap-icon://shield" valueColor="Error" />
 				</TileContent>
@@ -39,9 +41,15 @@
 				subheader="{i18n>average}"
 				frameType="OneByOne"
 				press=".onPressLogs"
-				tooltip="{i18n>viewQueryPerformanceLogs}">
+				tooltip="{i18n>viewQueryPerformanceLogs}"
+			>
 				<TileContent>
-					<NumericContent value="{/avg_processing_time}" scale="ms" icon="sap-icon://performance" valueColor="{path: '/avg_processing_time', formatter: '.formatter.formatElapsedColor'}" />
+					<NumericContent
+						value="{/avg_processing_time}"
+						scale="ms"
+						icon="sap-icon://performance"
+						valueColor="{path: '/avg_processing_time', formatter: '.formatter.formatElapsedColor'}"
+					/>
 				</TileContent>
 			</GenericTile>
 
@@ -51,229 +59,339 @@
 				subheader="{i18n>efficiency}"
 				frameType="OneByOne"
 				press=".onPressBlockedLogs"
-				tooltip="{i18n>viewBlockedQueryLogs}">
+				tooltip="{i18n>viewBlockedQueryLogs}"
+			>
 				<TileContent>
 					<NumericContent value="{/block_percentage}" scale="%" icon="sap-icon://pie-chart" valueColor="Critical" />
 				</TileContent>
 			</GenericTile>
 
-            <f:GridContainer class="sapUiSmallMarginTop">
-                <f:layout>
-                    <f:GridContainerSettings rowSize="84px" columnSize="84px" gap="8px" />
-                </f:layout>
-                <f:layoutXS>
-                    <f:GridContainerSettings rowSize="70px" columnSize="70px" gap="8px" />
-                </f:layoutXS>
-                
-                <!-- Top Clients Card -->
-                <f:Card class="hoverCopyCard">
-                    <f:layoutData>
-                        <f:GridContainerItemLayoutData columns="4" rows="6" />
-                    </f:layoutData>
-                    <f:header>
-                        <card:Header id="cardHeaderClients" title="{i18n>topClients}" iconSrc="sap-icon://group" />
-                    </f:header>
-                    <f:content>
-                        <VBox height="100%" renderType="Bare">
-                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllClients" tooltip="{parts:[{path:'i18n>copyAllClients'}, {path:'/top_clients', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table ariaLabelledBy="cardHeaderClients" items="{/top_clients}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true">
-                                <noData>
-                                    <IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noActiveClients}" />
-                                </noData>
-                                <columns>
-                                    <Column><Text text="{i18n>client}" /></Column>
-                                <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
-                            </columns>
-                            <items>
-                                <ColumnListItem type="Navigation" press=".onPressClient" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
-                                    <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
-                                            <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
-                                                <layoutData>
-                                                    <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
-                                                </layoutData>
-                                            </Text>
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyClient" tooltip="{parts:[{path:'i18n>copyClientName'}, {path:'name'}], formatter: '.formatter.formatMessage'}" class="copyButton">
-                                                <layoutData>
-                                                    <FlexItemData shrinkFactor="0" />
-                                                </layoutData>
-                                            </Button>
-                                        </HBox>
-                                        <Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
-                                    </cells>
-                                </ColumnListItem>
-                            </items>
-                        </Table>
-                        </VBox>
-                    </f:content>
-                </f:Card>
+			<f:GridContainer class="sapUiSmallMarginTop">
+				<f:layout>
+					<f:GridContainerSettings rowSize="84px" columnSize="84px" gap="8px" />
+				</f:layout>
+				<f:layoutXS>
+					<f:GridContainerSettings rowSize="70px" columnSize="70px" gap="8px" />
+				</f:layoutXS>
 
-                <!-- Top Domains Card -->
-                <f:Card class="hoverCopyCard">
-                    <f:layoutData>
-                        <f:GridContainerItemLayoutData columns="4" rows="6" />
-                    </f:layoutData>
-                    <f:header>
-                        <card:Header id="cardHeaderDomains" title="{i18n>topDomains}" iconSrc="sap-icon://world" />
-                    </f:header>
-                     <f:content>
-                        <VBox height="100%" renderType="Bare">
-                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllDomains" tooltip="{parts:[{path:'i18n>copyAllDomains'}, {path:'/top_queried_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table ariaLabelledBy="cardHeaderDomains" items="{/top_queried_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true">
-                                <noData>
-                                    <IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noQueriesRecorded}" />
-                                </noData>
-                                <columns>
-                                    <Column><Text text="{i18n>domain}" /></Column>
-                                <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
-                            </columns>
-                            <items>
-                                <ColumnListItem type="Navigation" press=".onPressDomain" tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
-                                    <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
-                                            <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
-                                                <layoutData>
-                                                    <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
-                                                </layoutData>
-                                            </Text>
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{parts:[{path:'i18n>copyDomainName'}, {path:'name'}], formatter: '.formatter.formatMessage'}" class="copyButton">
-                                                <layoutData>
-                                                    <FlexItemData shrinkFactor="0" />
-                                                </layoutData>
-                                            </Button>
-                                        </HBox>
-                                        <Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
-                                    </cells>
-                                </ColumnListItem>
-                            </items>
-                        </Table>
-                        </VBox>
-                    </f:content>
-                </f:Card>
+				<!-- Top Clients Card -->
+				<f:Card class="hoverCopyCard">
+					<f:layoutData>
+						<f:GridContainerItemLayoutData columns="4" rows="6" />
+					</f:layoutData>
+					<f:header>
+						<card:Header id="cardHeaderClients" title="{i18n>topClients}" iconSrc="sap-icon://group" />
+					</f:header>
+					<f:content>
+						<VBox height="100%" renderType="Bare">
+							<button
+								icon="sap-icon://copy"
+								type="Transparent"
+								press=".onCopyAllClients"
+								tooltip="{parts:[{path:'i18n>copyAllClients'}, {path:'/top_clients', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
+								class="floatingCopyBtn"
+							/>
+							<table
+								ariaLabelledBy="cardHeaderClients"
+								items="{/top_clients}"
+								inset="false"
+								fixedLayout="true"
+								class="sapUiSizeCompact"
+								alternateRowColors="true"
+							>
+								<noData>
+									<IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noActiveClients}" />
+								</noData>
+								<columns>
+									<Column><Text text="{i18n>client}" /></Column>
+									<Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
+								</columns>
+								<items>
+									<ColumnListItem
+										type="Navigation"
+										press=".onPressClient"
+										tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}"
+									>
+										<cells>
+											<HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
+												<Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
+													<layoutData>
+														<FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
+													</layoutData>
+												</Text>
+												<button
+													icon="sap-icon://copy"
+													type="Transparent"
+													press=".onCopyClient"
+													tooltip="{parts:[{path:'i18n>copyClientName'}, {path:'name'}], formatter: '.formatter.formatMessage'}"
+													class="copyButton"
+												>
+													<layoutData>
+														<FlexItemData shrinkFactor="0" />
+													</layoutData>
+												</button>
+											</HBox>
+											<Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
+										</cells>
+									</ColumnListItem>
+								</items>
+							</table>
+						</VBox>
+					</f:content>
+				</f:Card>
 
-                <!-- Top Blocked Domains Card -->
-                <f:Card class="hoverCopyCard">
-                    <f:layoutData>
-                        <f:GridContainerItemLayoutData columns="4" rows="6" />
-                    </f:layoutData>
-                    <f:header>
-                        <card:Header id="cardHeaderBlockedDomains" title="{i18n>topBlockedDomains}" iconSrc="sap-icon://decline" />
-                    </f:header>
-                     <f:content>
-                        <VBox height="100%" renderType="Bare">
-                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllBlockedDomains" tooltip="{parts:[{path:'i18n>copyAllBlockedDomains'}, {path:'/top_blocked_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table ariaLabelledBy="cardHeaderBlockedDomains" items="{/top_blocked_domains}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true">
-                                <noData>
-                                    <IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noBlockedDomains}" />
-                                </noData>
-                                <columns>
-                                    <Column><Text text="{i18n>domain}" /></Column>
-                                <Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
-                            </columns>
-                            <items>
-                                <ColumnListItem type="Navigation" press=".onPressBlockedDomain" tooltip="{parts:[{path:'i18n>viewBlockedLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}">
-                                    <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
-                                            <Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
-                                                <layoutData>
-                                                    <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
-                                                </layoutData>
-                                            </Text>
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{parts:[{path:'i18n>copyDomainName'}, {path:'name'}], formatter: '.formatter.formatMessage'}" class="copyButton">
-                                                <layoutData>
-                                                    <FlexItemData shrinkFactor="0" />
-                                                </layoutData>
-                                            </Button>
-                                        </HBox>
-                                        <Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
-                                    </cells>
-                                </ColumnListItem>
-                            </items>
-                        </Table>
-                        </VBox>
-                    </f:content>
-                </f:Card>
+				<!-- Top Domains Card -->
+				<f:Card class="hoverCopyCard">
+					<f:layoutData>
+						<f:GridContainerItemLayoutData columns="4" rows="6" />
+					</f:layoutData>
+					<f:header>
+						<card:Header id="cardHeaderDomains" title="{i18n>topDomains}" iconSrc="sap-icon://world" />
+					</f:header>
+					<f:content>
+						<VBox height="100%" renderType="Bare">
+							<button
+								icon="sap-icon://copy"
+								type="Transparent"
+								press=".onCopyAllDomains"
+								tooltip="{parts:[{path:'i18n>copyAllDomains'}, {path:'/top_queried_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
+								class="floatingCopyBtn"
+							/>
+							<table
+								ariaLabelledBy="cardHeaderDomains"
+								items="{/top_queried_domains}"
+								inset="false"
+								fixedLayout="true"
+								class="sapUiSizeCompact"
+								alternateRowColors="true"
+							>
+								<noData>
+									<IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noQueriesRecorded}" />
+								</noData>
+								<columns>
+									<Column><Text text="{i18n>domain}" /></Column>
+									<Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
+								</columns>
+								<items>
+									<ColumnListItem
+										type="Navigation"
+										press=".onPressDomain"
+										tooltip="{parts:[{path:'i18n>viewLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}"
+									>
+										<cells>
+											<HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
+												<Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
+													<layoutData>
+														<FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
+													</layoutData>
+												</Text>
+												<button
+													icon="sap-icon://copy"
+													type="Transparent"
+													press=".onCopyDomain"
+													tooltip="{parts:[{path:'i18n>copyDomainName'}, {path:'name'}], formatter: '.formatter.formatMessage'}"
+													class="copyButton"
+												>
+													<layoutData>
+														<FlexItemData shrinkFactor="0" />
+													</layoutData>
+												</button>
+											</HBox>
+											<Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
+										</cells>
+									</ColumnListItem>
+								</items>
+							</table>
+						</VBox>
+					</f:content>
+				</f:Card>
 
-                <!-- Slowest Queries Card -->
-                <f:Card class="hoverCopyCard">
-                    <f:layoutData>
-                        <f:GridContainerItemLayoutData columns="4" rows="6" />
-                    </f:layoutData>
-                    <f:header>
-                        <card:Header id="cardHeaderSlowestQueries" title="{i18n>slowestQueries}" iconSrc="sap-icon://time-account" />
-                    </f:header>
-                     <f:content>
-                        <VBox height="100%" renderType="Bare">
-                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyAllSlowestQueries" tooltip="{parts:[{path:'i18n>copyAllSlowestQueries'}, {path:'/slowest_queries', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}" class="floatingCopyBtn" />
-                            <Table ariaLabelledBy="cardHeaderSlowestQueries" items="{/slowest_queries}" inset="false" fixedLayout="true" class="sapUiSizeCompact" alternateRowColors="true">
-                                <noData>
-                                    <IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noPerformanceData}" />
-                                </noData>
-                                <columns>
-                                    <Column><Text text="{i18n>domain}" /></Column>
-                                <Column hAlign="End" width="30%"><Text text="{i18n>elapsedMs}" /></Column>
-                            </columns>
-                            <items>
-                                <ColumnListItem
-                                    type="Navigation"
-                                    press=".onPressSlowestDomain"
-                                    tooltip="{
+				<!-- Top Blocked Domains Card -->
+				<f:Card class="hoverCopyCard">
+					<f:layoutData>
+						<f:GridContainerItemLayoutData columns="4" rows="6" />
+					</f:layoutData>
+					<f:header>
+						<card:Header id="cardHeaderBlockedDomains" title="{i18n>topBlockedDomains}" iconSrc="sap-icon://decline" />
+					</f:header>
+					<f:content>
+						<VBox height="100%" renderType="Bare">
+							<button
+								icon="sap-icon://copy"
+								type="Transparent"
+								press=".onCopyAllBlockedDomains"
+								tooltip="{parts:[{path:'i18n>copyAllBlockedDomains'}, {path:'/top_blocked_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
+								class="floatingCopyBtn"
+							/>
+							<table
+								ariaLabelledBy="cardHeaderBlockedDomains"
+								items="{/top_blocked_domains}"
+								inset="false"
+								fixedLayout="true"
+								class="sapUiSizeCompact"
+								alternateRowColors="true"
+							>
+								<noData>
+									<IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noBlockedDomains}" />
+								</noData>
+								<columns>
+									<Column><Text text="{i18n>domain}" /></Column>
+									<Column hAlign="End" width="30%"><Text text="{i18n>count}" /></Column>
+								</columns>
+								<items>
+									<ColumnListItem
+										type="Navigation"
+										press=".onPressBlockedDomain"
+										tooltip="{parts:[{path:'i18n>viewBlockedLogsFor'}, {path:'name'}], formatter: '.formatter.formatMessage'}"
+									>
+										<cells>
+											<HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
+												<Text text="{name}" wrapping="false" class="sapUiTinyMarginEnd">
+													<layoutData>
+														<FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
+													</layoutData>
+												</Text>
+												<button
+													icon="sap-icon://copy"
+													type="Transparent"
+													press=".onCopyDomain"
+													tooltip="{parts:[{path:'i18n>copyDomainName'}, {path:'name'}], formatter: '.formatter.formatMessage'}"
+													class="copyButton"
+												>
+													<layoutData>
+														<FlexItemData shrinkFactor="0" />
+													</layoutData>
+												</button>
+											</HBox>
+											<Text text="{path: 'count', formatter: '.formatter.formatNumber'}" />
+										</cells>
+									</ColumnListItem>
+								</items>
+							</table>
+						</VBox>
+					</f:content>
+				</f:Card>
+
+				<!-- Slowest Queries Card -->
+				<f:Card class="hoverCopyCard">
+					<f:layoutData>
+						<f:GridContainerItemLayoutData columns="4" rows="6" />
+					</f:layoutData>
+					<f:header>
+						<card:Header
+							id="cardHeaderSlowestQueries"
+							title="{i18n>slowestQueries}"
+							iconSrc="sap-icon://time-account"
+						/>
+					</f:header>
+					<f:content>
+						<VBox height="100%" renderType="Bare">
+							<button
+								icon="sap-icon://copy"
+								type="Transparent"
+								press=".onCopyAllSlowestQueries"
+								tooltip="{parts:[{path:'i18n>copyAllSlowestQueries'}, {path:'/slowest_queries', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
+								class="floatingCopyBtn"
+							/>
+							<table
+								ariaLabelledBy="cardHeaderSlowestQueries"
+								items="{/slowest_queries}"
+								inset="false"
+								fixedLayout="true"
+								class="sapUiSizeCompact"
+								alternateRowColors="true"
+							>
+								<noData>
+									<IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noPerformanceData}" />
+								</noData>
+								<columns>
+									<Column><Text text="{i18n>domain}" /></Column>
+									<Column hAlign="End" width="30%"><Text text="{i18n>elapsedMs}" /></Column>
+								</columns>
+								<items>
+									<ColumnListItem
+										type="Navigation"
+										press=".onPressSlowestDomain"
+										tooltip="{
                                         path: 'occurrences',
                                         formatter: '.formatter.slowestTooltip'
-                                    }">
-                                    <cells>
-                                        <HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
-                                            <Text
-                                                text="{
+                                    }"
+									>
+										<cells>
+											<HBox alignItems="Center" wrap="NoWrap" width="100%" justifyContent="SpaceBetween">
+												<Text
+													text="{
                                                     parts: [
                                                         {path: 'domain'},
                                                         {path: 'occurrences'}
                                                     ],
                                                     formatter: '.formatter.formatDomainWithCount'
                                                 }"
-                                                wrapping="false"
-                                                class="sapUiTinyMarginEnd">
-                                                <layoutData>
-                                                    <FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
-                                                </layoutData>
-                                            </Text>
-                                            <Button icon="sap-icon://copy" type="Transparent" press=".onCopyDomain" tooltip="{parts:[{path:'i18n>copyDomainName'}, {path:'domain'}], formatter: '.formatter.formatMessage'}" class="copyButton">
-                                                <layoutData>
-                                                    <FlexItemData shrinkFactor="0" />
-                                                </layoutData>
-                                            </Button>
-                                        </HBox>
-                                        <ObjectNumber
-											number="{
+													wrapping="false"
+													class="sapUiTinyMarginEnd"
+												>
+													<layoutData>
+														<FlexItemData growFactor="1" shrinkFactor="1" minWidth="0" />
+													</layoutData>
+												</Text>
+												<button
+													icon="sap-icon://copy"
+													type="Transparent"
+													press=".onCopyDomain"
+													tooltip="{parts:[{path:'i18n>copyDomainName'}, {path:'domain'}], formatter: '.formatter.formatMessage'}"
+													class="copyButton"
+												>
+													<layoutData>
+														<FlexItemData shrinkFactor="0" />
+													</layoutData>
+												</button>
+											</HBox>
+											<ObjectNumber
+												number="{
 												path: 'elapsedMs',
 												formatter: '.formatter.formatElapsed'
 											}"
-											state="{
+												state="{
 												path: 'elapsedMs',
 												formatter: '.formatter.formatElapsedState'
 											}"
-											tooltip="{
+												tooltip="{
 												path: 'elapsedMs',
 												formatter: '.formatter.formatElapsedStateText'
 											}"
-                                             />
-                                    </cells>
-                                </ColumnListItem>
-                            </items>
-                        </Table>
-                        </VBox>
-                    </f:content>
-                </f:Card>
-            </f:GridContainer>
+											/>
+										</cells>
+									</ColumnListItem>
+								</items>
+							</table>
+						</VBox>
+					</f:content>
+				</f:Card>
+			</f:GridContainer>
 		</content>
 		<footer>
 			<OverflowToolbar>
-				<Text text="{i18n>lastUpdated} {path: '/lastUpdated', type: 'DateTime', formatOptions: { style: 'medium' }}" visible="{= !!${/lastUpdated} }" class="sapUiTinyMarginBegin" />
-				<Button icon="sap-icon://refresh" type="Transparent" press=".onManualRefresh" tooltip="{i18n>refreshData}" class="sapUiTinyMarginBegin" />
+				<Text
+					text="{i18n>lastUpdated} {path: '/lastUpdated', type: 'DateTime', formatOptions: { style: 'medium' }}"
+					visible="{= !!${/lastUpdated} }"
+					class="sapUiTinyMarginBegin"
+				/>
+				<button
+					icon="sap-icon://refresh"
+					type="Transparent"
+					press=".onManualRefresh"
+					tooltip="{i18n>refreshData}"
+					class="sapUiTinyMarginBegin"
+				/>
 				<ToolbarSpacer />
-				<Button text="{i18n>viewLogs}" press=".onPressLogs" type="Emphasized" />
-				<Button icon="sap-icon://action-settings" tooltip="{i18n>settings}" press=".onOpenSettings" ariaHasPopup="Dialog" />
-                <Button icon="sap-icon://log" tooltip="{i18n>logout}" press=".onLogoutPress" ariaHasPopup="Dialog" />
+				<button text="{i18n>viewLogs}" press=".onPressLogs" type="Emphasized" />
+				<button
+					icon="sap-icon://action-settings"
+					tooltip="{i18n>settings}"
+					press=".onOpenSettings"
+					ariaHasPopup="Dialog"
+				/>
+				<button icon="sap-icon://log" tooltip="{i18n>logout}" press=".onLogoutPress" ariaHasPopup="Dialog" />
 			</OverflowToolbar>
 		</footer>
 	</Page>

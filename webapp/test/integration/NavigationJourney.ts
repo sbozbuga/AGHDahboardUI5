@@ -4,18 +4,18 @@ import AppPage from "./pages/AppPage";
 const onTheAppPage = new AppPage();
 
 opaTest("Should see the initial page of the app", function () {
-    // Arrangements
-    onTheAppPage.iStartMyUIComponent({
-        componentConfig: {
-            name: "ui5.aghd"
-        }
-    });
+	// Arrangements
+	onTheAppPage.iStartMyUIComponent({
+		componentConfig: {
+			name: "ui5.aghd"
+		}
+	});
 
-    // Actions
+	// Actions
 
-    // Assertions
-    onTheAppPage.iShouldSeeTheApp();
+	// Assertions
+	onTheAppPage.iShouldSeeTheApp();
 
-    // Cleanup
-    onTheAppPage.iTeardownMyApp();
+	// Cleanup
+	onTheAppPage.iTeardownMyApp();
 });

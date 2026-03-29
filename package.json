@@ -12,12 +12,16 @@
     "start:dist": "ui5 serve --port 8085 -o index.html --config ui5-dist.yaml",
     "ts-typecheck": "tsc --noEmit",
     "lint": "eslint webapp",
+    "lint:fix": "eslint webapp --fix",
+    "ui5lint": "ui5lint",
+    "format": "prettier --write \"webapp/**/*.{ts,js,json,xml,css,md}\"",
+    "format:check": "prettier --check \"webapp/**/*.{ts,js,json,xml,css,md}\"",
+    "health": "npm run format:check && npm run lint && npm run ui5lint && npm run ts-typecheck",
     "test-runner": "ui5-test-runner --url http://localhost:8085/test/testsuite.qunit.html",
     "test-runner-coverage": "ui5-test-runner --url http://localhost:8085/test/testsuite.qunit.html --coverage -ccb 60 -ccf 100 -ccl 80 -ccs 80",
     "test-ui5": "ui5-test-runner --start start-coverage --url http://localhost:8085/test/testsuite.qunit.html --coverage -ccb 60 -ccf 100 -ccl 80 -ccs 80",
     "test": "npm run lint && npm run test-ui5",
-    "test:e2e": "playwright test",
-    "ui5lint": "ui5lint"
+    "test:e2e": "playwright test"
   },
   "repository": {
     "type": "git",
@@ -36,7 +40,7 @@
     "playwright": "^1.58.2",
     "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2",
+    "typescript": "^5.8.2",
     "typescript-eslint": "^8.57.2",
     "ui5-middleware-livereload": "^3.3.0",
     "ui5-middleware-simpleproxy": "^3.7.0",

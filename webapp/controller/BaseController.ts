@@ -22,277 +22,280 @@ import encodeXML from "sap/base/security/encodeXML";
  * @namespace ui5.aghd.controller
  */
 export default class BaseController extends Controller {
-    public formatter = formatter;
-    protected _mDialogs: Map<string, Promise<Dialog>> = new Map();
+	public formatter = formatter;
+	protected _mDialogs: Map<string, Promise<Dialog>> = new Map();
 
-    protected animateCopyButton(button: Button, duration: number = 2000): void {
-        const originalIcon = button.getIcon();
+	protected animateCopyButton(button: Button, duration: number = 2000): void {
+		const originalIcon = button.getIcon();
 
-        // Prevent re-entrancy: if already animating (icon is accept), do nothing
-        // to avoid capturing "accept" as the original icon.
-        if (originalIcon === "sap-icon://accept") {
-            return;
-        }
+		// Prevent re-entrancy: if already animating (icon is accept), do nothing
+		// to avoid capturing "accept" as the original icon.
+		if (originalIcon === "sap-icon://accept") {
+			return;
+		}
 
-        button.setIcon("sap-icon://accept");
-        setTimeout(() => {
-            button.setIcon(originalIcon);
-        }, duration);
-    }
+		button.setIcon("sap-icon://accept");
+		setTimeout(() => {
+			button.setIcon(originalIcon);
+		}, duration);
+	}
 
-    public onExit(): void {
-        this._mDialogs.clear();
-    }
+	public onExit(): void {
+		this._mDialogs.clear();
+	}
 
-    protected getText(key: string, args: string[] = []): string {
-        const model = this.getOwnerComponent()?.getModel("i18n") as ResourceModel;
-        if (!model) return key;
-        const bundle = model.getResourceBundle() as ResourceBundle;
-        // Check if bundle is loaded (it might be a promise if configured async, but usually loaded by controller time)
-        // If it's a promise, we can't synchronously return text. Fallback to key.
-        if (bundle && typeof bundle.getText === "function") {
-            return bundle.getText(key, args) || key;
-        }
-        return key;
-    }
+	protected getText(key: string, args: string[] = []): string {
+		const model = this.getOwnerComponent()?.getModel("i18n") as ResourceModel;
+		if (!model) return key;
+		const bundle = model.getResourceBundle() as ResourceBundle;
+		// Check if bundle is loaded (it might be a promise if configured async, but usually loaded by controller time)
+		// If it's a promise, we can't synchronously return text. Fallback to key.
+		if (bundle && typeof bundle.getText === "function") {
+			return bundle.getText(key, args) || key;
+		}
+		return key;
+	}
 
-    /**
-     * Typed helper to get a model from the view.
-     * @param name Optional model name
-     * @returns JSONModel
-     */
-    protected getViewModel(name?: string): JSONModel {
-        return this.getView()?.getModel(name) as JSONModel;
-    }
+	/**
+	 * Typed helper to get a model from the view.
+	 * @param name Optional model name
+	 * @returns JSONModel
+	 */
+	protected getViewModel(name?: string): JSONModel {
+		return this.getView()?.getModel(name) as JSONModel;
+	}
 
-    /**
-     * Typed helper to get a control by ID from the view.
-     * @param id The ID of the control
-     * @returns The dynamically typed control
-     */
-    protected getControl<T extends Control>(id: string): T {
-        return this.getView()?.byId(id) as T;
-    }
+	/**
+	 * Typed helper to get a control by ID from the view.
+	 * @param id The ID of the control
+	 * @returns The dynamically typed control
+	 */
+	protected getControl<T extends Control>(id: string): T {
+		return this.getView()?.byId(id) as T;
+	}
 
-    /**
-     * Generic helper to load and cache dialogs
-     */
-    protected async _openDialog(fragmentName: string): Promise<Dialog> {
-        const view = this.getView();
-        if (!view) throw new Error("View not available");
+	/**
+	 * Generic helper to load and cache dialogs
+	 */
+	protected async _openDialog(fragmentName: string): Promise<Dialog> {
+		const view = this.getView();
+		if (!view) throw new Error("View not available");
 
-        if (!this._mDialogs.has(fragmentName)) {
-            const pDialog = this.loadFragment({
-                name: fragmentName
-            }) as Promise<Dialog>;
+		if (!this._mDialogs.has(fragmentName)) {
+			const pDialog = this.loadFragment({
+				name: fragmentName
+			}) as Promise<Dialog>;
 
-            // Cache the promise immediately
-            this._mDialogs.set(fragmentName, pDialog);
+			// Cache the promise immediately
+			this._mDialogs.set(fragmentName, pDialog);
 
-            const dialog = await pDialog;
-            view.addDependent(dialog);
+			const dialog = await pDialog;
+			view.addDependent(dialog);
 
-            // Add style class if needed
-            dialog.addStyleClass((this.getOwnerComponent() as AppComponent).getContentDensityClass());
+			// Add style class if needed
+			dialog.addStyleClass((this.getOwnerComponent() as AppComponent).getContentDensityClass());
 
-            return dialog;
-        }
+			return dialog;
+		}
 
-        return this._mDialogs.get(fragmentName) as Promise<Dialog>;
-    }
+		return this._mDialogs.get(fragmentName) as Promise<Dialog>;
+	}
 
-    /* =========================================================== */
-    /* Settings Dialog Logic                                       */
-    /* =========================================================== */
+	/* =========================================================== */
+	/* Settings Dialog Logic                                       */
+	/* =========================================================== */
 
-    public async onOpenSettings(): Promise<void> {
-        const dialog = await this._openDialog(Constants.Fragments.SettingsDialog);
+	public async onOpenSettings(): Promise<void> {
+		const dialog = await this._openDialog(Constants.Fragments.SettingsDialog);
 
-        const view = this.getView() as View;
-        if (!view) return;
+		const view = this.getView() as View;
+		if (!view) return;
 
-        const apiKey = SettingsService.getInstance().getApiKey();
-        const currentModel = SettingsService.getInstance().getModel();
-        const baseUrl = SettingsService.getInstance().getBaseUrl();
+		const apiKey = SettingsService.getInstance().getApiKey();
+		const currentModel = SettingsService.getInstance().getModel();
+		const baseUrl = SettingsService.getInstance().getBaseUrl();
 
-        // Ensure model exists or create a temporary one for the dialog if the view doesn't have one
-        // Ideally, the view should have a model. We'll use the view's default model.
-        let model = view.getModel() as JSONModel;
-        if (!model) {
-            model = new JSONModel();
-            view.setModel(model);
-        }
+		// Ensure model exists or create a temporary one for the dialog if the view doesn't have one
+		// Ideally, the view should have a model. We'll use the view's default model.
+		let model = view.getModel() as JSONModel;
+		if (!model) {
+			model = new JSONModel();
+			view.setModel(model);
+		}
 
-        model.setProperty("/apiKey", apiKey);
-        model.setProperty("/selectedModel", currentModel);
-        model.setProperty("/baseUrl", baseUrl);
-        model.setProperty("/systemContext", SettingsService.getInstance().getSystemContext());
-        model.setProperty("/availableModels", []);
+		model.setProperty("/apiKey", apiKey);
+		model.setProperty("/selectedModel", currentModel);
+		model.setProperty("/baseUrl", baseUrl);
+		model.setProperty("/systemContext", SettingsService.getInstance().getSystemContext());
+		model.setProperty("/availableModels", []);
 
-        dialog.open();
+		dialog.open();
 
-        if (apiKey) {
-            dialog.setBusy(true);
-            try {
-                const models = await GeminiService.getInstance().getAvailableModels();
-                model.setProperty("/availableModels", models);
+		if (apiKey) {
+			dialog.setBusy(true);
+			try {
+				const models = await GeminiService.getInstance().getAvailableModels();
+				model.setProperty("/availableModels", models);
 
-                if (models.length > 0 && !models.find(m => m.key === currentModel)) {
-                    model.setProperty("/selectedModel", models[0].key);
-                }
-            } catch {
-                // ignore
-            } finally {
-                dialog.setBusy(false);
-            }
-        }
-    }
+				if (models.length > 0 && !models.find((m) => m.key === currentModel)) {
+					model.setProperty("/selectedModel", models[0].key);
+				}
+			} catch {
+				// ignore
+			} finally {
+				dialog.setBusy(false);
+			}
+		}
+	}
 
-    public onSaveSettings(): void {
-        const view = this.getView();
-        if (!view) return;
-        const model = view.getModel() as JSONModel;
-        const apiKey = model.getProperty("/apiKey") as string;
-        const selectedModel = model.getProperty("/selectedModel") as string;
-        const baseUrl = model.getProperty("/baseUrl") as string;
+	public onSaveSettings(): void {
+		const view = this.getView();
+		if (!view) return;
+		const model = view.getModel() as JSONModel;
+		const apiKey = model.getProperty("/apiKey") as string;
+		const selectedModel = model.getProperty("/selectedModel") as string;
+		const baseUrl = model.getProperty("/baseUrl") as string;
 
-        try {
-            SettingsService.getInstance().setApiKey(apiKey);
-            const systemContext = model.getProperty("/systemContext") as string;
-            SettingsService.getInstance().setSystemContext(systemContext);
+		try {
+			SettingsService.getInstance().setApiKey(apiKey);
+			const systemContext = model.getProperty("/systemContext") as string;
+			SettingsService.getInstance().setSystemContext(systemContext);
 
-            if (selectedModel) {
-                SettingsService.getInstance().setModel(selectedModel);
-            }
+			if (selectedModel) {
+				SettingsService.getInstance().setModel(selectedModel);
+			}
 
-            SettingsService.getInstance().setBaseUrl(baseUrl);
+			SettingsService.getInstance().setBaseUrl(baseUrl);
 
-            (view.byId("settingsDialog") as Dialog).close();
-            MessageBox.success(this.getText("settingsSaved"), {
-                onClose: () => {
-                    window.location.reload();
-                }
-            });
-        } catch (error) {
-            this.showError(error);
-        }
-    }
+			(view.byId("settingsDialog") as Dialog).close();
+			MessageBox.success(this.getText("settingsSaved"), {
+				onClose: () => {
+					window.location.reload();
+				}
+			});
+		} catch (error) {
+			this.showError(error);
+		}
+	}
 
-    /**
-     * Safely displays an error message to the user, truncating and escaping
-     * the text to prevent UI thread denial of service and potential XSS vectors.
-     * @param error The error object or string
-     */
-    protected showError(error: unknown): void {
-        const msg = error instanceof Error ? error.message : String(error);
-        const truncatedMsg = msg.substring(0, 1000);
-        const safeMsg = encodeXML(truncatedMsg);
-        MessageBox.error(safeMsg);
-    }
+	/**
+	 * Safely displays an error message to the user, truncating and escaping
+	 * the text to prevent UI thread denial of service and potential XSS vectors.
+	 * @param error The error object or string
+	 */
+	protected showError(error: unknown): void {
+		const msg = error instanceof Error ? error.message : String(error);
+		const truncatedMsg = msg.substring(0, 1000);
+		const safeMsg = encodeXML(truncatedMsg);
+		MessageBox.error(safeMsg);
+	}
 
-    public onCancelSettings(): void {
-        const view = this.getView();
-        if (!view) return;
-        (view.byId("settingsDialog") as Dialog).close();
-    }
+	public onCancelSettings(): void {
+		const view = this.getView();
+		if (!view) return;
+		(view.byId("settingsDialog") as Dialog).close();
+	}
 
-    public onToggleApiKeyVisibility(event: Event): void {
-        const input = event.getSource();
-        if (!(input instanceof Input)) return;
+	public onToggleApiKeyVisibility(event: Event): void {
+		const input = event.getSource();
+		if (!(input instanceof Input)) return;
 
-        const currentType = input.getType();
-        if (currentType === InputType.Password) {
-            input.setType(InputType.Text);
-            input.setValueHelpIconSrc("sap-icon://hide");
-        } else {
-            input.setType(InputType.Password);
-            input.setValueHelpIconSrc("sap-icon://show");
-        }
-    }
+		const currentType = input.getType();
+		if (currentType === InputType.Password) {
+			input.setType(InputType.Text);
+			input.setValueHelpIconSrc("sap-icon://hide");
+		} else {
+			input.setType(InputType.Password);
+			input.setValueHelpIconSrc("sap-icon://show");
+		}
+	}
 
-    /**
-     * Copies text to clipboard with a fallback for non-secure contexts.
-     * @param text The text to copy
-     * @param successMessage The message to show on success
-     * @param button Optional button to animate on success
-     */
-    protected copyToClipboard(text: string, successMessage: string, button?: Button): void {
-        if (!text) return;
+	/**
+	 * Copies text to clipboard with a fallback for non-secure contexts.
+	 * @param text The text to copy
+	 * @param successMessage The message to show on success
+	 * @param button Optional button to animate on success
+	 */
+	protected copyToClipboard(text: string, successMessage: string, button?: Button): void {
+		if (!text) return;
 
-        // Navigator clipboard requires Secure Context (HTTPS/localhost)
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => {
-                MessageToast.show(successMessage);
-                if (button) {
-                    this.animateCopyButton(button);
-                }
-            }).catch((err) => {
-                console.warn("Clipboard API failed, falling back to execCommand", (err as Error).message || "Unknown error");
-                this.fallbackCopy(text, successMessage, button);
-            });
-        } else {
-            this.fallbackCopy(text, successMessage, button);
-        }
-    }
+		// Navigator clipboard requires Secure Context (HTTPS/localhost)
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard
+				.writeText(text)
+				.then(() => {
+					MessageToast.show(successMessage);
+					if (button) {
+						this.animateCopyButton(button);
+					}
+				})
+				.catch((err) => {
+					console.warn("Clipboard API failed, falling back to execCommand", (err as Error).message || "Unknown error");
+					this.fallbackCopy(text, successMessage, button);
+				});
+		} else {
+			this.fallbackCopy(text, successMessage, button);
+		}
+	}
 
-    /**
-     * Fallback for copying to clipboard using a hidden textarea and execCommand.
-     */
-    protected fallbackCopy(text: string, successMessage: string, button?: Button): void {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
+	/**
+	 * Fallback for copying to clipboard using a hidden textarea and execCommand.
+	 */
+	protected fallbackCopy(text: string, successMessage: string, button?: Button): void {
+		const textArea = document.createElement("textarea");
+		textArea.value = text;
 
-        // Ensure it's not visible but part of the DOM
-        textArea.style.position = "fixed";
-        textArea.style.left = "-9999px";
-        textArea.style.top = "0";
-        document.body.appendChild(textArea);
+		// Ensure it's not visible but part of the DOM
+		textArea.style.position = "fixed";
+		textArea.style.left = "-9999px";
+		textArea.style.top = "0";
+		document.body.appendChild(textArea);
 
-        textArea.focus();
-        textArea.select();
+		textArea.focus();
+		textArea.select();
 
-        try {
-            // execCommand is deprecated but widely supported as fallback
-            const successful = document.execCommand("copy");
-            if (successful) {
-                MessageToast.show(successMessage);
-                if (button) {
-                    this.animateCopyButton(button);
-                }
-            } else {
-                MessageBox.error(this.getText("clipboardUnavailable"));
-            }
-        } catch (err) {
-            console.error("Fallback copy failed", (err as Error).message || "Unknown error");
-            MessageBox.error(this.getText("clipboardUnavailable"));
-        }
+		try {
+			// execCommand is deprecated but widely supported as fallback
+			const successful = document.execCommand("copy");
+			if (successful) {
+				MessageToast.show(successMessage);
+				if (button) {
+					this.animateCopyButton(button);
+				}
+			} else {
+				MessageBox.error(this.getText("clipboardUnavailable"));
+			}
+		} catch (err) {
+			console.error("Fallback copy failed", (err as Error).message || "Unknown error");
+			MessageBox.error(this.getText("clipboardUnavailable"));
+		}
 
-        document.body.removeChild(textArea);
-    }
+		document.body.removeChild(textArea);
+	}
 
-    private static readonly CSV_FORMULA_INJECTION_REGEX = /^[ \t\n\r]*[=+\-@\t\n\r]/;
-    private static readonly CSV_QUOTES_NEEDED_REGEX = /[",\n\r]/;
-    private static readonly CSV_QUOTE_REPLACE_REGEX = /"/g;
+	private static readonly CSV_FORMULA_INJECTION_REGEX = /^[ \t\n\r]*[=+\-@\t\n\r]/;
+	private static readonly CSV_QUOTES_NEEDED_REGEX = /[",\n\r]/;
+	private static readonly CSV_QUOTE_REPLACE_REGEX = /"/g;
 
-    /**
-     * Escapes a value to prevent CSV Formula Injection and properly quote it.
-     */
-    protected escapeCsvField(value: string | number | boolean | null | undefined): string {
-        if (value === null || value === undefined) {
-            return "";
-        }
-        let str = String(value);
+	/**
+	 * Escapes a value to prevent CSV Formula Injection and properly quote it.
+	 */
+	protected escapeCsvField(value: string | number | boolean | null | undefined): string {
+		if (value === null || value === undefined) {
+			return "";
+		}
+		let str = String(value);
 
-        // Prevent Formula Injection
-        if (BaseController.CSV_FORMULA_INJECTION_REGEX.test(str)) {
-            str = "'" + str;
-        }
+		// Prevent Formula Injection
+		if (BaseController.CSV_FORMULA_INJECTION_REGEX.test(str)) {
+			str = "'" + str;
+		}
 
-        // Quote if necessary
-        if (BaseController.CSV_QUOTES_NEEDED_REGEX.test(str)) {
-            str = '"' + str.replace(BaseController.CSV_QUOTE_REPLACE_REGEX, '""') + '"';
-        }
+		// Quote if necessary
+		if (BaseController.CSV_QUOTES_NEEDED_REGEX.test(str)) {
+			str = '"' + str.replace(BaseController.CSV_QUOTE_REPLACE_REGEX, '""') + '"';
+		}
 
-        return str;
-    }
+		return str;
+	}
 }

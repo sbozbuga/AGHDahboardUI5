@@ -1,7 +1,6 @@
 import Opa5 from "sap/ui/test/Opa5";
 
 export default class AppPage extends Opa5 {
-
 	// Actions
 	// Add custom actions here
 
@@ -20,5 +19,4 @@ export default class AppPage extends Opa5 {
 			errorMessage: "Did not find the Dashboard page"
 		});
 	}
-
 }

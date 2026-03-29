@@ -10,7 +10,6 @@ import BaseApiService from "./service/BaseApiService";
  * @namespace ui5.aghd
  */
 export default class Component extends UIComponent {
-
 	public static metadata = {
 		interfaces: ["sap.ui.core.IAsyncContentCreation"],
 		manifest: "json"
@@ -58,7 +57,8 @@ export default class Component extends UIComponent {
 			// check whether FLP has already set the content density class; do nothing in this case
 			if (document.body.classList.contains("sapUiSizeCozy") || document.body.classList.contains("sapUiSizeCompact")) {
 				this.contentDensityClass = "";
-			} else if (!Device.support.touch) { // apply "compact" mode if touch is not supported
+			} else if (!Device.support.touch) {
+				// apply "compact" mode if touch is not supported
 				this.contentDensityClass = "sapUiSizeCompact";
 			} else {
 				// "cozy" in case of touch support; default for most sap.m controls, but needed for desktop-first controls like sap.ui.table.Table
@@ -67,5 +67,4 @@ export default class Component extends UIComponent {
 		}
 		return this.contentDensityClass;
 	}
-
 }

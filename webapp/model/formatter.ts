@@ -6,147 +6,147 @@ const oDateTimeFormat = DateFormat.getDateTimeInstance({ pattern: "yyyy-MM-dd HH
 const oIntegerFormat = NumberFormat.getIntegerInstance({ groupingEnabled: true });
 
 export default {
-    formatMessage: formatMessage,
+	formatMessage: formatMessage,
 
-    /**
-     * Formats a date string or Date object.
-     * @param date Date object or string
-     * @returns Formatted date string
-     */
-    formatDateTime: function (date: string | Date | null | undefined): string {
-        if (!date) {
-            return "";
-        }
-        const oDate = date instanceof Date ? date : new Date(date);
-        return oDateTimeFormat.format(oDate);
-    },
+	/**
+	 * Formats a date string or Date object.
+	 * @param date Date object or string
+	 * @returns Formatted date string
+	 */
+	formatDateTime: function (date: string | Date | null | undefined): string {
+		if (!date) {
+			return "";
+		}
+		const oDate = date instanceof Date ? date : new Date(date);
+		return oDateTimeFormat.format(oDate);
+	},
 
-    /**
-     * Formats a number with thousands separators.
-     * @param value Number or string to format
-     * @returns Formatted string (e.g. "1,234") or "0"
-     */
-    formatNumber: function (value: number | string | null | undefined): string {
-        if (value == null) {
-            return "0";
-        }
-        // Optimization: Native Number() constructor is faster than typeof + parseFloat for numeric conversion
-        const num = Number(value);
-        if (isNaN(num)) {
-            return "0";
-        }
-        return oIntegerFormat.format(num);
-    },
+	/**
+	 * Formats a number with thousands separators.
+	 * @param value Number or string to format
+	 * @returns Formatted string (e.g. "1,234") or "0"
+	 */
+	formatNumber: function (value: number | string | null | undefined): string {
+		if (value == null) {
+			return "0";
+		}
+		// Optimization: Native Number() constructor is faster than typeof + parseFloat for numeric conversion
+		const num = Number(value);
+		if (isNaN(num)) {
+			return "0";
+		}
+		return oIntegerFormat.format(num);
+	},
 
-    /**
-     * Formats elapsed time in milliseconds to a string with 3 decimal places.
-     * @param ms Elapsed time in milliseconds (number)
-     * @returns Formatted string "0.000"
-     */
-    formatElapsed: function (ms: number | null | undefined): string {
-        return (typeof ms === 'number') ? ms.toFixed(3) : "0.000";
-    },
+	/**
+	 * Formats elapsed time in milliseconds to a string with 3 decimal places.
+	 * @param ms Elapsed time in milliseconds (number)
+	 * @returns Formatted string "0.000"
+	 */
+	formatElapsed: function (ms: number | null | undefined): string {
+		return typeof ms === "number" ? ms.toFixed(3) : "0.000";
+	},
 
-    /**
-     * Formats the domain with occurrence count if greater than 1.
-     * @param domain Domain name
-     * @param occurrences Array of elapsed times
-     * @returns "domain.com" or "domain.com (3)"
-     */
-    formatDomainWithCount: function (domain: string, occurrences: number[] | undefined): string {
-        if (!occurrences || occurrences.length <= 1) {
-            return domain;
-        }
-        return `${domain} (${occurrences.length})`;
-    },
+	/**
+	 * Formats the domain with occurrence count if greater than 1.
+	 * @param domain Domain name
+	 * @param occurrences Array of elapsed times
+	 * @returns "domain.com" or "domain.com (3)"
+	 */
+	formatDomainWithCount: function (domain: string, occurrences: number[] | undefined): string {
+		if (!occurrences || occurrences.length <= 1) {
+			return domain;
+		}
+		return `${domain} (${occurrences.length})`;
+	},
 
-    /**
-     * Generates a tooltip listing all elapsed times.
-     * @param occurrences Array of elapsed times
-     * @returns Formatted string with newlines
-     */
-    slowestTooltip: function (occurrences: number[] | undefined): string {
-        if (!occurrences || !Array.isArray(occurrences) || occurrences.length === 0) {
-            return "";
-        }
-        // Occurrences are already sorted descending by AdGuardService.
-        const len = occurrences.length;
-        const result = new Array(len) as string[];
-        for (let i = 0; i < len; i++) {
-            result[i] = `${occurrences[i].toFixed(3)} ms`;
-        }
-        return result.join("\n");
-    },
+	/**
+	 * Generates a tooltip listing all elapsed times.
+	 * @param occurrences Array of elapsed times
+	 * @returns Formatted string with newlines
+	 */
+	slowestTooltip: function (occurrences: number[] | undefined): string {
+		if (!occurrences || !Array.isArray(occurrences) || occurrences.length === 0) {
+			return "";
+		}
+		// Occurrences are already sorted descending by AdGuardService.
+		const len = occurrences.length;
+		const result = new Array(len) as string[];
+		for (let i = 0; i < len; i++) {
+			result[i] = `${occurrences[i].toFixed(3)} ms`;
+		}
+		return result.join("\n");
+	},
 
-    /**
-     * Formats the value state based on elapsed time.
-     * @param ms Elapsed time in milliseconds
-     * @returns "Error" | "Warning" | "None"
-     */
-    formatElapsedState: function (ms: number | string | null | undefined): string {
-        if (ms == null) {
-            return "None";
-        }
-        // Optimization: Native Number() constructor is faster than typeof + parseFloat
-        const val = Number(ms);
+	/**
+	 * Formats the value state based on elapsed time.
+	 * @param ms Elapsed time in milliseconds
+	 * @returns "Error" | "Warning" | "None"
+	 */
+	formatElapsedState: function (ms: number | string | null | undefined): string {
+		if (ms == null) {
+			return "None";
+		}
+		// Optimization: Native Number() constructor is faster than typeof + parseFloat
+		const val = Number(ms);
 
-        if (val > 500) {
-            return "Error";
-        } else if (val > 200) {
-            return "Warning";
-        } else {
-            return "None";
-        }
-    },
+		if (val > 500) {
+			return "Error";
+		} else if (val > 200) {
+			return "Warning";
+		} else {
+			return "None";
+		}
+	},
 
-    /**
-     * Formats the value state text based on elapsed time.
-     * @param ms Elapsed time in milliseconds
-     * @returns "Critical (> 500ms)" | "Warning (> 200ms)" | "Good (< 200ms)"
-     */
-    formatElapsedStateText: function (ms: number | string | null | undefined): string {
-        if (ms == null) {
-            return "None";
-        }
-        // Optimization: Native Number() constructor is faster than typeof + parseFloat
-        const val = Number(ms);
+	/**
+	 * Formats the value state text based on elapsed time.
+	 * @param ms Elapsed time in milliseconds
+	 * @returns "Critical (> 500ms)" | "Warning (> 200ms)" | "Good (< 200ms)"
+	 */
+	formatElapsedStateText: function (ms: number | string | null | undefined): string {
+		if (ms == null) {
+			return "None";
+		}
+		// Optimization: Native Number() constructor is faster than typeof + parseFloat
+		const val = Number(ms);
 
-        if (val > 500) {
-            return "Critical (> 500ms)";
-        } else if (val > 200) {
-            return "Warning (> 200ms)";
-        } else {
-            return "Good (< 200ms)";
-        }
-    },
+		if (val > 500) {
+			return "Critical (> 500ms)";
+		} else if (val > 200) {
+			return "Warning (> 200ms)";
+		} else {
+			return "Good (< 200ms)";
+		}
+	},
 
-    /**
-     * Formats the value color for NumericContent based on elapsed time.
-     * @param ms Elapsed time in milliseconds
-     * @returns "Good" | "Critical" | "Error" | "Neutral"
-     */
-    formatElapsedColor: function (ms: number | string | null | undefined): string {
-        if (ms == null) {
-            return "Neutral";
-        }
-        // Optimization: Native Number() constructor is faster than typeof + parseFloat
-        const val = Number(ms);
+	/**
+	 * Formats the value color for NumericContent based on elapsed time.
+	 * @param ms Elapsed time in milliseconds
+	 * @returns "Good" | "Critical" | "Error" | "Neutral"
+	 */
+	formatElapsedColor: function (ms: number | string | null | undefined): string {
+		if (ms == null) {
+			return "Neutral";
+		}
+		// Optimization: Native Number() constructor is faster than typeof + parseFloat
+		const val = Number(ms);
 
-        if (val > 500) {
-            return "Error";
-        } else if (val > 200) {
-            return "Critical";
-        } else {
-            return "Good";
-        }
-    },
+		if (val > 500) {
+			return "Error";
+		} else if (val > 200) {
+			return "Critical";
+		} else {
+			return "Good";
+		}
+	},
 
-    /**
-     * Returns the length of an array or 0 if null/undefined.
-     * @param list Array to check length of
-     * @returns Length of array
-     */
-    getLength: function (list: unknown[] | null | undefined): number {
-        return list && Array.isArray(list) ? list.length : 0;
-    }
+	/**
+	 * Returns the length of an array or 0 if null/undefined.
+	 * @param list Array to check length of
+	 * @returns Length of array
+	 */
+	getLength: function (list: unknown[] | null | undefined): number {
+		return list && Array.isArray(list) ? list.length : 0;
+	}
 };

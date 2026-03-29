@@ -16,8 +16,8 @@ export default {
 		loader: {
 			paths: {
 				"ui5/aghd": "../",
-				"integration": "./integration",
-				"unit": "./unit"
+				integration: "./integration",
+				unit: "./unit"
 			}
 		}
 	},
@@ -27,6 +27,6 @@ export default {
 		},
 		"integration/opaTests": {
 			title: "Integration tests for the UI5 AGH Dashboard app"
-		},
+		}
 	}
 } satisfies SuiteConfiguration;

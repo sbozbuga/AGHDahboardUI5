@@ -11,207 +11,212 @@ import encodeXML from "sap/base/security/encodeXML";
  * @namespace ui5.aghd.service
  */
 export default class AuthService extends BaseApiService {
-    private static instance: AuthService;
+	private static instance: AuthService;
 
-    public static getInstance(): AuthService {
-        if (!AuthService.instance) {
-            AuthService.instance = new AuthService();
-        }
-        return AuthService.instance;
-    }
+	public static getInstance(): AuthService {
+		if (!AuthService.instance) {
+			AuthService.instance = new AuthService();
+		}
+		return AuthService.instance;
+	}
 
-    private _isSafeUrl(url: string): boolean {
-        try {
-            // Handle relative URLs
-            if (url.startsWith("/")) {
-                // Ensure it's not a protocol-relative URL (e.g., //attacker.com)
-                return !url.startsWith("//");
-            }
+	private _isSafeUrl(url: string): boolean {
+		try {
+			// Handle relative URLs
+			if (url.startsWith("/")) {
+				// Ensure it's not a protocol-relative URL (e.g., //attacker.com)
+				return !url.startsWith("//");
+			}
 
-            const urlObj = new URL(url);
-            const hostname = urlObj.hostname;
+			const urlObj = new URL(url);
+			const hostname = urlObj.hostname;
 
-            // Check if same origin
-            if (hostname === window.location.hostname) {
-                return true;
-            }
+			// Check if same origin
+			if (hostname === window.location.hostname) {
+				return true;
+			}
 
-            // Check localhost
-            if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]") {
-                return true;
-            }
+			// Check localhost
+			if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]") {
+				return true;
+			}
 
-            // Check private IPs (IPv4)
-            const parts = hostname.split(".").map(Number);
-            if (parts.length === 4 && parts.every((p) => !isNaN(p) && p >= 0 && p <= 255)) {
-                if (parts[0] === 10) return true;
-                if (parts[0] === 192 && parts[1] === 168) return true;
-                if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
-            }
+			// Check private IPs (IPv4)
+			const parts = hostname.split(".").map(Number);
+			if (parts.length === 4 && parts.every((p) => !isNaN(p) && p >= 0 && p <= 255)) {
+				if (parts[0] === 10) return true;
+				if (parts[0] === 192 && parts[1] === 168) return true;
+				if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
+			}
 
-            return false;
-        } catch {
-            return false;
-        }
-    }
+			return false;
+		} catch {
+			return false;
+		}
+	}
 
-    /**
-     * Overrides BaseApiService's _handleSessionExpiration to open a custom login popup.
-     */
-    protected _handleSessionExpiration(): void {
-        const baseUrl = SettingsService.getInstance().getBaseUrl();
+	/**
+	 * Overrides BaseApiService's _handleSessionExpiration to open a custom login popup.
+	 */
+	protected _handleSessionExpiration(): void {
+		const baseUrl = SettingsService.getInstance().getBaseUrl();
 
-        if (!baseUrl) {
-            super._handleSessionExpiration();
-            return;
-        }
+		if (!baseUrl) {
+			super._handleSessionExpiration();
+			return;
+		}
 
-        if (this._isLoginDialogOpen) return;
-        this._isLoginDialogOpen = true;
+		if (this._isLoginDialogOpen) return;
+		this._isLoginDialogOpen = true;
 
-        const logInText = this._getText("logIn");
+		const logInText = this._getText("logIn");
 
-        MessageBox.warning(this._getText("sessionExpired"), {
-            actions: [logInText, MessageBox.Action.CANCEL],
-            onClose: (sAction: string | null) => {
-                if (sAction === logInText) {
-                    this._openLoginPopup();
-                } else {
-                    this._isLoginDialogOpen = false;
-                }
-            }
-        });
-    }
+		MessageBox.warning(this._getText("sessionExpired"), {
+			actions: [logInText, MessageBox.Action.CANCEL],
+			onClose: (sAction: string | null) => {
+				if (sAction === logInText) {
+					this._openLoginPopup();
+				} else {
+					this._isLoginDialogOpen = false;
+				}
+			}
+		});
+	}
 
-    private _openLoginPopup(): void {
-        const width = 1000;
-        const height = 700;
-        const left = (window.screen.width - width) / 2;
-        const top = (window.screen.height - height) / 2;
+	private _openLoginPopup(): void {
+		const width = 1000;
+		const height = 700;
+		const left = (window.screen.width - width) / 2;
+		const top = (window.screen.height - height) / 2;
 
-        const baseUrl = SettingsService.getInstance().getBaseUrl();
-        const targetUrl = baseUrl || "/";
+		const baseUrl = SettingsService.getInstance().getBaseUrl();
+		const targetUrl = baseUrl || "/";
 
-        // Security: Defense in Depth - Ensure targetUrl is safe before opening
-        try {
-            if (targetUrl.startsWith("/")) {
-                if (targetUrl.startsWith("//")) {
-                    throw new Error("Protocol-relative URLs are not allowed");
-                }
-            } else {
-                const parsed = new URL(targetUrl);
-                if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-                    throw new Error("Unsafe Protocol");
-                }
-            }
-        } catch {
-            MessageBox.error(this._getText("unsafeBaseUrl"));
-            this._isLoginDialogOpen = false;
-            return;
-        }
+		// Security: Defense in Depth - Ensure targetUrl is safe before opening
+		try {
+			if (targetUrl.startsWith("/")) {
+				if (targetUrl.startsWith("//")) {
+					throw new Error("Protocol-relative URLs are not allowed");
+				}
+			} else {
+				const parsed = new URL(targetUrl);
+				if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+					throw new Error("Unsafe Protocol");
+				}
+			}
+		} catch {
+			MessageBox.error(this._getText("unsafeBaseUrl"));
+			this._isLoginDialogOpen = false;
+			return;
+		}
 
-        const performOpen = () => {
-            const popup = window.open(
-                targetUrl,
-                "agh_login",
-                `width=${width},height=${height},top=${top},left=${left},resizable,scrollbars,noopener,noreferrer`
-            );
+		const performOpen = () => {
+			const popup = window.open(
+				targetUrl,
+				"agh_login",
+				`width=${width},height=${height},top=${top},left=${left},resizable,scrollbars,noopener,noreferrer`
+			);
 
-            if (!popup) {
-                MessageBox.error(this._getText("popupBlocked"));
-                this._isLoginDialogOpen = false;
-                return;
-            }
+			if (!popup) {
+				MessageBox.error(this._getText("popupBlocked"));
+				this._isLoginDialogOpen = false;
+				return;
+			}
 
-            // Since we can't easily check auth status from another window due to CORS,
-            // we will poll the server for stats. If we get stats, auth is successful.
-            const pollAuthStatus = async () => {
-                if (popup.closed) {
-                    this._isLoginDialogOpen = false;
-                    return;
-                }
+			// Since we can't easily check auth status from another window due to CORS,
+			// we will poll the server for stats. If we get stats, auth is successful.
+			const pollAuthStatus = async () => {
+				if (popup.closed) {
+					this._isLoginDialogOpen = false;
+					return;
+				}
 
-                try {
-                    const response = await fetch(baseUrl ? `${baseUrl}/control/status` : "/control/status", {
-                        credentials: baseUrl ? "include" : "same-origin"
-                    });
+				try {
+					const response = await fetch(baseUrl ? `${baseUrl}/control/status` : "/control/status", {
+						credentials: baseUrl ? "include" : "same-origin"
+					});
 
-                    if (response.ok) {
-                        popup.close();
-                        this._isLoginDialogOpen = false;
-                        MessageToast.show(this._getText("loginSuccessful"));
-                        setTimeout(() => window.location.reload(), 1000);
-                        return;
-                    }
-                } catch {
-                    // Still unauthorized or net error, let polling continue
-                }
+					if (response.ok) {
+						popup.close();
+						this._isLoginDialogOpen = false;
+						MessageToast.show(this._getText("loginSuccessful"));
+						setTimeout(() => window.location.reload(), 1000);
+						return;
+					}
+				} catch {
+					// Still unauthorized or net error, let polling continue
+				}
 
-                // Schedule next poll only after the current one finishes
-                setTimeout(() => void pollAuthStatus(), 2000);
-            };
+				// Schedule next poll only after the current one finishes
+				setTimeout(() => void pollAuthStatus(), 2000);
+			};
 
-            void pollAuthStatus();
-        };
+			void pollAuthStatus();
+		};
 
-        if (this._isSafeUrl(targetUrl)) {
-            performOpen();
-        } else {
-            const safeTargetUrl = encodeXML(targetUrl.substring(0, 1000));
-            MessageBox.confirm(this._getText("externalUrlWarning", [safeTargetUrl]), {
-                onClose: (sAction: string | null) => {
-                    if (sAction === MessageBox.Action.OK) {
-                        performOpen();
-                    } else {
-                        this._isLoginDialogOpen = false;
-                    }
-                }
-            });
-        }
-    }
+		if (this._isSafeUrl(targetUrl)) {
+			performOpen();
+		} else {
+			const safeTargetUrl = encodeXML(targetUrl.substring(0, 1000));
+			MessageBox.confirm(this._getText("externalUrlWarning", [safeTargetUrl]), {
+				onClose: (sAction: string | null) => {
+					if (sAction === MessageBox.Action.OK) {
+						performOpen();
+					} else {
+						this._isLoginDialogOpen = false;
+					}
+				}
+			});
+		}
+	}
 
-    public async login(name: string, password: string): Promise<void> {
-        const baseUrl = SettingsService.getInstance().getBaseUrl();
-        const targetUrl = baseUrl || window.location.origin;
+	public async login(name: string, password: string): Promise<void> {
+		const baseUrl = SettingsService.getInstance().getBaseUrl();
+		const targetUrl = baseUrl || window.location.origin;
 
-        try {
-            // Note: If targetUrl is relative, URL constructor might fail unless a base is provided
-            // However, targetUrl is either absolute or starts with a valid protocol if not relative.
-            // If targetUrl comes from window.location.origin, it's absolute.
-            const parsedUrl = new URL(targetUrl, window.location.origin);
+		try {
+			// Note: If targetUrl is relative, URL constructor might fail unless a base is provided
+			// However, targetUrl is either absolute or starts with a valid protocol if not relative.
+			// If targetUrl comes from window.location.origin, it's absolute.
+			const parsedUrl = new URL(targetUrl, window.location.origin);
 
-            // Security Enhancement: Prevent sending plaintext credentials over unencrypted HTTP
-            // Allow localhost or private network IPs, but block remote HTTP connections.
-            if (parsedUrl.protocol === "http:" && !this._isSafeUrl(targetUrl)) {
-                 throw new Error("Security Policy: Cannot transmit credentials over unencrypted HTTP connection. Please use HTTPS or a local network address.");
-            }
-        } catch (error) {
-            // Re-throw the explicit security error if it occurred
-            if (error instanceof Error && error.message.includes("Security Policy")) {
-                throw error;
-            }
-            // URL parsing errors or _isSafeUrl errors are ignored, assuming the URL might be relative
-            // and handled correctly by fetch. But relative URLs inherit the secure status of the page.
-        }
+			// Security Enhancement: Prevent sending plaintext credentials over unencrypted HTTP
+			// Allow localhost or private network IPs, but block remote HTTP connections.
+			if (parsedUrl.protocol === "http:" && !this._isSafeUrl(targetUrl)) {
+				throw new Error(
+					"Security Policy: Cannot transmit credentials over unencrypted HTTP connection. Please use HTTPS or a local network address."
+				);
+			}
+		} catch (error) {
+			// Re-throw the explicit security error if it occurred
+			if (error instanceof Error && error.message.includes("Security Policy")) {
+				throw error;
+			}
+			// URL parsing errors or _isSafeUrl errors are ignored, assuming the URL might be relative
+			// and handled correctly by fetch. But relative URLs inherit the secure status of the page.
+		}
 
-        await this._request(Constants.ApiEndpoints.Login, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ name, password })
-        });
-    }
+		await this._request(Constants.ApiEndpoints.Login, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ name, password })
+		});
+	}
 
-    public async logout(): Promise<void> {
-        try {
-            await this._request(Constants.ApiEndpoints.Logout, {
-                method: "POST"
-            });
-        } catch (error) {
-            console.warn("Server logout failed, clearing local credentials anyway", (error as Error).message || "Unknown error");
-        } finally {
-            SettingsService.getInstance().clearCredentials();
-        }
-    }
+	public async logout(): Promise<void> {
+		try {
+			await this._request(Constants.ApiEndpoints.Logout, {
+				method: "POST"
+			});
+		} catch (error) {
+			console.warn(
+				"Server logout failed, clearing local credentials anyway",
+				(error as Error).message || "Unknown error"
+			);
+		} finally {
+			SettingsService.getInstance().clearCredentials();
+		}
+	}
 }

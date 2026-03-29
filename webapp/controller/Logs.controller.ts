@@ -16,7 +16,6 @@ import SettingsService from "../service/SettingsService";
 import GeminiService from "../service/GeminiService";
 import { LogEntry, AdvancedFilterRule } from "../model/AdGuardTypes";
 import ViewSettingsItem from "sap/m/ViewSettingsItem";
-import encodeXML from "sap/base/security/encodeXML";
 import { Constants } from "../model/Constants";
 import BaseController from "./BaseController";
 
@@ -117,7 +116,6 @@ export default class Logs extends BaseController {
 		void this.onRefreshLogs();
 	}
 
-
 	public async onRefreshLogs(bAppend: boolean = false): Promise<void> {
 		const view = this.getView();
 		if (!view) return;
@@ -157,7 +155,6 @@ export default class Logs extends BaseController {
 			if (len > 0) {
 				viewModel.setProperty(Constants.ModelProperties.Offset, offset + len);
 			}
-
 		} catch (error) {
 			this.showError(error);
 		} finally {
@@ -226,13 +223,15 @@ export default class Logs extends BaseController {
 
 		// 1. Search Query Filters
 		if (this._sSearchQuery && this._sSearchQuery.length > 0) {
-			aFilters.push(new Filter({
-				filters: [
-					new Filter(Constants.ColumnIds.QuestionName, FilterOperator.Contains, this._sSearchQuery),
-					new Filter(Constants.ColumnIds.Client, FilterOperator.Contains, this._sSearchQuery)
-				],
-				and: false
-			}));
+			aFilters.push(
+				new Filter({
+					filters: [
+						new Filter(Constants.ColumnIds.QuestionName, FilterOperator.Contains, this._sSearchQuery),
+						new Filter(Constants.ColumnIds.Client, FilterOperator.Contains, this._sSearchQuery)
+					],
+					and: false
+				})
+			);
 		}
 
 		// 2. View Settings Filters (Status)
@@ -272,8 +271,6 @@ export default class Logs extends BaseController {
 		const router = UIComponent.getRouterFor(this);
 		router.navTo(Constants.Routes.Dashboard);
 	}
-
-
 
 	public async onOpenViewSettings(): Promise<void> {
 		const dialog = await this._openDialog(Constants.Fragments.ViewSettingsDialog);
@@ -401,10 +398,10 @@ export default class Logs extends BaseController {
 
 	public formatInsights(text: string): string {
 		if (!text) return "";
-		let safeText = encodeXML(text);
-		safeText = safeText
-			.replace(BOLD_REGEX, "<strong>$1</strong>")
-			.replace(NEWLINE_REGEX, "<br/>");
+		// Manual escape of HTML characters to avoid over-encoding markdown markers by encodeXML
+		let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+		safeText = safeText.replace(BOLD_REGEX, "<strong>$1</strong>").replace(NEWLINE_REGEX, "<br/>");
 		return safeText;
 	}
 
@@ -467,7 +464,6 @@ export default class Logs extends BaseController {
 		const view = this.getView();
 		if (!view) return;
 		this.getControl<Dialog>("advancedFilterDialog").close();
-
 	}
 
 	public onCopyDomain(event: Event): void {
@@ -525,7 +521,8 @@ export default class Logs extends BaseController {
 				const reason = this.escapeCsvField(log.reason);
 				const filterId = this.escapeCsvField(log.filterId);
 				const rule = this.escapeCsvField(log.rule);
-				rowsArr[i] = `${time},${client},${domain},${type},${status},${blocked},${elapsed},${upstream},${reason},${filterId},${rule}`;
+				rowsArr[i] =
+					`${time},${client},${domain},${type},${status},${blocked},${elapsed},${upstream},${reason},${filterId},${rule}`;
 			}
 			const rows = rowsArr.join("\n");
 

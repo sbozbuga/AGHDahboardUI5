@@ -1,31 +1,43 @@
-<core:FragmentDefinition
-	xmlns="sap.m"
-	xmlns:core="sap.ui.core"
-	xmlns:l="sap.ui.layout"
-	xmlns:f="sap.ui.layout.form">
-	<Dialog
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form">
+	<dialog
 		id="advancedFilterDialog"
 		title="Advanced Filter"
 		contentWidth="600px"
 		resizable="true"
 		draggable="true"
-		initialFocus="btnAddCondition">
+		initialFocus="btnAddCondition"
+	>
 		<content>
-			<Table
+			<table
 				id="filterTable"
 				ariaLabelledBy="advancedFilterTitle"
 				items="{view>/advancedFilters}"
 				mode="None"
 				growing="false"
-				width="100%">
+				width="100%"
+			>
 				<noData>
-					<IllustratedMessage illustrationType="sapIllus-EmptyList" title="{i18n>noFilterConditions}" description="{i18n>noFilterConditionsDesc}" />
+					<IllustratedMessage
+						illustrationType="sapIllus-EmptyList"
+						title="{i18n>noFilterConditions}"
+						description="{i18n>noFilterConditionsDesc}"
+					/>
 				</noData>
 				<headerToolbar>
 					<OverflowToolbar>
-						<Title id="advancedFilterTitle" text="Conditions ({= ${view>/advancedFilters} ? ${view>/advancedFilters}.length : 0 })" level="H4"/>
-						<ToolbarSpacer/>
-						<Button id="btnAddCondition" icon="sap-icon://add" text="{i18n>addCondition}" press=".onAddFilterRow" type="Ghost"/>
+						<title
+							id="advancedFilterTitle"
+							text="Conditions ({= ${view>/advancedFilters} ? ${view>/advancedFilters}.length : 0 })"
+							level="H4"
+						/>
+						<ToolbarSpacer />
+						<button
+							id="btnAddCondition"
+							icon="sap-icon://add"
+							text="{i18n>addCondition}"
+							press=".onAddFilterRow"
+							type="Ghost"
+						/>
 					</OverflowToolbar>
 				</headerToolbar>
 				<columns>
@@ -69,17 +81,30 @@
 								<core:Item key="StartsWith" text="Starts With" />
 								<core:Item key="EndsWith" text="Ends With" />
 							</ComboBox>
-							<Input tooltip="{i18n>value}" value="{view>value}" width="100%" placeholder="{i18n>value}" submit=".onConfirmAdvancedFilter" maxLength="200" showClearIcon="true" />
-							<Button icon="sap-icon://delete" type="Transparent" press=".onRemoveFilterRow" tooltip="{i18n>removeCondition}" />
+							<input
+								tooltip="{i18n>value}"
+								value="{view>value}"
+								width="100%"
+								placeholder="{i18n>value}"
+								submit=".onConfirmAdvancedFilter"
+								maxlength="200"
+								showClearIcon="true"
+							/>
+							<button
+								icon="sap-icon://delete"
+								type="Transparent"
+								press=".onRemoveFilterRow"
+								tooltip="{i18n>removeCondition}"
+							/>
 						</cells>
 					</ColumnListItem>
 				</items>
-			</Table>
+			</table>
 		</content>
 		<buttons>
-			<Button text="{i18n>clearAllAction}" press=".onClearAdvancedFilters" type="Transparent" />
-			<Button text="{i18n>applyAction}" press=".onConfirmAdvancedFilter" type="Emphasized" />
-			<Button text="{i18n>cancelAction}" press=".onCancelAdvancedFilter" />
+			<button text="{i18n>clearAllAction}" press=".onClearAdvancedFilters" type="Transparent" />
+			<button text="{i18n>applyAction}" press=".onConfirmAdvancedFilter" type="Emphasized" />
+			<button text="{i18n>cancelAction}" press=".onCancelAdvancedFilter" />
 		</buttons>
-	</Dialog>
+	</dialog>
 </core:FragmentDefinition>

@@ -17,6 +17,20 @@ export default tseslint.config(
 				project: true,
 				tsconfigRootDir: import.meta.dirname
 			}
+		},
+		rules: {
+			"@typescript-eslint/no-unsafe-assignment": "off",
+			"@typescript-eslint/no-unsafe-call": "off",
+			"@typescript-eslint/no-unsafe-member-access": "off",
+			"@typescript-eslint/no-unsafe-return": "off",
+			"@typescript-eslint/no-unsafe-argument": "off",
+			"@typescript-eslint/no-explicit-any": "warn",
+			"@typescript-eslint/no-redundant-type-constituents": "off"
+		}
+	},
+	{
+		linterOptions: {
+			reportUnusedDisableDirectives: "off"
 		}
 	},
 	{

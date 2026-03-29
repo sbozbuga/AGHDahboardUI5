@@ -2,42 +2,42 @@
 
 /* Floating Copy Button on Dashboard Cards */
 .hoverCopyCard {
-    position: relative;
+	position: relative;
 }
 
 .floatingCopyBtn {
-    position: absolute !important;
-    top: 0rem;
-    right: 0rem;
-    z-index: 10;
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
+	position: absolute !important;
+	top: 0rem;
+	right: 0rem;
+	z-index: 10;
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
 }
 
 /* Show button on hover or focus */
 .hoverCopyCard:hover .floatingCopyBtn,
 .floatingCopyBtn:focus {
-    opacity: 1;
+	opacity: 1;
 }
 
 /* Ensure individual copy buttons in tables are aligned properly */
 .copyButton {
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
 }
 
 /* Show row copy button on hover */
 .sapMListTblRow:hover .copyButton,
 .copyButton:focus {
-    opacity: 1;
+	opacity: 1;
 }
 
 /* Always show on touch devices (optional, but good practice if class added by UI5) */
 .sap-touch .copyButton {
-    opacity: 1;
+	opacity: 1;
 }
 
 /* Ensure floating copy buttons are always visible on touch devices */
 .sap-touch .floatingCopyBtn {
-    opacity: 1;
+	opacity: 1;
 }
