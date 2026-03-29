@@ -65,6 +65,7 @@ export interface RawAdGuardStats {
 	top_blocked_domains: Record<string, number | string>[];
 	top_clients: Record<string, number | string>[];
 	top_filters?: Record<string, number | string>[];
+	top_blocked_filters?: Record<string, number | string>[];
 }
 
 export interface AdvancedFilterRule {

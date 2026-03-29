@@ -50,7 +50,8 @@ export default class StatsService extends BaseApiService {
 		const filteringService = FilteringService.getInstance();
 		await filteringService.getFilters();
 
-		const topFilters = this.transformList(rawData.top_filters || [], "id", StatsService.TOP_LIST_LIMIT);
+		const rawTopFilters = rawData.top_filters || rawData.top_blocked_filters || [];
+		const topFilters = this.transformList(rawTopFilters, "id", StatsService.TOP_LIST_LIMIT);
 		// Resolve names for filters
 		topFilters.forEach((f) => {
 			const filterId = Number(f.name);
@@ -200,7 +201,13 @@ export default class StatsService extends BaseApiService {
 				entry = { name: "Unknown", count: 0 };
 			} else {
 				const obj = item as Record<string, unknown>;
-				const cnt = typeof obj.count === "number" ? obj.count : Number(obj.count) || 0;
+				// Try common count property names
+				const cnt =
+					typeof obj.count === "number"
+						? obj.count
+						: typeof obj.value === "number"
+							? obj.value
+							: Number(obj.count) || 0;
 
 				const preferredVal = obj[preferredKey];
 				if (typeof preferredVal === "string" && preferredVal) {
