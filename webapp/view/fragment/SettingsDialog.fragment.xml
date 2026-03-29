@@ -46,7 +46,12 @@
 					<core:Item key="{key}" text="{text}" />
 				</Select>
 
-				<Label text="{i18n>dashboardScanDepth}" labelFor="scanDepthInput" class="sapUiSmallMarginTop" />
+				<Label
+					id="scanDepthLabel"
+					text="{i18n>dashboardScanDepth}"
+					labelFor="scanDepthInput"
+					class="sapUiSmallMarginTop"
+				/>
 				<StepInput
 					id="scanDepthInput"
 					value="{/scanDepth}"
@@ -54,6 +59,7 @@
 					max="5000"
 					step="500"
 					width="100%"
+					ariaLabelledBy="scanDepthLabel"
 					ariaDescribedBy="scanDepthHelpText"
 				/>
 				<Text id="scanDepthHelpText" text="{i18n>scanDepthHelpText}" class="sapUiTinyMarginTop" />
