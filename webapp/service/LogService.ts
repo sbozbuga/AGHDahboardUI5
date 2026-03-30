@@ -2,6 +2,7 @@ import BaseApiService from "./BaseApiService";
 import { AdGuardData, RawAdGuardData, LogEntry } from "../model/AdGuardTypes";
 import { Constants } from "../model/Constants";
 import FilteringService from "./FilteringService";
+import ClientService from "./ClientService";
 
 /**
  * Service to fetch, handle pagination, and normalize raw AdGuard logs
@@ -30,8 +31,9 @@ export default class LogService extends BaseApiService {
 		const processedList: LogEntry[] = [];
 
 		const filteringService = FilteringService.getInstance();
-		// Pre-load filters if we need mapping for blocked queries
-		await filteringService.getFilters();
+		const clientService = ClientService.getInstance();
+		// Pre-load filters and clients if we need mapping for logs
+		await Promise.all([filteringService.getFilters(), clientService.getClients()]);
 
 		for (const rawEntry of rawList) {
 			const elapsedMs = Number(rawEntry.elapsedMs) || 0;

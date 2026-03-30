@@ -57,24 +57,26 @@ export default class ClientService extends BaseApiService {
 			// Map configured clients
 			this._clients.forEach((c) => {
 				c.ids.forEach((id) => {
-					this._clientMap.set(id, c.name);
+					const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+					this._clientMap.set(normalizedId, c.name);
 				});
 			});
+
+			// Map DHCP leases
+			await this._loadDHCPClients();
 
 			// Map auto-detected clients if available
 			if (data.auto_clients) {
 				data.auto_clients.forEach((c) => {
 					c.ids.forEach((id) => {
-						// Don't overwrite configured clients
-						if (!this._clientMap.has(id)) {
-							this._clientMap.set(id, c.name);
+						const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+						// Don't overwrite configured clients or DHCP leases
+						if (!this._clientMap.has(normalizedId)) {
+							this._clientMap.set(normalizedId, c.name);
 						}
 					});
 				});
 			}
-
-			// Map DHCP leases
-			await this._loadDHCPClients();
 
 			this._lastFetchTime = now;
 			return this._clients;
@@ -99,7 +101,8 @@ export default class ClientService extends BaseApiService {
 			if (parts.length >= 2) {
 				const id = parts[0];
 				const name = parts.slice(1).join(" ");
-				this._clientMap.set(id, name);
+				const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+				this._clientMap.set(normalizedId, name);
 			}
 		}
 	}
@@ -108,18 +111,27 @@ export default class ClientService extends BaseApiService {
 		try {
 			const dhcpData = await this._request<RawDHCPStatus>(Constants.ApiEndpoints.DHCPStatus);
 			if (dhcpData && dhcpData.enabled) {
-				const allLeases = [...(dhcpData.leases || []), ...(dhcpData.static_leases || [])];
+				const v4Leases = (dhcpData as any).v4?.leases || [];
+				const v4Static = (dhcpData as any).v4?.static_leases || [];
+				const allLeases = [...(dhcpData.leases || []), ...(dhcpData.static_leases || []), ...v4Leases, ...v4Static];
+				
+				console.log(`DHCP: Found ${allLeases.length} total leases`);
+
 				allLeases.forEach((lease) => {
 					if (lease.hostname) {
+						const normalizedIp = lease.ip.toLowerCase();
+						const normalizedMac = lease.mac.toLowerCase();
 						// Map IP and MAC to hostname if not already present
-						if (!this._clientMap.has(lease.ip)) {
-							this._clientMap.set(lease.ip, lease.hostname);
+						if (!this._clientMap.has(normalizedIp)) {
+							this._clientMap.set(normalizedIp, lease.hostname);
 						}
-						if (!this._clientMap.has(lease.mac)) {
-							this._clientMap.set(lease.mac, lease.hostname);
+						if (!this._clientMap.has(normalizedMac)) {
+							this._clientMap.set(normalizedMac, lease.hostname);
 						}
 					}
 				});
+			} else {
+				console.log("DHCP: Not enabled or status returned disabled.");
 			}
 		} catch (error) {
 			// DHCP might not be enabled or supported, ignore
@@ -132,14 +144,18 @@ export default class ClientService extends BaseApiService {
 	 * Returns the ID itself if no name is found.
 	 */
 	public getName(id: string): string {
-		return this._clientMap.get(id) || id;
+		if (!id) return "";
+		const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+		return this._clientMap.get(normalizedId) || id;
 	}
 
 	/**
 	 * Returns true if the client name is known (resolved).
 	 */
 	public isResolved(id: string): boolean {
-		return this._clientMap.has(id);
+		if (!id) return false;
+		const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+		return this._clientMap.has(normalizedId);
 	}
 
 	public clearCache(): void {

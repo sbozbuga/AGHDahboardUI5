@@ -4,6 +4,7 @@ import AuthService from "../service/AuthService";
 import StatsService from "../service/StatsService";
 import SettingsService from "../service/SettingsService";
 import LogService from "../service/LogService";
+import ClientService from "../service/ClientService";
 // formatter imported in BaseController
 import MessageBox from "sap/m/MessageBox";
 import Button from "sap/m/Button";
@@ -95,6 +96,8 @@ export default class Dashboard extends BaseController {
 	public async onManualRefresh(): Promise<void> {
 		// Reset polling timer to avoid double fetch
 		this.stopPolling();
+		// Clear client cache to force re-fetch of names/DHCP leases
+		ClientService.getInstance().clearCache();
 		await this.onRefreshStats(false);
 		this.startPolling();
 	}
