@@ -73,3 +73,17 @@ export interface AdvancedFilterRule {
 	operator: string;
 	value: string;
 }
+
+export interface DHCPLease {
+	mac: string;
+	ip: string;
+	hostname: string;
+	expires: string;
+}
+
+export interface RawDHCPStatus {
+	enabled: boolean;
+	interface_name: string;
+	leases: DHCPLease[];
+	static_leases: DHCPLease[];
+}

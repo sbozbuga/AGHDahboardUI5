@@ -1,6 +1,7 @@
 import BaseApiService from "./BaseApiService";
 import { Constants } from "../model/Constants";
 import SettingsService from "./SettingsService";
+import { RawDHCPStatus } from "../model/AdGuardTypes";
 
 export interface AdGuardClient {
 	name: string;
@@ -72,6 +73,9 @@ export default class ClientService extends BaseApiService {
 				});
 			}
 
+			// Map DHCP leases
+			await this._loadDHCPClients();
+
 			this._lastFetchTime = now;
 			return this._clients;
 		} catch (error) {
@@ -97,6 +101,29 @@ export default class ClientService extends BaseApiService {
 				const name = parts.slice(1).join(" ");
 				this._clientMap.set(id, name);
 			}
+		}
+	}
+
+	private async _loadDHCPClients(): Promise<void> {
+		try {
+			const dhcpData = await this._request<RawDHCPStatus>(Constants.ApiEndpoints.DHCPStatus);
+			if (dhcpData && dhcpData.enabled) {
+				const allLeases = [...(dhcpData.leases || []), ...(dhcpData.static_leases || [])];
+				allLeases.forEach((lease) => {
+					if (lease.hostname) {
+						// Map IP and MAC to hostname if not already present
+						if (!this._clientMap.has(lease.ip)) {
+							this._clientMap.set(lease.ip, lease.hostname);
+						}
+						if (!this._clientMap.has(lease.mac)) {
+							this._clientMap.set(lease.mac, lease.hostname);
+						}
+					}
+				});
+			}
+		} catch (error) {
+			// DHCP might not be enabled or supported, ignore
+			console.warn("Failed to fetch DHCP leases", (error as Error).message || "Unknown error");
 		}
 	}
 

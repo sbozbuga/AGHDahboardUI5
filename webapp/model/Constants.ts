@@ -37,7 +37,8 @@ export const Constants = {
 		Stats: "/control/stats",
 		QueryLog: "/control/querylog",
 		FilteringStatus: "/control/filtering/status",
-		Clients: "/control/clients"
+		Clients: "/control/clients",
+		DHCPStatus: "/control/dhcp/status"
 	},
 	LogStatus: {
 		Blocked: "Blocked",
