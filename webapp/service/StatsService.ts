@@ -75,6 +75,7 @@ export default class StatsService extends BaseApiService {
 
 		const topClients = this.transformList(rawData.top_clients, "ip", StatsService.TOP_LIST_LIMIT);
 		topClients.forEach((c) => {
+			c.ip = c.name; // Preserve IP
 			c.name = clientService.getName(c.name);
 		});
 
@@ -231,6 +232,7 @@ export default class StatsService extends BaseApiService {
 				.slice(0, StatsService.TOP_LIST_LIMIT)
 				.map(([ip, count]) => ({
 					name: clientService.getName(ip),
+					ip,
 					count
 				}));
 

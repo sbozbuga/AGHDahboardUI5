@@ -244,7 +244,7 @@ export default class Dashboard extends BaseController {
 		const entry = context.getObject() as StatsEntry;
 
 		this.navToLogs({
-			search: entry.name
+			search: (entry as any).ip || entry.name
 		});
 	}
 
@@ -335,7 +335,7 @@ export default class Dashboard extends BaseController {
 		if (!context) return;
 
 		// Top Clients uses 'name' for IP
-		const client = context.getProperty("name") as string;
+		const client = (context.getProperty("ip") || context.getProperty("name")) as string;
 
 		if (client) {
 			this.copyToClipboard(this.escapeCsvField(client), this.getText("clientCopied"), source);
