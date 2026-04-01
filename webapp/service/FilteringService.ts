@@ -40,7 +40,8 @@ export default class FilteringService extends BaseApiService {
 			this._loaded = true;
 			return this._filters;
 		} catch (error) {
-			console.error("Failed to fetch filters", error);
+			// Security Enhancement: Prevent data leakage in browser console.
+			console.error("Failed to fetch filters", (error as Error).message || "Unknown error");
 			return [];
 		}
 	}

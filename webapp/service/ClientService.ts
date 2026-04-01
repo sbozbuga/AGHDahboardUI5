@@ -82,6 +82,7 @@ export default class ClientService extends BaseApiService {
 			return this._clients;
 		} catch (error) {
 			this._loadCustomClients(); // Still load local even if API fails
+			// Security Enhancement: Prevent data leakage in browser console.
 			console.error("Failed to fetch clients", (error as Error).message || "Unknown error");
 			return [];
 		}

@@ -167,6 +167,7 @@ export default class StatsService extends BaseApiService {
 
 			return top10;
 		} catch (error) {
+			// Security Enhancement: Prevent data leakage in browser console.
 			console.error("Failed to fetch slowest queries", (error as Error).message || "Unknown error");
 			return [];
 		}
@@ -256,7 +257,8 @@ export default class StatsService extends BaseApiService {
 				lastUpdated: new Date()
 			};
 		} catch (error) {
-			console.error("Failed to aggregate stats from logs", error);
+			// Security Enhancement: Prevent data leakage in browser console.
+			console.error("Failed to aggregate stats from logs", (error as Error).message || "Unknown error");
 			throw error;
 		}
 	}
@@ -321,7 +323,8 @@ export default class StatsService extends BaseApiService {
 			// Sort by count descending and limit
 			return result.sort((a, b) => b.count - a.count).slice(0, StatsService.TOP_LIST_LIMIT);
 		} catch (error) {
-			console.error("Failed to aggregate top filters from logs", error);
+			// Security Enhancement: Prevent data leakage in browser console.
+			console.error("Failed to aggregate top filters from logs", (error as Error).message || "Unknown error");
 			return [];
 		}
 	}

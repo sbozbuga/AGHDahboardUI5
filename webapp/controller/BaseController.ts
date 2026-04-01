@@ -272,6 +272,7 @@ export default class BaseController extends Controller {
 				MessageBox.error(this.getText("clipboardUnavailable"));
 			}
 		} catch (err) {
+			// Security Enhancement: Prevent data leakage in browser console.
 			console.error("Fallback copy failed", (err as Error).message || "Unknown error");
 			MessageBox.error(this.getText("clipboardUnavailable"));
 		}
