@@ -65,19 +65,21 @@ export default class StatsService extends BaseApiService {
 			topFilters = await this._getTopFiltersFromLogs();
 		} else {
 			// Resolve names for filters from API (they usually only have IDs)
-			topFilters.forEach((f) => {
+			// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
+			for (const f of topFilters) {
 				const filterId = Number(f.name);
 				if (!isNaN(filterId)) {
 					f.name = filteringService.getFilterNameSync(filterId) || `Filter ${filterId}`;
 				}
-			});
+			}
 		}
 
 		const topClients = this.transformList(rawData.top_clients, "ip", StatsService.TOP_LIST_LIMIT);
-		topClients.forEach((c) => {
+		// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
+		for (const c of topClients) {
 			c.ip = c.name; // Preserve IP
 			c.name = clientService.getName(c.name);
-		});
+		}
 
 		return {
 			num_dns_queries: rawData.num_dns_queries,
