@@ -413,7 +413,7 @@
 								icon="sap-icon://copy"
 								type="Transparent"
 								press=".onCopySlowestQueries"
-								tooltip="{parts:[{path:'i18n>copyAllDomains'}, {path:'/slowest_queries', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
+								tooltip="{parts:[{path:'i18n>copyAllSlowestQueries'}, {path:'/slowest_queries', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 								class="floatingCopyBtn"
 							/>
 							<Table
