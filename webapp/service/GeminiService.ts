@@ -122,6 +122,7 @@ export default class GeminiService {
 		} catch (error) {
 			const msg = error instanceof Error ? error.message : String(error);
 			const safeMsg = this._redactApiKey(msg, apiKey);
+			// Security Enhancement: Prevent data leakage in browser console.
 			console.error("Gemini API Error:", safeMsg);
 			// eslint-disable-next-line preserve-caught-error
 			throw new Error(this._getText("failedToGenerateInsights"), { cause: { message: safeMsg } });
@@ -338,6 +339,7 @@ export default class GeminiService {
 		} catch (error) {
 			const msg = error instanceof Error ? error.message : String(error);
 			const safeMsg = this._redactApiKey(msg, apiKey);
+			// Security Enhancement: Prevent data leakage in browser console.
 			console.error("Failed to fetch models", safeMsg);
 			return [];
 		} finally {

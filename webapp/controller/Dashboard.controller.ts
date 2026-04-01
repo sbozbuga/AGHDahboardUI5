@@ -218,6 +218,7 @@ export default class Dashboard extends BaseController {
 			if (!silent) {
 				this.showError(error);
 			}
+			// Security Enhancement: Prevent data leakage in browser console.
 			console.error("Failed to fetch stats", (error as Error).message || "Unknown error");
 		} finally {
 			if (!silent) {

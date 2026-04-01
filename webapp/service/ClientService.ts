@@ -57,7 +57,7 @@ export default class ClientService extends BaseApiService {
 			// Map configured clients
 			this._clients.forEach((c) => {
 				c.ids.forEach((id) => {
-					const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+					const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 					this._clientMap.set(normalizedId, c.name);
 				});
 			});
@@ -69,7 +69,7 @@ export default class ClientService extends BaseApiService {
 			if (data.auto_clients) {
 				data.auto_clients.forEach((c) => {
 					c.ids.forEach((id) => {
-						const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+						const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 						// Don't overwrite configured clients or DHCP leases
 						if (!this._clientMap.has(normalizedId)) {
 							this._clientMap.set(normalizedId, c.name);
@@ -82,6 +82,7 @@ export default class ClientService extends BaseApiService {
 			return this._clients;
 		} catch (error) {
 			this._loadCustomClients(); // Still load local even if API fails
+			// Security Enhancement: Prevent data leakage in browser console.
 			console.error("Failed to fetch clients", (error as Error).message || "Unknown error");
 			return [];
 		}
@@ -101,7 +102,7 @@ export default class ClientService extends BaseApiService {
 			if (parts.length >= 2) {
 				const id = parts[0];
 				const name = parts.slice(1).join(" ");
-				const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+				const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 				this._clientMap.set(normalizedId, name);
 			}
 		}
@@ -145,7 +146,7 @@ export default class ClientService extends BaseApiService {
 	 */
 	public getName(id: string): string {
 		if (!id) return "";
-		const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+		const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 		return this._clientMap.get(normalizedId) || id;
 	}
 
@@ -154,7 +155,7 @@ export default class ClientService extends BaseApiService {
 	 */
 	public isResolved(id: string): boolean {
 		if (!id) return false;
-		const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+		const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 		return this._clientMap.has(normalizedId);
 	}
 
