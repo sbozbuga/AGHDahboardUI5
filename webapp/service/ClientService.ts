@@ -55,27 +55,29 @@ export default class ClientService extends BaseApiService {
 			this._clients = data.clients || [];
 
 			// Map configured clients
-			this._clients.forEach((c) => {
-				c.ids.forEach((id) => {
-					const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+			// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
+			for (const c of this._clients) {
+				for (const id of c.ids) {
+					const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 					this._clientMap.set(normalizedId, c.name);
-				});
-			});
+				}
+			}
 
 			// Map DHCP leases
 			await this._loadDHCPClients();
 
 			// Map auto-detected clients if available
 			if (data.auto_clients) {
-				data.auto_clients.forEach((c) => {
-					c.ids.forEach((id) => {
-						const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+				// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
+				for (const c of data.auto_clients) {
+					for (const id of c.ids) {
+						const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 						// Don't overwrite configured clients or DHCP leases
 						if (!this._clientMap.has(normalizedId)) {
 							this._clientMap.set(normalizedId, c.name);
 						}
-					});
-				});
+					}
+				}
 			}
 
 			this._lastFetchTime = now;
@@ -101,7 +103,7 @@ export default class ClientService extends BaseApiService {
 			if (parts.length >= 2) {
 				const id = parts[0];
 				const name = parts.slice(1).join(" ");
-				const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+				const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 				this._clientMap.set(normalizedId, name);
 			}
 		}
@@ -117,7 +119,8 @@ export default class ClientService extends BaseApiService {
 				
 				console.log(`DHCP: Found ${allLeases.length} total leases`);
 
-				allLeases.forEach((lease) => {
+				// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
+				for (const lease of allLeases) {
 					if (lease.hostname) {
 						const normalizedIp = lease.ip.toLowerCase();
 						const normalizedMac = lease.mac.toLowerCase();
@@ -129,7 +132,7 @@ export default class ClientService extends BaseApiService {
 							this._clientMap.set(normalizedMac, lease.hostname);
 						}
 					}
-				});
+				}
 			} else {
 				console.log("DHCP: Not enabled or status returned disabled.");
 			}
@@ -145,7 +148,7 @@ export default class ClientService extends BaseApiService {
 	 */
 	public getName(id: string): string {
 		if (!id) return "";
-		const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+		const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 		return this._clientMap.get(normalizedId) || id;
 	}
 
@@ -154,7 +157,7 @@ export default class ClientService extends BaseApiService {
 	 */
 	public isResolved(id: string): boolean {
 		if (!id) return false;
-		const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+		const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 		return this._clientMap.has(normalizedId);
 	}
 

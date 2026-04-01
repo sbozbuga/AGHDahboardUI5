@@ -36,7 +36,10 @@ export default class FilteringService extends BaseApiService {
 			const data = await this._request<{ filters: Filter[] }>(Constants.ApiEndpoints.FilteringStatus);
 			this._filters = data.filters || [];
 			this._filterCache.clear();
-			this._filters.forEach((f) => this._filterCache.set(f.id, f.name));
+			// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
+			for (const f of this._filters) {
+				this._filterCache.set(f.id, f.name);
+			}
 			this._loaded = true;
 			return this._filters;
 		} catch (error) {
