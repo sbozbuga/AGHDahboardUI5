@@ -244,7 +244,7 @@ export default class Dashboard extends BaseController {
 		const entry = context.getObject() as StatsEntry;
 
 		this.navToLogs({
-			search: (entry as any).ip || entry.name
+			search: (entry as { ip?: string }).ip || entry.name
 		});
 	}
 

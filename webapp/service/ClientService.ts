@@ -57,7 +57,7 @@ export default class ClientService extends BaseApiService {
 			// Map configured clients
 			this._clients.forEach((c) => {
 				c.ids.forEach((id) => {
-					const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+					const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 					this._clientMap.set(normalizedId, c.name);
 				});
 			});
@@ -69,7 +69,7 @@ export default class ClientService extends BaseApiService {
 			if (data.auto_clients) {
 				data.auto_clients.forEach((c) => {
 					c.ids.forEach((id) => {
-						const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+						const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 						// Don't overwrite configured clients or DHCP leases
 						if (!this._clientMap.has(normalizedId)) {
 							this._clientMap.set(normalizedId, c.name);
@@ -101,7 +101,7 @@ export default class ClientService extends BaseApiService {
 			if (parts.length >= 2) {
 				const id = parts[0];
 				const name = parts.slice(1).join(" ");
-				const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+				const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 				this._clientMap.set(normalizedId, name);
 			}
 		}
@@ -111,9 +111,9 @@ export default class ClientService extends BaseApiService {
 		try {
 			const dhcpData = await this._request<RawDHCPStatus>(Constants.ApiEndpoints.DHCPStatus);
 			if (dhcpData && dhcpData.enabled) {
-				const v4Leases = (dhcpData as any).v4?.leases || [];
-				const v4Static = (dhcpData as any).v4?.static_leases || [];
-				const allLeases = [...(dhcpData.leases || []), ...(dhcpData.static_leases || []), ...v4Leases, ...v4Static];
+				const v4Leases = (dhcpData as { v4?: { leases: unknown[] } }).v4?.leases || [];
+				const v4Static = (dhcpData as { v4?: { static_leases: unknown[] } }).v4?.static_leases || [];
+				const allLeases = [...(dhcpData.leases || []), ...(dhcpData.static_leases || []), ...v4Leases, ...v4Static] as { hostname?: string; ip: string; mac: string }[];
 				
 				console.log(`DHCP: Found ${allLeases.length} total leases`);
 
@@ -145,7 +145,7 @@ export default class ClientService extends BaseApiService {
 	 */
 	public getName(id: string): string {
 		if (!id) return "";
-		const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+		const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 		return this._clientMap.get(normalizedId) || id;
 	}
 
@@ -154,7 +154,7 @@ export default class ClientService extends BaseApiService {
 	 */
 	public isResolved(id: string): boolean {
 		if (!id) return false;
-		const normalizedId = id.replace(/[\[\]]/g, "").toLowerCase();
+		const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
 		return this._clientMap.has(normalizedId);
 	}
 
