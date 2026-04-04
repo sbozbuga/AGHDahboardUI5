@@ -41,7 +41,7 @@
     "playwright": "^1.58.2",
     "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2",
+    "typescript": "^6.0.2",
     "typescript-eslint": "^8.57.2",
     "ui5-middleware-livereload": "^3.3.0",
     "ui5-middleware-simpleproxy": "^3.7.0",
