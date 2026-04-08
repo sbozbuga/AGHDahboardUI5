@@ -56,8 +56,9 @@
 					growing="true"
 					showExceededText="true"
 					maxLength="2000"
+					ariaDescribedBy="customClientsHelpText"
 				/>
-				<Text text="{i18n>customClientsHelpText}" class="sapUiTinyMarginTop" />
+				<Text id="customClientsHelpText" text="{i18n>customClientsHelpText}" class="sapUiTinyMarginTop" />
 
 				<Label text="System Context (Optional)" labelFor="contextInput" class="sapUiSmallMarginTop" />
 				<TextArea

@@ -195,10 +195,15 @@ export default class StatsService extends BaseApiService {
 			const clients = new Map<string, number>();
 			const filters = new Map<number, number>();
 
+			// Optimization: Extract primitive time values to avoid property access in the loop
+			const startTimeMs = startTime ? startTime.getTime() : undefined;
+			const endTimeMs = endTime ? endTime.getTime() : undefined;
+
 			for (const e of data.data) {
-				const logTime = new Date(e.time);
-				if (startTime && logTime < startTime) continue;
-				if (endTime && logTime > endTime) continue;
+				// Optimization: Date.parse is significantly faster than new Date() for ISO strings
+				const logTimeMs = Date.parse(e.time);
+				if (startTimeMs && logTimeMs < startTimeMs) continue;
+				if (endTimeMs && logTimeMs > endTimeMs) continue;
 
 				total++;
 				const isBlocked = !!(e.filterId && e.filterId > 0) || e.reason === "FilteredBlockedService";
@@ -220,32 +225,45 @@ export default class StatsService extends BaseApiService {
 				totalProcessingTime += procTime;
 			}
 
-			const topDomains = Array.from(domains.entries())
-				.sort((a, b) => b[1] - a[1])
-				.slice(0, StatsService.TOP_LIST_LIMIT)
-				.map(([name, count]) => ({ name, count }));
+			const mapToTopK = (map: Map<string | number, number>, k: number): [string | number, number][] => {
+				const topK: [string | number, number][] = [];
+				for (const [key, val] of map) {
+					if (k > 0 && topK.length === k && val <= topK[k - 1][1]) continue;
+					let i = 0;
+					while (i < topK.length && val <= topK[i][1]) i++;
+					if (i < k) {
+						topK.splice(i, 0, [key, val]);
+						if (topK.length > k) topK.pop();
+					}
+				}
+				return topK;
+			};
 
-			const topBlockedDomains = Array.from(blockedDomains.entries())
-				.sort((a, b) => b[1] - a[1])
-				.slice(0, StatsService.TOP_LIST_LIMIT)
-				.map(([name, count]) => ({ name, count }));
+			const topDomainsList = mapToTopK(domains, StatsService.TOP_LIST_LIMIT);
+			const topDomains = new Array(topDomainsList.length) as StatsEntry[];
+			for (let i = 0; i < topDomainsList.length; i++) {
+				topDomains[i] = { name: topDomainsList[i][0] as string, count: topDomainsList[i][1] };
+			}
 
-			const topClients = Array.from(clients.entries())
-				.sort((a, b) => b[1] - a[1])
-				.slice(0, StatsService.TOP_LIST_LIMIT)
-				.map(([ip, count]) => ({
-					name: clientService.getName(ip),
-					ip,
-					count
-				}));
+			const topBlockedDomainsList = mapToTopK(blockedDomains, StatsService.TOP_LIST_LIMIT);
+			const topBlockedDomains = new Array(topBlockedDomainsList.length) as StatsEntry[];
+			for (let i = 0; i < topBlockedDomainsList.length; i++) {
+				topBlockedDomains[i] = { name: topBlockedDomainsList[i][0] as string, count: topBlockedDomainsList[i][1] };
+			}
 
-			const topFilters = Array.from(filters.entries())
-				.sort((a, b) => b[1] - a[1])
-				.slice(0, StatsService.TOP_LIST_LIMIT)
-				.map(([id, count]) => ({
-					name: filteringService.getFilterNameSync(id) || `Filter ${id}`,
-					count
-				}));
+			const topClientsList = mapToTopK(clients, StatsService.TOP_LIST_LIMIT);
+			const topClients = new Array(topClientsList.length) as StatsEntry[];
+			for (let i = 0; i < topClientsList.length; i++) {
+				const ip = topClientsList[i][0] as string;
+				topClients[i] = { name: clientService.getName(ip), ip, count: topClientsList[i][1] };
+			}
+
+			const topFiltersList = mapToTopK(filters, StatsService.TOP_LIST_LIMIT);
+			const topFilters = new Array(topFiltersList.length) as StatsEntry[];
+			for (let i = 0; i < topFiltersList.length; i++) {
+				const id = topFiltersList[i][0] as number;
+				topFilters[i] = { name: filteringService.getFilterNameSync(id) || `Filter ${id}`, count: topFiltersList[i][1] };
+			}
 
 			return {
 				num_dns_queries: total,
