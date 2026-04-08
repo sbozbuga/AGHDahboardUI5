@@ -2,22 +2,27 @@
   "compilerOptions": {
     "target": "es2023",
     "module": "es2022",
-    "moduleResolution": "Bundler",
-    "ignoreDeprecations": "5.0",
+    "moduleResolution": "Node",
+    "ignoreDeprecations": "6.0",
     "skipLibCheck": true,
     "allowJs": true,
     "strict": true,
     "strictPropertyInitialization": false,
-    "rootDir": "./webapp",
+    "rootDir": ".",
+    "baseUrl": "./",
+    "types": [
+      "openui5",
+      "node"
+    ],
     "paths": {
       "ui5/aghd/*": [
-        "./webapp/*"
+        "webapp/*"
       ],
       "unit/*": [
-        "./webapp/test/unit/*"
+        "webapp/test/unit/*"
       ],
       "integration/*": [
-        "./webapp/test/integration/*"
+        "webapp/test/integration/*"
       ]
     },
     "composite": true
