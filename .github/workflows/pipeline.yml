@@ -19,10 +19,9 @@ jobs:
         uses: actions/setup-node@v6.3.0
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Health Check (Format, Lint, UI5 Lint, Typecheck)
         run: npm run health
@@ -53,10 +52,9 @@ jobs:
         uses: actions/setup-node@v6.3.0
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build Optimized App
         run: npm run build:opt
