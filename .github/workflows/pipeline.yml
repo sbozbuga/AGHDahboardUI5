@@ -28,7 +28,6 @@ jobs:
 
       - name: Run Unit Tests
         run: npm run test
-        # Note: Depending on your local browser setup, test-ui5 may need additional configuration for headless execution in CI.
 
   build:
     name: Build
