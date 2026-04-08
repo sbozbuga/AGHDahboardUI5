@@ -116,8 +116,12 @@ export default class ClientService extends BaseApiService {
 			if (dhcpData && dhcpData.enabled) {
 				const v4Leases = (dhcpData as { v4?: { leases: unknown[] } }).v4?.leases || [];
 				const v4Static = (dhcpData as { v4?: { static_leases: unknown[] } }).v4?.static_leases || [];
-				const allLeases = [...(dhcpData.leases || []), ...(dhcpData.static_leases || []), ...v4Leases, ...v4Static] as { hostname?: string; ip: string; mac: string }[];
-				
+				const allLeases = [...(dhcpData.leases || []), ...(dhcpData.static_leases || []), ...v4Leases, ...v4Static] as {
+					hostname?: string;
+					ip: string;
+					mac: string;
+				}[];
+
 				console.log(`DHCP: Found ${allLeases.length} total leases`);
 
 				// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
