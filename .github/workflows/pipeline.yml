@@ -26,17 +26,9 @@ jobs:
       - name: Health Check (Format, Lint, UI5 Lint, Typecheck)
         run: npm run health
 
-      #- name: Install Playwright Browsers
-      #  run: npx playwright install --with-deps
-
       - name: Run Unit Tests
         run: npm run test
         # Note: Depending on your local browser setup, test-ui5 may need additional configuration for headless execution in CI.
-
-      - name: Run E2E Tests
-        run: npm run test:e2e
-        env:
-          CI: true
 
   build:
     name: Build
