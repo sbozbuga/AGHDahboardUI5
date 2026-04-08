@@ -28,7 +28,7 @@ server:
       afterMiddleware: compression
       mountPath: /control
       configuration:
-        baseUri: "https://192.168.178.37:8443/control/"
+        baseUri: "https://192.168.178.37/control/"
         # SECURITY WARNING: strictSSL: false allows MITM attacks. Use true in production or with valid certs.
         strictSSL: false
         # username: "PLACEHOLDER"
