@@ -26,8 +26,8 @@ jobs:
       - name: Health Check (Format, Lint, UI5 Lint, Typecheck)
         run: npm run health
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+      #- name: Install Playwright Browsers
+      #  run: npx playwright install --with-deps
 
       - name: Run Unit Tests
         run: npm run test
