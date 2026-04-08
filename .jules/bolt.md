@@ -77,3 +77,7 @@
 **Learning:** In V8/Node.js environments, manually creating a pre-allocated array and using `for` loops to copy elements from two existing arrays is surprisingly slower (~35%) than using native `Array.prototype.concat()`. While manual pre-allocation avoids `push()` resizing overhead, the `concat` method is heavily optimized in C++ by the JavaScript engine and efficiently handles memory allocation and element copying without the overhead of interpreted JavaScript loops.
 **Action:** Always prefer `Array.prototype.concat()` over manual `for` loop copying when merging large arrays, as it is both faster and vastly more readable.
 
+
+## 2026-04-08 - Object Instantiation vs Primitive Parsing in Hot Loops
+**Learning:** In high-frequency loops (like processing thousands of log entries), instantiating `new Date(string)` creates significant object allocation and GC overhead. `Date.parse(string)` is heavily optimized in V8 to quickly return a primitive number timestamp, and is roughly ~30% faster than `new Date()`.
+**Action:** When comparing dates in tight loops, extract bounds to primitive timestamps beforehand and use `Date.parse(isoString)` rather than creating temporary `Date` objects inside the loop.
