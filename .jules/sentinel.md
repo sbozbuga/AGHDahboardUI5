@@ -1,4 +1,4 @@
-## 2024-04-08 - Obfuscated IP Anonymization Bypass
-**Vulnerability:** The PII anonymization logic used a strict regex (`/^(\d{1,3}\.){3}\d{1,3}$/`) to identify IPv4 addresses. This allowed obfuscated IP addresses (like `0x0a.0.0.1`) to bypass detection and be sent to a third-party AI provider unredacted.
-**Learning:** Standard decimal regexes are insufficient for validating or parsing IP addresses, as they fail to match hex/octal obfuscated IPs, creating a security gap.
-**Prevention:** Always use `.split(".").map(Number)` to validate IP address components, which correctly evaluates hex/octal obfuscated IPs natively.
+## 2025-03-22 - XSS via Unescaped Confirmation Dialog
+**Vulnerability:** The Base URL configured by the user (or attacker) was being passed directly to `MessageBox.confirm` in the external URL warning without proper encoding. Although the `URL` constructor checks validated the protocol, it did not prevent embedded tags within the URL string from being rendered as HTML by the UI5 component.
+**Learning:** `sap.m.MessageBox` instances may render HTML depending on internal configurations or specific characters. Even when a URL has passed basic parsing (like ensuring `http://` protocol), the raw input string may contain tags like `<script>` that node's `URL` constructor canonicalizes but original raw strings retain.
+**Prevention:** Always sanitize or encode ANY user-supplied or user-configurable string using `sap/base/security/encodeXML` before displaying it in dialogs, error messages, or warnings, even if the string has passed domain-specific validation (like URL parsing).
