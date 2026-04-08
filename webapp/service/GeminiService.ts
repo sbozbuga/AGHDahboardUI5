@@ -32,7 +32,6 @@ export default class GeminiService {
 	private static readonly MODELS_CACHE_TTL = 3600000; // 1 hour
 	private static readonly MIN_MODELS_FETCH_INTERVAL = 10000; // 10 seconds
 	private static readonly MAX_LOGS_FOR_ANALYSIS = 100;
-	private static readonly IPV4_REGEX = /^(\d{1,3}\.){3}\d{1,3}$/;
 	private static readonly XML_ENTITIES: Record<string, string> = {
 		"&": "&amp;",
 		"<": "&lt;",
@@ -204,8 +203,10 @@ export default class GeminiService {
 	}
 
 	private anonymizeClient(client: string, hostnameMap?: Map<string, string>, nameGenerator?: () => string): string {
-		// Optimization: Use pre-compiled Regex to avoid recompilation overhead on each call
-		if (GeminiService.IPV4_REGEX.test(client)) {
+		const parts = client.split(".");
+		// Security: Use map(Number) instead of strict regex to correctly identify
+		// hex/octal obfuscated IP addresses (e.g. 0x0a.0.0.1) and prevent PII leakage bypass
+		if (parts.length === 4 && parts.map(Number).every((p) => !isNaN(p) && p >= 0 && p <= 255)) {
 			// Optimization: Use substring instead of split+join to reduce array allocation overhead
 			// "192.168.1.5" -> lastIndexOf(".") is 9 -> substring(0, 9) is "192.168.1"
 			const lastDotIndex = client.lastIndexOf(".");
