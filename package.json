@@ -35,7 +35,7 @@
     "@types/openui5": "1.145.0",
     "@ui5/cli": "^4.0.50",
     "@ui5/linter": "^1.20.16",
-    "babel-plugin-istanbul": "^7.0.1",
+    "babel-plugin-istanbul": "^8.0.0",
     "eslint": "^10.1.0",
     "globals": "^17.4.0",
     "playwright": "^1.58.2",
