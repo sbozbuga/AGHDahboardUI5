@@ -70,6 +70,12 @@
 					maxLength="500"
 					showExceededText="true"
 					valueLiveUpdate="true"
+					ariaDescribedBy="contextHelpText"
+				/>
+				<Text
+					id="contextHelpText"
+					text="Provide additional context to improve AI generated analysis."
+					class="sapUiTinyMarginTop"
 				/>
 			</VBox>
 		</content>
