@@ -31,6 +31,7 @@ export default class ClientService extends BaseApiService {
 	private _clients: AdGuardClient[] = [];
 	private _lastFetchTime = 0;
 	private static readonly CACHE_DURATION = 300000; // 5 minutes
+	private static readonly BRACKET_REGEX = /[[\]]/g;
 
 	public static getInstance(): ClientService {
 		if (!ClientService.instance) {
@@ -58,7 +59,7 @@ export default class ClientService extends BaseApiService {
 			// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
 			for (const c of this._clients) {
 				for (const id of c.ids) {
-					const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
+					const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
 					this._clientMap.set(normalizedId, c.name);
 				}
 			}
@@ -71,7 +72,7 @@ export default class ClientService extends BaseApiService {
 				// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
 				for (const c of data.auto_clients) {
 					for (const id of c.ids) {
-						const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
+						const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
 						// Don't overwrite configured clients or DHCP leases
 						if (!this._clientMap.has(normalizedId)) {
 							this._clientMap.set(normalizedId, c.name);
@@ -104,7 +105,7 @@ export default class ClientService extends BaseApiService {
 			if (parts.length >= 2) {
 				const id = parts[0];
 				const name = parts.slice(1).join(" ");
-				const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
+				const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
 				this._clientMap.set(normalizedId, name);
 			}
 		}
@@ -153,7 +154,7 @@ export default class ClientService extends BaseApiService {
 	 */
 	public getName(id: string): string {
 		if (!id) return "";
-		const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
+		const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
 		return this._clientMap.get(normalizedId) || id;
 	}
 
@@ -162,7 +163,7 @@ export default class ClientService extends BaseApiService {
 	 */
 	public isResolved(id: string): boolean {
 		if (!id) return false;
-		const normalizedId = id.replace(/[[\]]/g, "").toLowerCase();
+		const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
 		return this._clientMap.has(normalizedId);
 	}
 
