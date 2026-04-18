@@ -32,7 +32,7 @@
     "@playwright/test": "^1.58.2",
     "@prettier/plugin-xml": "^3.4.2",
     "@types/node": "^25.5.0",
-    "@types/openui5": "1.145.0",
+    "@types/openui5": "1.146.0",
     "@ui5/cli": "^4.0.50",
     "@ui5/linter": "^1.20.16",
     "babel-plugin-istanbul": "^8.0.0",
