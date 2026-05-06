@@ -135,9 +135,9 @@ export default class GeminiService {
 
 		const total = logsToAnalyze.length;
 		let blockedCount = 0;
-		const clientCounts = new Map<string, number>();
-		const domainCounts = new Map<string, number>();
-		const upstreamCounts = new Map<string, number>();
+		const clientCounts = new Map<string, { v: number }>();
+		const domainCounts = new Map<string, { v: number }>();
+		const upstreamCounts = new Map<string, { v: number }>();
 
 		// Anonymization map to maintain consistent pseudonyms for hostnames within this summary
 		const hostnameMap = new Map<string, string>();
@@ -150,13 +150,19 @@ export default class GeminiService {
 
 			let client = log.client || "Unknown";
 			client = this.anonymizeClient(client, hostnameMap, () => `Client-${hostnameCounter++}`);
-			clientCounts.set(client, (clientCounts.get(client) || 0) + 1);
+			const cObj = clientCounts.get(client);
+			if (cObj) cObj.v++;
+			else clientCounts.set(client, { v: 1 });
 
 			const domain = log.question?.name || "Unknown";
-			domainCounts.set(domain, (domainCounts.get(domain) || 0) + 1);
+			const dObj = domainCounts.get(domain);
+			if (dObj) dObj.v++;
+			else domainCounts.set(domain, { v: 1 });
 
 			const upstream = log.upstream || "Unknown";
-			upstreamCounts.set(upstream, (upstreamCounts.get(upstream) || 0) + 1);
+			const uObj = upstreamCounts.get(upstream);
+			if (uObj) uObj.v++;
+			else upstreamCounts.set(upstream, { v: 1 });
 		}
 
 		return {
@@ -169,10 +175,11 @@ export default class GeminiService {
 		};
 	}
 
-	private getTopK(counts: Map<string, number>, k: number): [string, number][] {
+	private getTopK(counts: Map<string, { v: number }>, k: number): [string, number][] {
 		const topK: [string, number][] = [];
 
-		for (const [key, val] of counts) {
+		for (const [key, obj] of counts) {
+			const val = obj.v;
 			// Optimization: Early exit if item is smaller than the smallest in topK
 			if (k > 0 && topK.length === k && val <= topK[k - 1][1]) {
 				continue;

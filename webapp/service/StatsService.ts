@@ -190,10 +190,10 @@ export default class StatsService extends BaseApiService {
 			let total = 0;
 			let blocked = 0;
 			let totalProcessingTime = 0;
-			const domains = new Map<string, number>();
-			const blockedDomains = new Map<string, number>();
-			const clients = new Map<string, number>();
-			const filters = new Map<number, number>();
+			const domains = new Map<string, { v: number }>();
+			const blockedDomains = new Map<string, { v: number }>();
+			const clients = new Map<string, { v: number }>();
+			const filters = new Map<number, { v: number }>();
 
 			// Optimization: Extract primitive time values to avoid property access in the loop
 			const startTimeMs = startTime ? startTime.getTime() : undefined;
@@ -210,24 +210,34 @@ export default class StatsService extends BaseApiService {
 				if (isBlocked) {
 					blocked++;
 					const domain = e.question.name;
-					blockedDomains.set(domain, (blockedDomains.get(domain) || 0) + 1);
+					const bdObj = blockedDomains.get(domain);
+					if (bdObj) bdObj.v++;
+					else blockedDomains.set(domain, { v: 1 });
 
 					if (e.filterId && e.filterId > 0) {
-						filters.set(e.filterId, (filters.get(e.filterId) || 0) + 1);
+						const fObj = filters.get(e.filterId);
+						if (fObj) fObj.v++;
+						else filters.set(e.filterId, { v: 1 });
 					}
 				}
 
 				const domain = e.question.name;
-				domains.set(domain, (domains.get(domain) || 0) + 1);
-				clients.set(e.client, (clients.get(e.client) || 0) + 1);
+				const dObj = domains.get(domain);
+				if (dObj) dObj.v++;
+				else domains.set(domain, { v: 1 });
+
+				const cObj = clients.get(e.client);
+				if (cObj) cObj.v++;
+				else clients.set(e.client, { v: 1 });
 
 				const procTime = Number(e.elapsedMs) || 0;
 				totalProcessingTime += procTime;
 			}
 
-			const mapToTopK = (map: Map<string | number, number>, k: number): [string | number, number][] => {
+			const mapToTopK = (map: Map<string | number, { v: number }>, k: number): [string | number, number][] => {
 				const topK: [string | number, number][] = [];
-				for (const [key, val] of map) {
+				for (const [key, obj] of map) {
+					const val = obj.v;
 					if (k > 0 && topK.length === k && val <= topK[k - 1][1]) continue;
 					let i = 0;
 					while (i < topK.length && val <= topK[i][1]) i++;
@@ -323,21 +333,22 @@ export default class StatsService extends BaseApiService {
 			const data = await this._request<RawAdGuardData>(url);
 			const filteringService = FilteringService.getInstance();
 
-			const filterCounts = new Map<number, number>();
+			const filterCounts = new Map<number, { v: number }>();
 
 			for (const e of data.data) {
 				// AdGuard Home API uses 'reason' or 'status' to indicate filtering blocks.
 				// We check 'filterId' being non-zero as a reliable indicator of a list block.
 				if (e.filterId && e.filterId > 0) {
-					const count = filterCounts.get(e.filterId) || 0;
-					filterCounts.set(e.filterId, count + 1);
+					const fObj = filterCounts.get(e.filterId);
+					if (fObj) fObj.v++;
+					else filterCounts.set(e.filterId, { v: 1 });
 				}
 			}
 
 			const result: StatsEntry[] = [];
-			for (const [id, count] of filterCounts.entries()) {
+			for (const [id, obj] of filterCounts.entries()) {
 				const name = filteringService.getFilterNameSync(id) || `Filter ${id}`;
-				result.push({ name, count });
+				result.push({ name, count: obj.v });
 			}
 
 			// Sort by count descending and limit
