@@ -66,9 +66,9 @@ QUnit.module("Dashboard Polling Logic", {
 			return ctx.lastTimeoutId;
 		}) as unknown as typeof window.setTimeout;
 
-		window.clearTimeout = (() => {
+		window.clearTimeout = () => {
 			ctx.clearTimeoutCalls++;
-		}) as unknown as typeof window.clearTimeout;
+		};
 
 		// Spy on document.addEventListener
 		ctx.originalAddEventListener = document.addEventListener.bind(document);
