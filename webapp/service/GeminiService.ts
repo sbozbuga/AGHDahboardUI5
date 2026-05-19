@@ -2,6 +2,7 @@ import SettingsService from "./SettingsService";
 import { LogEntry } from "../model/AdGuardTypes";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
+import Log from "sap/base/Log";
 
 interface LogSummary {
 	total_queries: number;
@@ -122,7 +123,7 @@ export default class GeminiService {
 			const msg = error instanceof Error ? error.message : String(error);
 			const safeMsg = this._redactApiKey(msg, apiKey);
 			// Security Enhancement: Prevent data leakage in browser console.
-			console.error("Gemini API Error:", safeMsg);
+			Log.error("Gemini API Error", "An error occurred during API request", "ui5.aghd.service.GeminiService");
 			// eslint-disable-next-line preserve-caught-error
 			throw new Error(this._getText("failedToGenerateInsights"), { cause: { message: safeMsg } });
 		}
@@ -298,7 +299,7 @@ export default class GeminiService {
 			if (this._cachedModels && this._cachedModelsApiKey === apiKey) {
 				return this._cachedModels;
 			}
-			console.warn("GeminiService: getAvailableModels rate limited.");
+			Log.warning("GeminiService: getAvailableModels rate limited.", undefined, "ui5.aghd.service.GeminiService");
 			return [];
 		}
 
@@ -337,11 +338,9 @@ export default class GeminiService {
 			this._lastModelsFetchTime = now;
 
 			return result;
-		} catch (error) {
-			const msg = error instanceof Error ? error.message : String(error);
-			const safeMsg = this._redactApiKey(msg, apiKey);
+		} catch {
 			// Security Enhancement: Prevent data leakage in browser console.
-			console.error("Failed to fetch models", safeMsg);
+			Log.error("Failed to fetch models", "An error occurred while fetching models", "ui5.aghd.service.GeminiService");
 			return [];
 		} finally {
 			clearTimeout(timeoutId);
