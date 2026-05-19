@@ -12,6 +12,7 @@ import "unit/service/AuthServiceSecurity.qunit";
 import "unit/service/GeminiService.qunit";
 import "unit/service/GeminiServiceBenchmark.qunit";
 import "unit/service/StatsServiceSlowestQueriesBenchmark.qunit";
+import "unit/service/StatsServiceAggregationBenchmark.qunit";
 import "unit/service/GeminiServiceSecurity.qunit";
 import "unit/service/SettingsService.qunit";
 import "unit/service/SettingsServiceSecurity.qunit";

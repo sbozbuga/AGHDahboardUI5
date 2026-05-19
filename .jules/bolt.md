@@ -5,3 +5,7 @@
 ## 2026-05-06 - Mutable Reference Map Performance Optimization
 **Learning:** For performance optimization in Map-based counters (e.g., in `StatsService` and `GeminiService`), using a mutable object pattern `Map<K, { v: number }>` reduces lookups from two (get and set) to one (get) for existing keys, providing significant speed improvements (approx 40%) over the standard `map.set(key, (map.get(key) || 0) + 1)` pattern in high-frequency loops.
 **Action:** Always prefer the mutable object reference Map pattern `Map<K, { v: number }>` for loops that do frequent counting operations over Map items.
+
+## 2026-05-12 - Primitive vs Object Map Counter Optimization
+**Learning:** While the mutable object pattern `Map<K, { v: number }>` reduces Map lookups, it incurs a memory allocation penalty for every unique key. In high-cardinality scenarios (e.g., aggregating 1M+ logs with 500k+ unique domains), the garbage collection overhead of these allocations outweighs the benefit of fewer lookups.
+**Action:** Use primitive `number` values for Maps in high-cardinality aggregation loops to reduce GC pressure, even if it requires two lookups (`get` and `set`) per increment.
