@@ -163,7 +163,12 @@ export default {
 	formatInsights: function (text: string): string {
 		if (!text) return "";
 		// Manual escape of HTML characters to avoid over-encoding markdown markers by encodeXML
-		let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+		let safeText = text
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
 
 		const BOLD_REGEX = /\*\*(.*?)\*\*/g;
 		const NEWLINE_REGEX = /\n/g;
