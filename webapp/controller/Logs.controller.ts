@@ -472,7 +472,8 @@ export default class Logs extends BaseController {
 		const domain = question ? question.name : "";
 
 		if (domain) {
-			this.copyToClipboard(domain, this.getText("domainCopied"), source);
+			const escapedDomain = this.escapeCsvField(domain);
+			this.copyToClipboard(escapedDomain, this.getText("domainCopied"), source);
 		}
 	}
 
@@ -486,7 +487,8 @@ export default class Logs extends BaseController {
 		const client = context.getProperty("client") as string;
 
 		if (client) {
-			this.copyToClipboard(client, this.getText("clientCopied"), source);
+			const escapedClient = this.escapeCsvField(client);
+			this.copyToClipboard(escapedClient, this.getText("clientCopied"), source);
 		}
 	}
 
