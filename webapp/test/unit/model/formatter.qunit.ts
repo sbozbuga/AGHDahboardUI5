@@ -169,6 +169,11 @@ QUnit.test("formatInsights sanitizes HTML and applies Markdown", function (asser
 	const actual = formatter.formatInsights(input);
 	// Relaxed check: just ensure it starts with escaped script
 	assert.ok(actual.startsWith("&lt;script&gt;"), "Starts with escaped script tag. Got: " + actual);
+	assert.ok(actual.includes("&#39;xss&#39;"), "Escapes single quotes");
+
+	input = '<div class="test"></div>';
+	const actual2 = formatter.formatInsights(input);
+	assert.ok(actual2.includes("&quot;test&quot;"), "Escapes double quotes");
 
 	// 3. Mixed
 	input = "**Bold** and <i>Italic</i>";
