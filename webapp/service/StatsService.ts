@@ -244,26 +244,26 @@ export default class StatsService extends BaseApiService {
 			const topDomainsList = mapToTopK(domains, StatsService.TOP_LIST_LIMIT);
 			const topDomains = new Array(topDomainsList.length) as StatsEntry[];
 			for (let i = 0; i < topDomainsList.length; i++) {
-				topDomains[i] = { name: topDomainsList[i][0] as string, count: topDomainsList[i][1] };
+				topDomains[i] = { name: topDomainsList[i][0], count: topDomainsList[i][1] };
 			}
 
 			const topBlockedDomainsList = mapToTopK(blockedDomains, StatsService.TOP_LIST_LIMIT);
 			const topBlockedDomains = new Array(topBlockedDomainsList.length) as StatsEntry[];
 			for (let i = 0; i < topBlockedDomainsList.length; i++) {
-				topBlockedDomains[i] = { name: topBlockedDomainsList[i][0] as string, count: topBlockedDomainsList[i][1] };
+				topBlockedDomains[i] = { name: topBlockedDomainsList[i][0], count: topBlockedDomainsList[i][1] };
 			}
 
 			const topClientsList = mapToTopK(clients, StatsService.TOP_LIST_LIMIT);
 			const topClients = new Array(topClientsList.length) as StatsEntry[];
 			for (let i = 0; i < topClientsList.length; i++) {
-				const ip = topClientsList[i][0] as string;
+				const ip = topClientsList[i][0];
 				topClients[i] = { name: clientService.getName(ip), ip, count: topClientsList[i][1] };
 			}
 
 			const topFiltersList = mapToTopK(filters, StatsService.TOP_LIST_LIMIT);
 			const topFilters = new Array(topFiltersList.length) as StatsEntry[];
 			for (let i = 0; i < topFiltersList.length; i++) {
-				const id = topFiltersList[i][0] as number;
+				const id = topFiltersList[i][0];
 				topFilters[i] = { name: filteringService.getFilterNameSync(id) || `Filter ${id}`, count: topFiltersList[i][1] };
 			}
 
