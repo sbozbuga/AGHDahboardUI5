@@ -220,14 +220,15 @@ export default class StatsService extends BaseApiService {
 				const domain = e.question.name;
 				domains.set(domain, (domains.get(domain) || 0) + 1);
 
-				clients.set(e.client, (clients.get(e.client) || 0) + 1);
+				const clientIp = e.client;
+				clients.set(clientIp, (clients.get(clientIp) || 0) + 1);
 
 				const procTime = Number(e.elapsedMs) || 0;
 				totalProcessingTime += procTime;
 			}
 
-			const mapToTopK = <K extends string | number>(map: Map<K, number>, k: number): [K, number][] => {
-				const topK: [K, number][] = [];
+			const mapToTopK = (map: Map<string | number, number>, k: number): [string | number, number][] => {
+				const topK: [string | number, number][] = [];
 				for (const [key, val] of map) {
 					if (k > 0 && topK.length === k && val <= topK[k - 1][1]) continue;
 					let i = 0;
@@ -337,7 +338,7 @@ export default class StatsService extends BaseApiService {
 			const result: StatsEntry[] = [];
 			for (const [id, count] of filterCounts.entries()) {
 				const name = filteringService.getFilterNameSync(id) || `Filter ${id}`;
-				result.push({ name, count });
+				result.push({ name, count: count });
 			}
 
 			// Sort by count descending and limit
