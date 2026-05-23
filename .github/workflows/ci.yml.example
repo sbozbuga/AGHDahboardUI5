@@ -1,0 +1,230 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+# Cancel in-progress runs when a new push is made
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write  # Needed for pushing to GHCR
+
+jobs:
+  # 🛡️ PHASE 1: Quality Checks (Quality Shield)
+  lint:
+    name: 🎨 Lint & Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install Linting Tools
+        run: uv sync --all-extras
+
+      - name: Ruff Check
+        run: uv run ruff check .
+
+      - name: Ruff Format Check
+        run: uv run ruff format --check .
+
+      - name: Bandit Security Scan
+        run: uv run bandit -c pyproject.toml -r src scripts
+
+      - name: Semgrep Security Scan
+        run: uv run semgrep --config=auto .
+
+  type-check:
+    name: 🧠 Type Verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Install dependencies
+        run: uv sync --all-extras
+      - name: Mypy Check
+        run: uv run mypy src/
+
+  frontend-build:
+    name: 🌐 Frontend Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build
+
+  test:
+    name: 🧪 Automated Testing (Python ${{ matrix.python-version }})
+    needs: [lint]  # Tests only wait for linting/security scanning
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Create local config dir
+        run: mkdir -p local-configs
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run Pytest with Coverage
+        # --cov-report=json outputs to coverage.json for potential upload to Codecov
+        run: uv run pytest --cov=src --cov-report=term-missing tests/
+
+# 🚀 PHASE 3: Continuous Deployment (Pilot)
+  deploy:
+    name: 🚀 Deploy to Raspberry Pi
+    needs: [test, type-check, frontend-build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    # 🔗 ADIM 1: Secret'ları iş seviyesinde env değişkenlerine bağla
+    env:
+      HAS_TS_OAUTH: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_OAUTH_SECRET != '' }}
+      HAS_TS_KEY: ${{ secrets.TS_AUTH_KEY != '' || secrets.TS_TAILNET_LOCK_KEY != '' }}
+      HAS_SSH_KEY: ${{ secrets.PI_SSH_KEY != '' }}
+
+    steps:
+      - name: Join Tailscale
+        if: env.HAS_TS_OAUTH == 'true' || env.HAS_TS_KEY == 'true'
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          authkey: ${{ secrets.TS_TAILNET_LOCK_KEY }}
+          tags: tag:deploy
+          version: latest
+
+      - name: Wait for MagicDNS propagation
+        if: env.HAS_TS_OAUTH == 'true' || env.HAS_TS_KEY == 'true'
+        run: sleep 1
+
+      - name: Resolve deployment host
+        if: env.HAS_SSH_KEY == 'true'
+        run: |
+          # 🔍 Set deployment variables from secrets or defaults
+          echo "DEPLOY_HOST=${{ secrets.PI_HOST || 'pi5ssd' }}" >> $GITHUB_ENV
+          echo "DEPLOY_USER=${{ secrets.PI_USER || 'sb' }}" >> $GITHUB_ENV
+          echo "DEPLOY_PORT=${{ secrets.PI_PORT || 22 }}" >> $GITHUB_ENV
+
+      - name: Start SSH Agent
+        if: env.HAS_SSH_KEY == 'true'
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PI_SSH_KEY }}
+
+      - name: Verify SSH reachability
+        if: env.HAS_SSH_KEY == 'true'
+        run: |
+          echo "🔍 Checking connectivity to $DEPLOY_USER@$DEPLOY_HOST on port $DEPLOY_PORT"
+
+          # Check Tailscale status if we joined
+          if command -v tailscale > /dev/null; then
+            echo "🚠 Tailscale Status:"
+            tailscale status --peers=false || echo "Node not fully joined"
+          fi
+
+          echo "📡 Testing IP connectivity..."
+          if ! ping -c 1 -W 5 "$DEPLOY_HOST" > /dev/null 2>&1; then
+             echo "⚠️ Warning: Ping failed. Host may not be responding or MagicDNS is slow."
+             echo "🔍 Resolution diagnostic:"
+             getent hosts "$DEPLOY_HOST" || echo "❌ Cannot resolve hostname: $DEPLOY_HOST"
+          fi
+
+          echo "🚀 Testing SSH reachability (Wait up to 20s)..."
+          ssh -o BatchMode=yes -o ConnectTimeout=20 -o StrictHostKeyChecking=no -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" true
+
+      - name: Trigger Remote Pull
+        if: env.HAS_SSH_KEY == 'true'
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
+          key: ${{ secrets.PI_SSH_KEY }}
+          port: ${{ env.DEPLOY_PORT }}
+          script: |
+            cd ~/lab-mon
+            # 🔍 Get current commit before update
+            PREV_REV=$(git rev-parse HEAD)
+            git pull origin main
+            CURR_REV=$(git rev-parse HEAD)
+
+            # 🛠️ Define what triggers a restart (Python code, templates, deps, or service files)
+            RELEVANT_CHANGES=$(git diff --name-only $PREV_REV $CURR_REV | grep -E "(\.py$|\.html$|pyproject\.toml$|uv\.lock$|system/.*\.service$|system/.*\.conf$|frontend/.*$)" || true)
+
+            if [ "$PREV_REV" != "$CURR_REV" ] && [ -n "$RELEVANT_CHANGES" ]; then
+                echo "🚀 Relevant changes detected. Synchronizing environment and restarting service..."
+
+                # 📋 Update systemd service file if it was changed
+                if echo "$RELEVANT_CHANGES" | grep -q "system/lab-mon.service"; then
+                    echo "📋 Service file changed, updating systemd..."
+                    sudo cp system/lab-mon.service /etc/systemd/system/lab-mon.service
+                    sudo systemctl daemon-reload
+                fi
+
+                # 🌐 Update Nginx config if it was changed
+                if echo "$RELEVANT_CHANGES" | grep -q "system/nginx-lab-gateway.conf"; then
+                    echo "🌐 Nginx config changed, updating sites-available..."
+                    sudo cp system/nginx-lab-gateway.conf /etc/nginx/sites-available/lab-gateway
+                    # Ensure it's enabled if not already
+                    sudo ln -sf /etc/nginx/sites-available/lab-gateway /etc/nginx/sites-enabled/lab-gateway
+                    # Test and reload
+                    echo "🔍 Testing Nginx configuration..."
+                    sudo nginx -t && sudo systemctl reload nginx
+                fi
+
+                # 🛠️ Build Frontend if changed
+                if echo "$RELEVANT_CHANGES" | grep -q "frontend/"; then
+                    echo "🛠️ Frontend changes detected. Building..."
+                    cd frontend
+                    npm install
+                    npm run build
+                    cd ..
+                fi
+
+                export PATH="$HOME/.local/bin:$PATH"
+                uv sync --all-extras
+                sudo systemctl restart lab-mon
+                sudo systemctl status lab-mon
+                sudo journalctl -u lab-mon -n 20 --no-pager
+                echo "✅ Service and Nginx updated and verified."
+            elif [ "$PREV_REV" != "$CURR_REV" ]; then
+                echo "😴 Only non-service changes detected (docs/assets). Skipping service restart."
+            else
+                echo "🧊 No new commits. Deployment is already up to date."
+            fi
+            echo "✅ Deployment step finished at $(date)"
