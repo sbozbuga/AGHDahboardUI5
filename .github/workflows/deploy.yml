@@ -80,7 +80,7 @@ jobs:
           # Scan and register host key to avoid interactive prompt
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
-          # Execute remote deployment script
+          # Execute remote deployment script using absolute path
           echo "🚀 Triggering remote deployment (aghd-up) on $DEPLOY_USER@$DEPLOY_HOST..."
-          ssh -i ~/.ssh/id_ed25519 -o ConnectTimeout=20 "$DEPLOY_USER@$DEPLOY_HOST" "cd ~/gitRepo/AGHDahboardUI5 && aghd-up"
+          ssh -i ~/.ssh/id_ed25519 -o ConnectTimeout=20 "$DEPLOY_USER@$DEPLOY_HOST" "/home/sb/lab-mon/scripts/aghd-up"
           echo "✅ Remote deployment completed successfully."
