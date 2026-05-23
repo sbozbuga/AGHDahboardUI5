@@ -45,7 +45,6 @@ jobs:
     # 🌟 Configures GitHub Environment for deployment tracking & scoped secrets
     environment:
       name: production
-      url: http://${{ secrets.PI5_HOST }}
 
     # Bind secrets to env variables for conditional checks
     env:
