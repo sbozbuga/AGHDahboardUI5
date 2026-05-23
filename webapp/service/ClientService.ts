@@ -58,9 +58,11 @@ export default class ClientService extends BaseApiService {
 			// Map configured clients
 			// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
 			for (const c of this._clients) {
-				for (const id of c.ids) {
-					const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
-					this._clientMap.set(normalizedId, c.name);
+				if (c && Array.isArray(c.ids)) {
+					for (const id of c.ids) {
+						const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
+						this._clientMap.set(normalizedId, c.name);
+					}
 				}
 			}
 
@@ -71,11 +73,13 @@ export default class ClientService extends BaseApiService {
 			if (data.auto_clients) {
 				// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
 				for (const c of data.auto_clients) {
-					for (const id of c.ids) {
-						const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
-						// Don't overwrite configured clients or DHCP leases
-						if (!this._clientMap.has(normalizedId)) {
-							this._clientMap.set(normalizedId, c.name);
+					if (c && Array.isArray(c.ids)) {
+						for (const id of c.ids) {
+							const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
+							// Don't overwrite configured clients or DHCP leases
+							if (!this._clientMap.has(normalizedId)) {
+								this._clientMap.set(normalizedId, c.name);
+							}
 						}
 					}
 				}
