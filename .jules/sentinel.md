@@ -6,3 +6,8 @@
 **Vulnerability:** The custom HTML sanitization function in `formatter.ts` (`formatInsights`) replaced `<`, `>`, and `&`, but failed to replace single (`'`) and double (`"`) quotes. This left the application vulnerable to attribute injection (XSS) if the sanitized string was used in an HTML attribute context.
 **Learning:** Manual HTML sanitization using `replace` often misses critical edge cases like quotes. Attackers can break out of attributes using single or double quotes to inject malicious JavaScript.
 **Prevention:** Always escape quotes (`'` to `&#39;` and `"` to `&quot;`) alongside standard characters, or better yet, rely on established sanitization libraries or UI5's built-in `encodeXML` and safe text controls (`sap.m.FormattedText`) where possible.
+
+## 2025-05-19 - DoS via UI5 maxLength Bypass
+**Vulnerability:** The `Login` view relied solely on the `maxLength` property of `sap.m.Input` controls to restrict the length of usernames and passwords. However, `maxLength` only restricts direct keyboard input in the UI; it does not prevent programmatic updates or direct API calls from inserting massive strings into the JSONModel.
+**Learning:** In SAP UI5, UI-level length restrictions are insufficient for security. Attackers or malicious scripts can bypass `maxLength` by updating the model directly, potentially passing massive strings to backend services or causing client-side memory exhaustion (Denial of Service).
+**Prevention:** Always implement explicit length validation in the controller logic before processing sensitive data or making API calls, even if `maxLength` is set in the view.
