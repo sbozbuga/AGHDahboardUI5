@@ -68,6 +68,15 @@ export default class Login extends BaseController {
 				usernameInput.focus();
 			}
 			bValidationError = true;
+		} else if (username.length > 50) {
+			// Security Enhancement: Validate input length programmatically
+			// to prevent DoS via massive input that bypasses UI controls.
+			usernameInput.setValueState(ValueState.Error);
+			usernameInput.setValueStateText("Username must be 50 characters or less");
+			if (!bValidationError) {
+				usernameInput.focus();
+			}
+			bValidationError = true;
 		} else {
 			usernameInput.setValueState(ValueState.None);
 		}
@@ -75,6 +84,14 @@ export default class Login extends BaseController {
 		if (!password) {
 			passwordInput.setValueState(ValueState.Error);
 			passwordInput.setValueStateText("Password is required");
+			if (!bValidationError) {
+				passwordInput.focus();
+			}
+			bValidationError = true;
+		} else if (password.length > 100) {
+			// Security Enhancement: Validate input length programmatically
+			passwordInput.setValueState(ValueState.Error);
+			passwordInput.setValueStateText("Password must be 100 characters or less");
 			if (!bValidationError) {
 				passwordInput.focus();
 			}
