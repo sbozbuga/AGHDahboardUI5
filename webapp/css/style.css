@@ -16,7 +16,7 @@
 
 /* Show button on hover or focus */
 .hoverCopyCard:hover .floatingCopyBtn,
-.floatingCopyBtn:focus {
+.floatingCopyBtn:focus-visible {
 	opacity: 1;
 }
 
@@ -28,7 +28,7 @@
 
 /* Show row copy button on hover */
 .sapMListTblRow:hover .copyButton,
-.copyButton:focus {
+.copyButton:focus-visible {
 	opacity: 1;
 }
 
