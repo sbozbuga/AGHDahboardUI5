@@ -31,8 +31,8 @@ export default {
 		if (value == null) {
 			return "0";
 		}
-		// Optimization: Number() is faster than parseFloat
-		const num = Number(value);
+		// Optimization: typeof check before Number() avoids constructor overhead for primitives
+		const num = typeof value === "number" ? value : Number(value);
 		if (isNaN(num)) {
 			return "0";
 		}
@@ -92,8 +92,8 @@ export default {
 		if (ms == null) {
 			return "None";
 		}
-		// Optimization: Native Number() constructor is faster than typeof + parseFloat
-		const val = Number(ms);
+		// Optimization: typeof check before Number() avoids constructor overhead for primitives
+		const val = typeof ms === "number" ? ms : Number(ms);
 
 		if (val > 500) {
 			return "Error";
@@ -113,8 +113,8 @@ export default {
 		if (ms == null) {
 			return "None";
 		}
-		// Optimization: Native Number() constructor is faster than typeof + parseFloat
-		const val = Number(ms);
+		// Optimization: typeof check before Number() avoids constructor overhead for primitives
+		const val = typeof ms === "number" ? ms : Number(ms);
 
 		if (val > 500) {
 			return "Critical (> 500ms)";
@@ -134,8 +134,8 @@ export default {
 		if (ms == null) {
 			return "Neutral";
 		}
-		// Optimization: Native Number() constructor is faster than typeof + parseFloat
-		const val = Number(ms);
+		// Optimization: typeof check before Number() avoids constructor overhead for primitives
+		const val = typeof ms === "number" ? ms : Number(ms);
 
 		if (val > 500) {
 			return "Error";
