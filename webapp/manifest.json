@@ -7,7 +7,7 @@
 		"title": "UI5 AGH Dashboard",
 		"description": "UI5 AGH Dashboard",
 		"applicationVersion": {
-			"version": "1.0.0"
+			"version": "1.0.1"
 		}
 	},
 	"sap.fiori": {},
@@ -48,7 +48,8 @@
 				"settings": {
 					"bundleName": "ui5.aghd.i18n.i18n",
 					"supportedLocales": ["en", "de", "tr"],
-					"fallbackLocale": "en"
+					"fallbackLocale": "en",
+					"async": true
 				}
 			}
 		},

@@ -27,21 +27,30 @@ export default class Component extends UIComponent {
 		// set up event bus for services
 		BaseApiService.setGlobalEventBus(this.getEventBus());
 
+		// Replace the manifest-created i18n model with a cache-busted version
+		// to prevent stale translations after deployments (browser caches .properties files).
+		const appVersion = (this.getManifestEntry("/sap.app/applicationVersion/version") as string) || "1.0.0";
+		const i18nModel = new ResourceModel({
+			bundleName: "ui5.aghd.i18n.i18n",
+			bundleUrl: `i18n/i18n.properties?v=${appVersion}`,
+			supportedLocales: ["en", "de", "tr"],
+			fallbackLocale: "en",
+			async: true
+		});
+		this.setModel(i18nModel, "i18n");
+
 		// Inject Resource Bundle into Services
-		const i18nModel = this.getModel("i18n") as ResourceModel;
-		if (i18nModel) {
-			const bundleOrPromise = i18nModel.getResourceBundle();
-			if (bundleOrPromise instanceof Promise) {
-				void bundleOrPromise.then((bundle) => {
-					AuthService.getInstance().setResourceBundle(bundle);
-					StatsService.getInstance().setResourceBundle(bundle);
-					GeminiService.getInstance().setResourceBundle(bundle);
-				});
-			} else {
-				AuthService.getInstance().setResourceBundle(bundleOrPromise);
-				StatsService.getInstance().setResourceBundle(bundleOrPromise);
-				GeminiService.getInstance().setResourceBundle(bundleOrPromise);
-			}
+		const bundleOrPromise = i18nModel.getResourceBundle();
+		if (bundleOrPromise instanceof Promise) {
+			void bundleOrPromise.then((bundle) => {
+				AuthService.getInstance().setResourceBundle(bundle);
+				StatsService.getInstance().setResourceBundle(bundle);
+				GeminiService.getInstance().setResourceBundle(bundle);
+			});
+		} else {
+			AuthService.getInstance().setResourceBundle(bundleOrPromise);
+			StatsService.getInstance().setResourceBundle(bundleOrPromise);
+			GeminiService.getInstance().setResourceBundle(bundleOrPromise);
 		}
 	}
 
