@@ -64,7 +64,11 @@ export default class ClientService extends BaseApiService {
 
 			// Map configured clients
 			for (const c of this._clients) {
-				this._mapClient(c, true);
+				try {
+					this._mapClient(c, true);
+				} catch {
+					// Defensive: skip clients with malformed data (e.g. non-iterable ids)
+				}
 			}
 
 			// Map DHCP leases
@@ -73,7 +77,11 @@ export default class ClientService extends BaseApiService {
 			// Map auto-detected clients if available
 			if (data.auto_clients && Array.isArray(data.auto_clients)) {
 				for (const c of data.auto_clients) {
-					this._mapClient(c, false);
+					try {
+						this._mapClient(c, false);
+					} catch {
+						// Defensive: skip auto_clients with malformed data
+					}
 				}
 			}
 
