@@ -21,6 +21,12 @@ export interface RawClientsData {
 	auto_clients?: AdGuardClient[];
 }
 
+export interface ClientMappingSource {
+	name: string;
+	ids?: string[] | string;
+	ip?: string;
+}
+
 /**
  * Service for managing AdGuard Home Client data and name resolution.
  * @namespace ui5.aghd.service
@@ -83,10 +89,10 @@ export default class ClientService extends BaseApiService {
 	/**
 	 * Normalizes and maps all identifiers (IPs, MACs, ClientIDs) of a client to its name in the internal client map.
 	 * @private
-	 * @param {any} c - The client object to map.
+	 * @param {ClientMappingSource} c - The client object to map.
 	 * @param {boolean} [overwrite=false] - Whether to overwrite existing mappings.
 	 */
-	private _mapClient(c: any, overwrite = false): void {
+	private _mapClient(c: ClientMappingSource, overwrite = false): void {
 		if (!c || !c.name) return;
 
 		const idsToMap: string[] = [];
