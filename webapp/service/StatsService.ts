@@ -182,10 +182,10 @@ export default class StatsService extends BaseApiService {
 
 		try {
 			const url = `${Constants.ApiEndpoints.QueryLog}?limit=${scanDepth}&offset=0`;
-			const data = await this._request<RawAdGuardData>(url);
 			const filteringService = FilteringService.getInstance();
 			const clientService = ClientService.getInstance();
-			await clientService.getClients();
+
+			const [data] = await Promise.all([this._request<RawAdGuardData>(url), clientService.getClients()]);
 
 			let total = 0;
 			let blocked = 0;
