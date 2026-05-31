@@ -155,8 +155,6 @@ export default class ClientService extends BaseApiService {
 					mac: string;
 				}[];
 
-				console.log(`DHCP: Found ${allLeases.length} total leases`);
-
 				// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
 				for (const lease of allLeases) {
 					if (lease.hostname) {
@@ -171,8 +169,6 @@ export default class ClientService extends BaseApiService {
 						}
 					}
 				}
-			} else {
-				console.log("DHCP: Not enabled or status returned disabled.");
 			}
 		} catch (error) {
 			// DHCP might not be enabled or supported, ignore
