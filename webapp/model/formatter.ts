@@ -209,7 +209,8 @@ export default {
 
 			if (i < len - 1) {
 				const next = processedLines[i + 1];
-				const isCurrentListTag = current === "<ul>" || current === "</ul>" || current.startsWith("<li>") || current.endsWith("</li>");
+				const isCurrentListTag =
+					current === "<ul>" || current === "</ul>" || current.startsWith("<li>") || current.endsWith("</li>");
 				const isNextListTag = next === "<ul>" || next === "</ul>" || next.startsWith("<li>") || next.endsWith("</li>");
 
 				if (!isCurrentListTag && !isNextListTag) {
