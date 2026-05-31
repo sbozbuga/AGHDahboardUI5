@@ -161,9 +161,11 @@ export default {
 	 * @returns HTML string with <strong> and <br/> tags
 	 */
 	formatInsights: function (text: string): string {
-		if (!text) return "";
+		if (!text) {
+			return "";
+		}
 		// Manual escape of HTML characters to avoid over-encoding markdown markers by encodeXML
-		let safeText = text
+		const safeText = text
 			.replace(/&/g, "&amp;")
 			.replace(/</g, "&lt;")
 			.replace(/>/g, "&gt;")
@@ -171,9 +173,51 @@ export default {
 			.replace(/'/g, "&#39;");
 
 		const BOLD_REGEX = /\*\*(.*?)\*\*/g;
-		const NEWLINE_REGEX = /\n/g;
+		const lines = safeText.split("\n");
+		const processedLines: string[] = [];
+		let inList = false;
 
-		safeText = safeText.replace(BOLD_REGEX, "<strong>$1</strong>").replace(NEWLINE_REGEX, "<br/>");
-		return safeText;
+		for (const line of lines) {
+			const processedLine = line.replace(BOLD_REGEX, "<strong>$1</strong>");
+			const trimmed = processedLine.trim();
+
+			if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
+				if (!inList) {
+					processedLines.push("<ul>");
+					inList = true;
+				}
+				const content = trimmed.substring(2);
+				processedLines.push(`<li>${content}</li>`);
+			} else {
+				if (inList) {
+					processedLines.push("</ul>");
+					inList = false;
+				}
+				processedLines.push(processedLine);
+			}
+		}
+
+		if (inList) {
+			processedLines.push("</ul>");
+		}
+
+		let resultHtml = "";
+		const len = processedLines.length;
+		for (let i = 0; i < len; i++) {
+			const current = processedLines[i];
+			resultHtml += current;
+
+			if (i < len - 1) {
+				const next = processedLines[i + 1];
+				const isCurrentListTag = current === "<ul>" || current === "</ul>" || current.startsWith("<li>") || current.endsWith("</li>");
+				const isNextListTag = next === "<ul>" || next === "</ul>" || next.startsWith("<li>") || next.endsWith("</li>");
+
+				if (!isCurrentListTag && !isNextListTag) {
+					resultHtml += "<br/>";
+				}
+			}
+		}
+
+		return resultHtml;
 	}
 };

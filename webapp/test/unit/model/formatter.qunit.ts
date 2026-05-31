@@ -184,4 +184,9 @@ QUnit.test("formatInsights sanitizes HTML and applies Markdown", function (asser
 	input = "Line 1\nLine 2";
 	expected = "Line 1<br/>Line 2";
 	assert.strictEqual(formatter.formatInsights(input), expected, "Markdown Newlines work");
+
+	// 5. Bullet Lists
+	input = "Intro\n- **Point 1**\n* Point 2\nOutro";
+	expected = "Intro<ul><li><strong>Point 1</strong></li><li>Point 2</li></ul>Outro";
+	assert.strictEqual(formatter.formatInsights(input), expected, "Markdown Lists work");
 });
