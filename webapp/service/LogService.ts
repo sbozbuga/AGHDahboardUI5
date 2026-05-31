@@ -26,14 +26,19 @@ export default class LogService extends BaseApiService {
 			url += `&response_status=${encodeURIComponent(filterStatus)}`;
 		}
 
-		const data = await this._request<RawAdGuardData>(url);
-		const rawList = data.data || [];
-		const processedList: LogEntry[] = [];
-
 		const filteringService = FilteringService.getInstance();
 		const clientService = ClientService.getInstance();
-		// Pre-load filters and clients if we need mapping for logs
-		await Promise.all([filteringService.getFilters(), clientService.getClients()]);
+
+		// Pre-load filters and clients concurrently with log fetching if we need mapping for logs
+		// ⚡ Bolt: Fetching logs, filters, and clients concurrently reduces overall latency
+		const [data] = await Promise.all([
+			this._request<RawAdGuardData>(url),
+			filteringService.getFilters(),
+			clientService.getClients()
+		]);
+
+		const rawList = data.data || [];
+		const processedList: LogEntry[] = [];
 
 		for (const rawEntry of rawList) {
 			const elapsedMs = Number(rawEntry.elapsedMs) || 0;
