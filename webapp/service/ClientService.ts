@@ -56,32 +56,17 @@ export default class ClientService extends BaseApiService {
 			this._clients = data.clients || [];
 
 			// Map configured clients
-			// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
 			for (const c of this._clients) {
-				if (c && Array.isArray(c.ids)) {
-					for (const id of c.ids) {
-						const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
-						this._clientMap.set(normalizedId, c.name);
-					}
-				}
+				this._mapClient(c, true);
 			}
 
 			// Map DHCP leases
 			await this._loadDHCPClients();
 
 			// Map auto-detected clients if available
-			if (data.auto_clients) {
-				// Optimization: Native for...of loops eliminate callback allocation and invocation overhead associated with .forEach()
+			if (data.auto_clients && Array.isArray(data.auto_clients)) {
 				for (const c of data.auto_clients) {
-					if (c && Array.isArray(c.ids)) {
-						for (const id of c.ids) {
-							const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
-							// Don't overwrite configured clients or DHCP leases
-							if (!this._clientMap.has(normalizedId)) {
-								this._clientMap.set(normalizedId, c.name);
-							}
-						}
-					}
+					this._mapClient(c, false);
 				}
 			}
 
@@ -92,6 +77,43 @@ export default class ClientService extends BaseApiService {
 			// Security Enhancement: Prevent data leakage in browser console.
 			console.error("Failed to fetch clients", (error as Error).message || "Unknown error");
 			return [];
+		}
+	}
+
+	/**
+	 * Normalizes and maps all identifiers (IPs, MACs, ClientIDs) of a client to its name in the internal client map.
+	 * @private
+	 * @param {any} c - The client object to map.
+	 * @param {boolean} [overwrite=false] - Whether to overwrite existing mappings.
+	 */
+	private _mapClient(c: any, overwrite = false): void {
+		if (!c || !c.name) return;
+
+		const idsToMap: string[] = [];
+
+		// Handle c.ids if it is an array
+		if (Array.isArray(c.ids)) {
+			for (const id of c.ids) {
+				if (typeof id === "string") {
+					idsToMap.push(id);
+				}
+			}
+		} else if (typeof c.ids === "string" && c.ids) {
+			// Fallback: c.ids is a string
+			idsToMap.push(c.ids);
+		}
+
+		// Handle c.ip if it exists (highly common for auto_clients)
+		if (typeof c.ip === "string" && c.ip) {
+			idsToMap.push(c.ip);
+		}
+
+		// Map all gathered identifiers
+		for (const id of idsToMap) {
+			const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
+			if (overwrite || !this._clientMap.has(normalizedId)) {
+				this._clientMap.set(normalizedId, c.name);
+			}
 		}
 	}
 
