@@ -1,7 +1,8 @@
 import BaseApiService from "./BaseApiService";
 import { Constants } from "../model/Constants";
 import SettingsService from "./SettingsService";
-import { RawDHCPStatus } from "../model/AdGuardTypes";
+import type { RawDHCPStatus } from "../model/AdGuardTypes";
+import Log from "sap/base/Log";
 
 export interface AdGuardClient {
 	name: string;
@@ -80,8 +81,8 @@ export default class ClientService extends BaseApiService {
 			return this._clients;
 		} catch (error) {
 			this._loadCustomClients(); // Still load local even if API fails
-			// Security Enhancement: Prevent data leakage in browser console.
-			console.error("Failed to fetch clients", (error as Error).message || "Unknown error");
+			// Security Enhancement: Use framework logging to prevent data leakage in browser console.
+			Log.error("Failed to fetch clients", (error as Error).message || "Unknown error");
 			return [];
 		}
 	}
@@ -172,7 +173,7 @@ export default class ClientService extends BaseApiService {
 			}
 		} catch (error) {
 			// DHCP might not be enabled or supported, ignore
-			console.warn("Failed to fetch DHCP leases", (error as Error).message || "Unknown error");
+			Log.warning("Failed to fetch DHCP leases", (error as Error).message || "Unknown error");
 		}
 	}
 

@@ -6,6 +6,10 @@ import ClientService from "../service/ClientService";
 const oDateTimeFormat = DateFormat.getDateTimeInstance({ pattern: "yyyy-MM-dd HH:mm:ss.SSS" });
 const oIntegerFormat = NumberFormat.getIntegerInstance({ groupingEnabled: true });
 
+// Threshold constants for elapsed time formatting
+const ELAPSED_CRITICAL_MS = 500;
+const ELAPSED_WARNING_MS = 200;
+
 export default {
 	formatMessage: formatMessage,
 
@@ -95,9 +99,9 @@ export default {
 		// Optimization: typeof check before Number() avoids constructor overhead for primitives
 		const val = typeof ms === "number" ? ms : Number(ms);
 
-		if (val > 500) {
+		if (val > ELAPSED_CRITICAL_MS) {
 			return "Error";
-		} else if (val > 200) {
+		} else if (val > ELAPSED_WARNING_MS) {
 			return "Warning";
 		} else {
 			return "None";
@@ -116,9 +120,9 @@ export default {
 		// Optimization: typeof check before Number() avoids constructor overhead for primitives
 		const val = typeof ms === "number" ? ms : Number(ms);
 
-		if (val > 500) {
+		if (val > ELAPSED_CRITICAL_MS) {
 			return "Critical (> 500ms)";
-		} else if (val > 200) {
+		} else if (val > ELAPSED_WARNING_MS) {
 			return "Warning (> 200ms)";
 		} else {
 			return "Good (< 200ms)";
@@ -137,9 +141,9 @@ export default {
 		// Optimization: typeof check before Number() avoids constructor overhead for primitives
 		const val = typeof ms === "number" ? ms : Number(ms);
 
-		if (val > 500) {
+		if (val > ELAPSED_CRITICAL_MS) {
 			return "Error";
-		} else if (val > 200) {
+		} else if (val > ELAPSED_WARNING_MS) {
 			return "Critical";
 		} else {
 			return "Good";

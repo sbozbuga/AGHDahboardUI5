@@ -1,5 +1,6 @@
 import BaseApiService from "./BaseApiService";
 import { Constants } from "../model/Constants";
+import Log from "sap/base/Log";
 
 export interface Filter {
 	id: number;
@@ -43,8 +44,8 @@ export default class FilteringService extends BaseApiService {
 			this._loaded = true;
 			return this._filters;
 		} catch (error) {
-			// Security Enhancement: Prevent data leakage in browser console.
-			console.error("Failed to fetch filters", (error as Error).message || "Unknown error");
+			// Security Enhancement: Use framework logging to prevent data leakage in browser console.
+			Log.error("Failed to fetch filters", (error as Error).message || "Unknown error");
 			return [];
 		}
 	}

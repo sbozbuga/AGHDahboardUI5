@@ -18,7 +18,8 @@ import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import Control from "sap/ui/core/Control";
 import UIComponent from "sap/ui/core/UIComponent";
 import encodeXML from "sap/base/security/encodeXML";
-import { StatsEntry } from "../model/AdGuardTypes";
+import type { StatsEntry } from "../model/AdGuardTypes";
+import Log from "sap/base/Log";
 
 /**
  * @namespace ui5.aghd.controller
@@ -236,7 +237,7 @@ export default class BaseController extends Controller {
 					}
 				})
 				.catch((err) => {
-					console.warn("Clipboard API failed, falling back to execCommand", (err as Error).message || "Unknown error");
+					Log.warning("Clipboard API failed, falling back to execCommand", (err as Error).message || "Unknown error");
 					this.fallbackCopy(text, successMessage, button);
 				});
 		} else {
@@ -272,8 +273,8 @@ export default class BaseController extends Controller {
 				MessageBox.error(this.getText("clipboardUnavailable"));
 			}
 		} catch (err) {
-			// Security Enhancement: Prevent data leakage in browser console.
-			console.error("Fallback copy failed", (err as Error).message || "Unknown error");
+			// Security Enhancement: Use framework logging to prevent data leakage in browser console.
+			Log.error("Fallback copy failed", (err as Error).message || "Unknown error");
 			MessageBox.error(this.getText("clipboardUnavailable"));
 		}
 

@@ -32,6 +32,15 @@ export default class SettingsService {
 		if (this.storage.get(this.STORAGE_KEY_API_KEY)) {
 			this.storage.remove(this.STORAGE_KEY_API_KEY);
 		}
+
+		// Cross-tab sync: Invalidate in-memory cache when another tab changes settings
+		window.addEventListener("storage", (e) => {
+			if (e.key === this.STORAGE_KEY_BASE_URL) this._baseUrl = null;
+			if (e.key === this.STORAGE_KEY_MODEL) this._model = null;
+			if (e.key === this.STORAGE_KEY_CONTEXT) this._context = null;
+			if (e.key === this.STORAGE_KEY_SCAN_DEPTH) this._scanDepth = null;
+			if (e.key === this.STORAGE_KEY_CUSTOM_CLIENTS) this._customClients = null;
+		});
 	}
 
 	public static getInstance(): SettingsService {

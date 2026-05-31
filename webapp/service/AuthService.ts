@@ -4,6 +4,7 @@ import MessageToast from "sap/m/MessageToast";
 import BaseApiService from "./BaseApiService";
 import { Constants } from "../model/Constants";
 import encodeXML from "sap/base/security/encodeXML";
+import Log from "sap/base/Log";
 
 /**
  * Service for handling AdGuard Home Authentication.
@@ -66,8 +67,8 @@ export default class AuthService extends BaseApiService {
 			return;
 		}
 
-		if (this._isLoginDialogOpen) return;
-		this._isLoginDialogOpen = true;
+		if (BaseApiService._isLoginDialogOpen) return;
+		BaseApiService._isLoginDialogOpen = true;
 
 		const logInText = this._getText("logIn");
 
@@ -77,7 +78,7 @@ export default class AuthService extends BaseApiService {
 				if (sAction === logInText) {
 					this._openLoginPopup();
 				} else {
-					this._isLoginDialogOpen = false;
+					BaseApiService._isLoginDialogOpen = false;
 				}
 			}
 		});
@@ -106,7 +107,7 @@ export default class AuthService extends BaseApiService {
 			}
 		} catch {
 			MessageBox.error(this._getText("unsafeBaseUrl"));
-			this._isLoginDialogOpen = false;
+			BaseApiService._isLoginDialogOpen = false;
 			return;
 		}
 
@@ -119,7 +120,7 @@ export default class AuthService extends BaseApiService {
 
 			if (!popup) {
 				MessageBox.error(this._getText("popupBlocked"));
-				this._isLoginDialogOpen = false;
+				BaseApiService._isLoginDialogOpen = false;
 				return;
 			}
 
@@ -127,7 +128,7 @@ export default class AuthService extends BaseApiService {
 			// we will poll the server for stats. If we get stats, auth is successful.
 			const pollAuthStatus = async () => {
 				if (popup.closed) {
-					this._isLoginDialogOpen = false;
+					BaseApiService._isLoginDialogOpen = false;
 					return;
 				}
 
@@ -138,7 +139,7 @@ export default class AuthService extends BaseApiService {
 
 					if (response.ok) {
 						popup.close();
-						this._isLoginDialogOpen = false;
+						BaseApiService._isLoginDialogOpen = false;
 						MessageToast.show(this._getText("loginSuccessful"));
 						setTimeout(() => window.location.reload(), 1000);
 						return;
@@ -148,10 +149,16 @@ export default class AuthService extends BaseApiService {
 				}
 
 				// Schedule next poll only after the current one finishes
-				setTimeout(() => void pollAuthStatus(), 2000);
+				setTimeout(() => {
+					pollAuthStatus().catch(() => {
+						BaseApiService._isLoginDialogOpen = false;
+					});
+				}, 2000);
 			};
 
-			void pollAuthStatus();
+			void pollAuthStatus().catch(() => {
+				BaseApiService._isLoginDialogOpen = false;
+			});
 		};
 
 		if (this._isSafeUrl(targetUrl)) {
@@ -163,7 +170,7 @@ export default class AuthService extends BaseApiService {
 					if (sAction === MessageBox.Action.OK) {
 						performOpen();
 					} else {
-						this._isLoginDialogOpen = false;
+						BaseApiService._isLoginDialogOpen = false;
 					}
 				}
 			});
@@ -211,7 +218,7 @@ export default class AuthService extends BaseApiService {
 				method: "POST"
 			});
 		} catch (error) {
-			console.warn(
+			Log.warning(
 				"Server logout failed, clearing local credentials anyway",
 				(error as Error).message || "Unknown error"
 			);

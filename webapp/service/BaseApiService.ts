@@ -1,7 +1,6 @@
 import SettingsService from "./SettingsService";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
 import MessageBox from "sap/m/MessageBox";
-import UI5Object from "sap/ui/base/Object";
 import EventBus from "sap/ui/core/EventBus";
 
 export class ApiError extends Error {
@@ -20,9 +19,9 @@ export class ApiError extends Error {
  * like timeout handling, base URL resolution, and error parsing.
  * @namespace ui5.aghd.service
  */
-export default class BaseApiService extends UI5Object {
+export default class BaseApiService {
 	protected _resourceBundle: ResourceBundle | null = null;
-	protected _isLoginDialogOpen = false;
+	protected static _isLoginDialogOpen = false;
 	protected static readonly REQUEST_TIMEOUT = 10000;
 	protected static _eventBus: EventBus | null = null;
 
@@ -98,17 +97,17 @@ export default class BaseApiService extends UI5Object {
 	protected _handleSessionExpiration(): void {
 		// Default behavior: Emit an event that App Controller listens to to open settings
 		// if no connection url is defined.
-		if (this._isLoginDialogOpen) return;
+		if (BaseApiService._isLoginDialogOpen) return;
 
 		const baseUrl = SettingsService.getInstance().getBaseUrl();
 		const openSettingsText = this._getText("openSettings");
 
 		if (!baseUrl) {
-			this._isLoginDialogOpen = true;
+			BaseApiService._isLoginDialogOpen = true;
 			MessageBox.warning(this._getText("connectionFailed"), {
 				actions: [openSettingsText, MessageBox.Action.CANCEL],
 				onClose: (sAction: string | null) => {
-					this._isLoginDialogOpen = false;
+					BaseApiService._isLoginDialogOpen = false;
 					if (sAction === openSettingsText) {
 						BaseApiService._eventBus?.publish("ui5.aghd", "openSettings");
 					}

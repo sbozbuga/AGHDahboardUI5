@@ -1,5 +1,5 @@
 import BaseApiService from "./BaseApiService";
-import { AdGuardData, RawAdGuardData, LogEntry } from "../model/AdGuardTypes";
+import type { AdGuardData, RawAdGuardData, LogEntry } from "../model/AdGuardTypes";
 import { Constants } from "../model/Constants";
 import FilteringService from "./FilteringService";
 import ClientService from "./ClientService";

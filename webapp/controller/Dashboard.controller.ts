@@ -9,9 +9,10 @@ import ClientService from "../service/ClientService";
 import MessageBox from "sap/m/MessageBox";
 import Button from "sap/m/Button";
 import { Constants } from "../model/Constants";
-import { AdGuardStats, StatsEntry } from "../model/AdGuardTypes";
+import type { AdGuardStats, StatsEntry } from "../model/AdGuardTypes";
 import Event from "sap/ui/base/Event";
 import ColumnListItem from "sap/m/ColumnListItem";
+import Log from "sap/base/Log";
 
 /**
  * @namespace ui5.aghd.controller
@@ -218,8 +219,8 @@ export default class Dashboard extends BaseController {
 			if (!silent) {
 				this.showError(error);
 			}
-			// Security Enhancement: Prevent data leakage in browser console.
-			console.error("Failed to fetch stats", (error as Error).message || "Unknown error");
+			// Security Enhancement: Use framework logging to prevent data leakage in browser console.
+			Log.error("Failed to fetch stats", (error as Error).message || "Unknown error");
 		} finally {
 			if (!silent) {
 				this.getView()?.setBusy(false);

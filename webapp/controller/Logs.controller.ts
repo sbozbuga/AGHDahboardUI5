@@ -14,7 +14,7 @@ import Button from "sap/m/Button";
 import Table from "sap/m/Table";
 import SettingsService from "../service/SettingsService";
 import GeminiService from "../service/GeminiService";
-import { LogEntry, AdvancedFilterRule } from "../model/AdGuardTypes";
+import type { LogEntry, AdvancedFilterRule } from "../model/AdGuardTypes";
 import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import { Constants } from "../model/Constants";
 import BaseController from "./BaseController";

@@ -1,9 +1,10 @@
 import BaseApiService from "./BaseApiService";
-import { RawAdGuardStats, AdGuardStats, RawAdGuardData, StatsEntry } from "../model/AdGuardTypes";
+import type { RawAdGuardStats, AdGuardStats, RawAdGuardData, StatsEntry } from "../model/AdGuardTypes";
 import { Constants } from "../model/Constants";
 import FilteringService from "./FilteringService";
 import ClientService from "./ClientService";
 import SettingsService from "./SettingsService";
+import Log from "sap/base/Log";
 
 export interface SlowestQueryEntry {
 	domain: string;
@@ -25,7 +26,7 @@ export default class StatsService extends BaseApiService {
 	private static readonly DEFAULT_SCAN_DEPTH = 1000;
 	private static readonly SLOWEST_QUERY_CACHE_DURATION = 60000;
 
-	private _slowestQueriesMap = new Map<string, SlowestQueryEntry>();
+	private _slowestQueriesMap: Map<string, SlowestQueryEntry> = new Map();
 	private _slowestQueriesCache: SlowestQueryEntry[] | null = null;
 	private _slowestQueriesCacheTime: number = 0;
 	private _slowestQueriesCacheDepth: number = 0;
@@ -169,8 +170,8 @@ export default class StatsService extends BaseApiService {
 
 			return top10;
 		} catch (error) {
-			// Security Enhancement: Prevent data leakage in browser console.
-			console.error("Failed to fetch slowest queries", (error as Error).message || "Unknown error");
+			// Security Enhancement: Use framework logging to prevent data leakage in browser console.
+			Log.error("Failed to fetch slowest queries", (error as Error).message || "Unknown error");
 			return [];
 		}
 	}
@@ -279,8 +280,8 @@ export default class StatsService extends BaseApiService {
 				lastUpdated: new Date()
 			};
 		} catch (error) {
-			// Security Enhancement: Prevent data leakage in browser console.
-			console.error("Failed to aggregate stats from logs", (error as Error).message || "Unknown error");
+			// Security Enhancement: Use framework logging to prevent data leakage in browser console.
+			Log.error("Failed to aggregate stats from logs", (error as Error).message || "Unknown error");
 			throw error;
 		}
 	}
@@ -344,8 +345,8 @@ export default class StatsService extends BaseApiService {
 			// Sort by count descending and limit
 			return result.sort((a, b) => b.count - a.count).slice(0, StatsService.TOP_LIST_LIMIT);
 		} catch (error) {
-			// Security Enhancement: Prevent data leakage in browser console.
-			console.error("Failed to aggregate top filters from logs", (error as Error).message || "Unknown error");
+			// Security Enhancement: Use framework logging to prevent data leakage in browser console.
+			Log.error("Failed to aggregate top filters from logs", (error as Error).message || "Unknown error");
 			return [];
 		}
 	}
@@ -369,10 +370,14 @@ export default class StatsService extends BaseApiService {
 		}
 	}
 
-	private transformList(list: unknown, preferredKey: string, limit?: number): StatsEntry[] {
+	private transformList(
+		list: Record<string, unknown>[] | Record<string, unknown>,
+		preferredKey: string,
+		limit?: number
+	): StatsEntry[] {
 		if (!Array.isArray(list)) {
 			if (typeof list === "object" && list !== null) {
-				const entries = Object.entries(list as Record<string, unknown>);
+				const entries = Object.entries(list);
 				const len = limit ? Math.min(entries.length, limit) : entries.length;
 				const result = new Array(len) as StatsEntry[];
 				// Optimization: Loop mapping avoids creating intermediate sliced arrays
