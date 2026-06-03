@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "ui5 build --clean-dest",
-    "build:opt": "ui5 build self-contained --clean-dest --all",
+    "build:opt": "ui5 build self-contained --clean-dest --all && node -e \"const fs=require('fs');const p='dist/index.html';let c=fs.readFileSync(p,'utf8');c=c.replace('resources/sap-ui-custom.js','resources/sap-ui-core.js');fs.writeFileSync(p,c);console.log('Fixed bootstrap to sap-ui-core.js')\"",
     "start": "ui5 serve --port 8085 -o index.html",
     "start-coverage": "ui5 serve --port 8085 --config ui5-coverage.yaml",
     "start:dist": "ui5 serve --port 8085 -o index.html --config ui5-dist.yaml",
