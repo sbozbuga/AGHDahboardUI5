@@ -49,9 +49,7 @@
     "ui5-tooling-modules": "^3.35.0",
     "ui5-tooling-transpile": "^3.11.0"
   },
-  "dependencies": {
-    "@google/generative-ai": "^0.24.1"
-  },
+  "dependencies": {},
   "overrides": {
     "serialize-javascript": "^7.0.2",
     "tar": "^7.5.0"

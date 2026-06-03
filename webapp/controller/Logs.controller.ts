@@ -1,4 +1,3 @@
-import MessageBox from "sap/m/MessageBox";
 import AppComponent from "../Component";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import Filter from "sap/ui/model/Filter";
@@ -12,8 +11,6 @@ import LogService from "../service/LogService";
 import Dialog from "sap/m/Dialog";
 import Button from "sap/m/Button";
 import Table from "sap/m/Table";
-import SettingsService from "../service/SettingsService";
-import GeminiService from "../service/GeminiService";
 import type { LogEntry, AdvancedFilterRule } from "../model/AdGuardTypes";
 import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import { Constants } from "../model/Constants";
@@ -352,63 +349,7 @@ export default class Logs extends BaseController {
 		}
 	}
 
-	public async onAnalyzeLogs(): Promise<void> {
-		if (!SettingsService.getInstance().hasApiKey()) {
-			MessageBox.warning(this.getText("apiKeyMissing"));
-			void this.onOpenSettings();
-			return;
-		}
 
-		const view = this.getView();
-		if (!view) return;
-		const model = this.getViewModel();
-		const logs = model.getProperty(Constants.ModelProperties.Data) as LogEntry[];
-
-		if (!logs || logs.length === 0) {
-			MessageBox.information(this.getText("noLogsFound"));
-			return;
-		}
-
-		view.setBusy(true);
-
-		try {
-			const insights = await GeminiService.getInstance().generateInsights(logs);
-			const html = this.formatter.formatInsights(insights);
-
-			// We put these on the view model so they don't pollute the data model
-			const viewModel = this.getViewModel("view");
-			viewModel.setProperty("/analysisHtml", html);
-			viewModel.setProperty("/analysisText", insights);
-			void this.onOpenInsights();
-		} catch (error) {
-			this.showError(error);
-		} finally {
-			view.setBusy(false);
-		}
-	}
-
-	public onCopyInsights(event: Event): void {
-		const viewModel = this.getViewModel("view");
-		const text = viewModel.getProperty("/analysisText") as string;
-		const source = event.getSource();
-
-		if (!text) return;
-
-		// Pass source as Button if it is one, otherwise undefined
-		const btn = source instanceof Button ? source : undefined;
-		this.copyToClipboard(text, this.getText("listCopied"), btn);
-	}
-
-	public async onOpenInsights(): Promise<void> {
-		const dialog = await this._openDialog(Constants.Fragments.InsightsDialog);
-		dialog.open();
-	}
-
-	public onCloseInsights(): void {
-		const view = this.getView();
-		if (!view) return;
-		this.getControl<Dialog>("insightsDialog").close();
-	}
 
 	// Advanced Filter Handlers
 	public async onOpenAdvancedFilter(): Promise<void> {

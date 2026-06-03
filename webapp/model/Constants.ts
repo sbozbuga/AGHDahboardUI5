@@ -5,7 +5,6 @@ export const Constants = {
 	Fragments: {
 		SettingsDialog: "ui5.aghd.view.fragment.SettingsDialog",
 		ViewSettingsDialog: "ui5.aghd.view.ViewSettingsDialog",
-		InsightsDialog: "ui5.aghd.view.fragment.InsightsDialog",
 		AdvancedFilterDialog: "ui5.aghd.view.fragment.AdvancedFilterDialog"
 	},
 	ModelProperties: {
@@ -32,8 +31,6 @@ export const Constants = {
 		Logs: "logs"
 	},
 	ApiEndpoints: {
-		Login: "/control/login",
-		Logout: "/control/logout",
 		Stats: "/control/stats",
 		QueryLog: "/control/querylog",
 		FilteringStatus: "/control/filtering/status",

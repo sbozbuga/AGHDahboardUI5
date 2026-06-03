@@ -63,14 +63,7 @@
 							tooltip="{parts:[{path:'i18n>copyAll'}, {path:'/data', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 						/>
 						<ToolbarSeparator />
-						<Button
-							text="{i18n>smartAnalysis}"
-							icon="sap-icon://lightbulb"
-							press=".onAnalyzeLogs"
-							type="Emphasized"
-							tooltip="{i18n>generateAIInsights}"
-							ariaHasPopup="Dialog"
-						/>
+
 						<Button
 							id="btnFilter"
 							icon="sap-icon://filter"

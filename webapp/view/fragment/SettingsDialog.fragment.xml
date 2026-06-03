@@ -18,33 +18,7 @@
 					class="sapUiTinyMarginBottom"
 				/>
 
-				<Label text="Gemini API Key" labelFor="apiKeyInput" class="sapUiSmallMarginTop" />
-				<Input
-					id="apiKeyInput"
-					value="{/apiKey}"
-					showClearIcon="true"
-					placeholder="Enter your Gemini API Key"
-					type="Password"
-					showValueHelp="true"
-					valueHelpIconSrc="sap-icon://show"
-					valueHelpRequest=".onToggleApiKeyVisibility"
-					width="100%"
-					maxLength="100"
-					submit=".onSaveSettings"
-					ariaDescribedBy="apiKeyHelpText"
-				/>
-				<Text id="apiKeyHelpText" text="Your API key is stored locally in your browser." class="sapUiTinyMarginTop" />
-				<Link
-					text="Get an API Key"
-					href="https://aistudio.google.com/app/apikey"
-					target="_blank"
-					class="sapUiSmallMarginBottom"
-				/>
 
-				<Label text="Gemini Model" labelFor="modelSelect" class="sapUiSmallMarginTop" />
-				<Select id="modelSelect" selectedKey="{/selectedModel}" items="{/availableModels}" width="100%">
-					<core:Item key="{key}" text="{text}" />
-				</Select>
 
 				<Label text="{i18n>customClientsTitle}" labelFor="customClientsInput" class="sapUiSmallMarginTop" />
 				<TextArea
@@ -60,23 +34,7 @@
 				/>
 				<Text id="customClientsHelpText" text="{i18n>customClientsHelpText}" class="sapUiTinyMarginTop" />
 
-				<Label text="System Context (Optional)" labelFor="contextInput" class="sapUiSmallMarginTop" />
-				<TextArea
-					id="contextInput"
-					value="{/systemContext}"
-					placeholder="Describe your network (e.g., Raspberry Pi 5, Unbound, IoT devices...)"
-					rows="4"
-					width="100%"
-					maxLength="500"
-					showExceededText="true"
-					valueLiveUpdate="true"
-					ariaDescribedBy="contextHelpText"
-				/>
-				<Text
-					id="contextHelpText"
-					text="Provide additional context to improve AI generated analysis."
-					class="sapUiTinyMarginTop"
-				/>
+
 			</VBox>
 		</content>
 		<buttons>
