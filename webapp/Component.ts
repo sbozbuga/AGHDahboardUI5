@@ -1,7 +1,6 @@
 import UIComponent from "sap/ui/core/UIComponent";
 import Device from "sap/ui/Device";
 import StatsService from "./service/StatsService";
-import GeminiService from "./service/GeminiService";
 import ResourceModel from "sap/ui/model/resource/ResourceModel";
 import BaseApiService from "./service/BaseApiService";
 
@@ -33,11 +32,9 @@ export default class Component extends UIComponent {
 			if (bundleOrPromise instanceof Promise) {
 				void bundleOrPromise.then((bundle) => {
 					StatsService.getInstance().setResourceBundle(bundle);
-					GeminiService.getInstance().setResourceBundle(bundle);
 				});
 			} else {
 				StatsService.getInstance().setResourceBundle(bundleOrPromise);
-				GeminiService.getInstance().setResourceBundle(bundleOrPromise);
 			}
 		}
 	}
