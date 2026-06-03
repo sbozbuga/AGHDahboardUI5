@@ -60,7 +60,7 @@ export default class ClientService extends BaseApiService {
 			this._clientMap.clear();
 			this._loadCustomClients();
 			const data = await this._request<RawClientsData>(Constants.ApiEndpoints.Clients);
-			this._clients = data.clients || [];
+			this._clients = Array.isArray(data.clients) ? data.clients : [];
 
 			// Map configured clients
 			for (const c of this._clients) {
