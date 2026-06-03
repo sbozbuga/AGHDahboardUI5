@@ -1,6 +1,5 @@
 import SettingsService from "./SettingsService";
 import ResourceBundle from "sap/base/i18n/ResourceBundle";
-import MessageBox from "sap/m/MessageBox";
 import UI5Object from "sap/ui/base/Object";
 import EventBus from "sap/ui/core/EventBus";
 
@@ -22,7 +21,6 @@ export class ApiError extends Error {
  */
 export default class BaseApiService extends UI5Object {
 	protected _resourceBundle: ResourceBundle | null = null;
-	protected static _isLoginDialogOpen = false;
 	protected static readonly REQUEST_TIMEOUT = 10000;
 	protected static _eventBus: EventBus | null = null;
 
@@ -69,11 +67,6 @@ export default class BaseApiService extends UI5Object {
 		try {
 			const response = await fetch(targetUrl, config);
 
-			if (response.status === 401) {
-				this._handleSessionExpiration();
-				throw new ApiError(this._getText("unauthorized"), 401);
-			}
-
 			if (!response.ok) {
 				throw new ApiError(this._getText("requestFailed", [response.statusText]), response.status);
 			}
@@ -91,29 +84,6 @@ export default class BaseApiService extends UI5Object {
 			throw error;
 		} finally {
 			clearTimeout(timeoutId);
-		}
-	}
-
-	// A hook for subclasses like AuthService to override with popup logic
-	protected _handleSessionExpiration(): void {
-		// Default behavior: Emit an event that App Controller listens to to open settings
-		// if no connection url is defined.
-		if (BaseApiService._isLoginDialogOpen) return;
-
-		const baseUrl = SettingsService.getInstance().getBaseUrl();
-		const openSettingsText = this._getText("openSettings");
-
-		if (!baseUrl) {
-			BaseApiService._isLoginDialogOpen = true;
-			MessageBox.warning(this._getText("connectionFailed"), {
-				actions: [openSettingsText, MessageBox.Action.CANCEL],
-				onClose: (sAction: string | null) => {
-					BaseApiService._isLoginDialogOpen = false;
-					if (sAction === openSettingsText) {
-						BaseApiService._eventBus?.publish("ui5.aghd", "openSettings");
-					}
-				}
-			});
 		}
 	}
 }

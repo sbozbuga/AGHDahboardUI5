@@ -1,12 +1,10 @@
 import BaseController from "./BaseController";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import AuthService from "../service/AuthService";
 import StatsService from "../service/StatsService";
 import SettingsService from "../service/SettingsService";
 import LogService from "../service/LogService";
 import ClientService from "../service/ClientService";
 // formatter imported in BaseController
-import MessageBox from "sap/m/MessageBox";
 import Button from "sap/m/Button";
 import { Constants } from "../model/Constants";
 import type { AdGuardStats, StatsEntry } from "../model/AdGuardTypes";
@@ -209,12 +207,6 @@ export default class Dashboard extends BaseController {
 				lastUpdated: new Date()
 			});
 		} catch (error) {
-			if ((error as Error).message === "Unauthorized") {
-				// Stop timer on auth error to prevent endless loops.
-				// Service handles the UI (Popup).
-				this.stopPolling();
-				return;
-			}
 			// Suppress errors during silent refresh to avoid popup span
 			if (!silent) {
 				this.showError(error);
@@ -284,31 +276,6 @@ export default class Dashboard extends BaseController {
 
 		this.navToLogs({
 			search: entry.domain
-		});
-	}
-
-	public onLogoutPress(): void {
-		MessageBox.confirm(this.getText("logoutConfirmation"), {
-			title: this.getText("logout"),
-			actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
-			onClose: (action: string | null) => {
-				if (action === MessageBox.Action.OK) {
-					const model = this.getViewModel();
-					// Security Enhancement: Clear sensitive data from the UI model
-					// before the async logout and reload happen to prevent temporary exposure
-					if (model) {
-						model.setData({});
-					}
-					void (async () => {
-						await AuthService.getInstance().logout();
-						MessageBox.success(this.getText("loggedOut"), {
-							onClose: () => {
-								window.location.reload();
-							}
-						});
-					})();
-				}
-			}
 		});
 	}
 

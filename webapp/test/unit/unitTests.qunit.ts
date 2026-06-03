@@ -1,14 +1,12 @@
 // import all your QUnit tests here
 import "unit/controller/App.qunit";
 import "unit/controller/Dashboard.qunit";
-import "unit/controller/Login.qunit";
 import "unit/controller/Logs.qunit";
 import "unit/controller/LogsPerformance.qunit";
 import "unit/controller/LogsOptimization.qunit";
 import "unit/controller/LogsSearchDebounce.qunit";
 import "unit/service/IntegrationServices.qunit";
 import "unit/service/StatsServicePerformance.qunit";
-import "unit/service/AuthServiceSecurity.qunit";
 import "unit/service/GeminiService.qunit";
 import "unit/service/GeminiServiceBenchmark.qunit";
 import "unit/service/StatsServiceSlowestQueriesBenchmark.qunit";

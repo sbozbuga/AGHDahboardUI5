@@ -1,10 +1,8 @@
 import Dashboard from "ui5/aghd/controller/Dashboard.controller";
 import StatsService from "ui5/aghd/service/StatsService";
 import LogService from "ui5/aghd/service/LogService";
-import AuthService from "ui5/aghd/service/AuthService";
 import QUnit from "sap/ui/thirdparty/qunit-2";
 import JSONModel from "sap/ui/model/json/JSONModel";
-import MessageBox from "sap/m/MessageBox";
 
 interface TestContext {
 	controller: Dashboard;
@@ -22,7 +20,6 @@ interface TestContext {
 	mockService: any;
 	originalGetStatsInstance: () => StatsService;
 	originalGetLogInstance: () => LogService;
-	originalGetAuthInstance: () => AuthService;
 }
 
 QUnit.module("Dashboard Controller Performance");
@@ -279,73 +276,4 @@ QUnit.test("onRefreshStats updates lastUpdated property", async function (this: 
 	assert.ok(model.getProperty("/lastUpdated") instanceof Date, "lastUpdated is set to a Date object");
 });
 
-QUnit.module("Dashboard Logout Logic", {
-	beforeEach: function (this: TestContext) {
-		// eslint-disable-next-line @typescript-eslint/no-this-alias
-		const ctx = this;
-		ctx.controller = new Dashboard("dashboard");
 
-		// Mock AuthService
-		// eslint-disable-next-line @typescript-eslint/unbound-method
-		ctx.originalGetAuthInstance = AuthService.getInstance;
-
-		ctx.mockService = {
-			logout: () => Promise.resolve()
-		};
-
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-		AuthService.getInstance = () => ctx.mockService;
-	},
-	afterEach: function (this: TestContext) {
-		// eslint-disable-next-line @typescript-eslint/no-this-alias
-		const ctx = this;
-		ctx.controller.destroy();
-		AuthService.getInstance = ctx.originalGetAuthInstance;
-	}
-});
-
-QUnit.test("onLogoutPress asks for confirmation", function (this: TestContext, assert: Assert) {
-	// eslint-disable-next-line @typescript-eslint/no-this-alias
-	const ctx = this;
-
-	// Spy on MessageBox.confirm
-	let confirmCalled = false;
-	// eslint-disable-next-line @typescript-eslint/unbound-method
-	const originalConfirm = MessageBox.confirm;
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	MessageBox.confirm = (message: string, options: any) => {
-		confirmCalled = true;
-		// Since i18n is not loaded, we get key "logoutConfirmation"
-		assert.ok(
-			message.includes("logoutConfirmation") || message.includes("Are you sure"),
-			"Confirmation message shown (key or text)"
-		);
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-		assert.ok(options.actions.includes(MessageBox.Action.OK), "OK action available");
-
-		// Simulate clicking OK
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-		if (options.onClose) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-			options.onClose(MessageBox.Action.OK);
-		}
-	};
-
-	// Spy on service logout
-	let logoutCalled = false;
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-	ctx.mockService.logout = () => {
-		logoutCalled = true;
-		return Promise.resolve();
-	};
-
-	try {
-		ctx.controller.onLogoutPress();
-		assert.ok(confirmCalled, "MessageBox.confirm was called");
-		assert.ok(logoutCalled, "AuthService.logout was called after confirmation");
-	} finally {
-		// Restore
-		MessageBox.confirm = originalConfirm;
-	}
-});
