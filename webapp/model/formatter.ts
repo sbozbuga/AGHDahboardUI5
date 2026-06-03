@@ -168,59 +168,53 @@ export default {
 		if (!text) {
 			return "";
 		}
-		// Manual escape of HTML characters to avoid over-encoding markdown markers by encodeXML
-		const safeText = text
+		const BOLD_REGEX = /\*\*(.*?)\*\*/g;
+		// Manual escape of HTML characters to avoid over-encoding markdown markers by encodeXML,
+		// and apply bold styling globally to avoid doing it per line
+		const result = text
 			.replace(/&/g, "&amp;")
 			.replace(/</g, "&lt;")
 			.replace(/>/g, "&gt;")
 			.replace(/"/g, "&quot;")
-			.replace(/'/g, "&#39;");
+			.replace(/'/g, "&#39;")
+			.replace(BOLD_REGEX, "<strong>$1</strong>");
 
-		const BOLD_REGEX = /\*\*(.*?)\*\*/g;
-		const lines = safeText.split("\n");
-		const processedLines: string[] = [];
+		const lines = result.split("\n");
 		let inList = false;
+		let resultHtml = "";
 
-		for (const line of lines) {
-			const processedLine = line.replace(BOLD_REGEX, "<strong>$1</strong>");
-			const trimmed = processedLine.trim();
+		const len = lines.length;
+		for (let i = 0; i < len; i++) {
+			const line = lines[i];
+			const trimmed = line.trim();
 
-			if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
+			const isList = trimmed.startsWith("* ") || trimmed.startsWith("- ");
+
+			if (isList) {
 				if (!inList) {
-					processedLines.push("<ul>");
+					resultHtml += "<ul>";
 					inList = true;
 				}
-				const content = trimmed.substring(2);
-				processedLines.push(`<li>${content}</li>`);
+				resultHtml += `<li>${trimmed.substring(2)}</li>`;
 			} else {
 				if (inList) {
-					processedLines.push("</ul>");
+					resultHtml += "</ul>";
 					inList = false;
 				}
-				processedLines.push(processedLine);
+				resultHtml += line;
+
+				if (i < len - 1) {
+					const nextLine = lines[i + 1].trim();
+					const nextIsList = nextLine.startsWith("* ") || nextLine.startsWith("- ");
+					if (!nextIsList) {
+						resultHtml += "<br/>";
+					}
+				}
 			}
 		}
 
 		if (inList) {
-			processedLines.push("</ul>");
-		}
-
-		let resultHtml = "";
-		const len = processedLines.length;
-		for (let i = 0; i < len; i++) {
-			const current = processedLines[i];
-			resultHtml += current;
-
-			if (i < len - 1) {
-				const next = processedLines[i + 1];
-				const isCurrentListTag =
-					current === "<ul>" || current === "</ul>" || current.startsWith("<li>") || current.endsWith("</li>");
-				const isNextListTag = next === "<ul>" || next === "</ul>" || next.startsWith("<li>") || next.endsWith("</li>");
-
-				if (!isCurrentListTag && !isNextListTag) {
-					resultHtml += "<br/>";
-				}
-			}
+			resultHtml += "</ul>";
 		}
 
 		return resultHtml;
