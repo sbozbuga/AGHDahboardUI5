@@ -90,5 +90,3 @@ QUnit.skip("setBaseUrl throws on URLs with query params or fragments", function 
 		"Throws on fragments"
 	);
 });
-
-

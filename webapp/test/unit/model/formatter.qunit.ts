@@ -156,4 +156,3 @@ QUnit.test("Should handle null or undefined for date", function (assert) {
 	assert.strictEqual(formatter.formatDateTime(null), "", "Returns empty string for null");
 	assert.strictEqual(formatter.formatDateTime(undefined), "", "Returns empty string for undefined");
 });
-

@@ -157,7 +157,5 @@ export default {
 	 */
 	getLength: function (list: unknown[] | null | undefined): number {
 		return list && Array.isArray(list) ? list.length : 0;
-	},
-
-
+	}
 };

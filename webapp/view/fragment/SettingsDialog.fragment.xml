@@ -18,8 +18,6 @@
 					class="sapUiTinyMarginBottom"
 				/>
 
-
-
 				<Label text="{i18n>customClientsTitle}" labelFor="customClientsInput" class="sapUiSmallMarginTop" />
 				<TextArea
 					id="customClientsInput"
@@ -33,8 +31,6 @@
 					ariaDescribedBy="customClientsHelpText"
 				/>
 				<Text id="customClientsHelpText" text="{i18n>customClientsHelpText}" class="sapUiTinyMarginTop" />
-
-
 			</VBox>
 		</content>
 		<buttons>

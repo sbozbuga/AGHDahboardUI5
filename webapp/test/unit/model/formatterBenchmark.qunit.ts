@@ -3,8 +3,6 @@ import QUnit from "sap/ui/thirdparty/qunit-2";
 
 QUnit.module("formatter Benchmark");
 
-
-
 QUnit.test("formatElapsedState vs typeof + Number", function (assert: Assert) {
 	const iterations = 10000;
 

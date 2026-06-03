@@ -167,8 +167,6 @@ export default class BaseController extends Controller {
 		(view.byId("settingsDialog") as Dialog).close();
 	}
 
-
-
 	/**
 	 * Copies text to clipboard with a fallback for non-secure contexts.
 	 * @param text The text to copy

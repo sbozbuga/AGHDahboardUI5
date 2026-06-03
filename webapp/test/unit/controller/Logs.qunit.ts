@@ -6,8 +6,6 @@ import Button from "sap/m/Button";
 
 QUnit.module("Logs Controller");
 
-
-
 QUnit.test("onInit sets model size limit to DEFAULT_LIMIT", function (assert) {
 	const controller = new LogsController("logs");
 

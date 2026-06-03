@@ -275,5 +275,3 @@ QUnit.test("onRefreshStats updates lastUpdated property", async function (this: 
 
 	assert.ok(model.getProperty("/lastUpdated") instanceof Date, "lastUpdated is set to a Date object");
 });
-
-

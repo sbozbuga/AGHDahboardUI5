@@ -349,8 +349,6 @@ export default class Logs extends BaseController {
 		}
 	}
 
-
-
 	// Advanced Filter Handlers
 	public async onOpenAdvancedFilter(): Promise<void> {
 		const dialog = await this._openDialog(Constants.Fragments.AdvancedFilterDialog);
