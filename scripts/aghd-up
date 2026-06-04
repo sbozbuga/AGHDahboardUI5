@@ -1,0 +1,74 @@
+#!/bin/bash
+# Aghd deployment script
+
+REPO_DIR="$HOME/gitRepo/AGHDahboardUI5"
+TARGET_DIR="/var/www/html/aghd"
+FORCE_BUILD=false
+
+if [[ "$1" == "-f" ]]; then
+    FORCE_BUILD=true
+fi
+
+echo "---------------------------------------------------"
+echo "🚀 Aghd Deployment Starting..."
+[[ "$FORCE_BUILD" == true ]] && echo "⚠️  FORCE MODE: Building even if no changes detected."
+echo "---------------------------------------------------"
+
+cd "$REPO_DIR" || {
+    echo "❌ Directory not found!"
+    exit 1
+}
+
+echo "1. Updating Git..."
+# Record current commit hash before pulling
+PREV_COMMIT=$(git rev-parse HEAD)
+GIT_STATUS=$(git pull)
+
+if [[ "$GIT_STATUS" == *"Already up to date."* ]] && [[ "$FORCE_BUILD" == false ]]; then
+    echo "✅ Code is already up to date. Skipping build."
+    echo "💡 Note: You can use 'aghd-up -f' to force build."
+else
+    # Check if there are any build-relevant files updated
+    REBUILD_REQUIRED=true
+    if [[ "$FORCE_BUILD" == false ]]; then
+        # Get list of changed files between PREV_COMMIT and current HEAD
+        CHANGED_FILES=$(git diff --name-only "$PREV_COMMIT" HEAD)
+        
+        # Determine if any of the changed files require a rebuild
+        REBUILD_REQUIRED=false
+        while read -r file; do
+            if [[ -z "$file" ]]; then
+                continue
+            fi
+            # Ignore documentation, CI/CD, and project metadata
+            if [[ ! "$file" =~ \.md$ && "$file" != ".gitignore" && "$file" != ".editorconfig" && "$file" != ".prettierrc" && "$file" != "LICENSE" && "$file" != "AGHD.png" && ! "$file" =~ ^\.github/ ]]; then
+                REBUILD_REQUIRED=true
+                break
+            fi
+        done <<< "$CHANGED_FILES"
+    fi
+
+    if [[ "$REBUILD_REQUIRED" == false ]]; then
+        echo "✅ Only unrelated updates (docs/CI/meta) detected. Skipping build and deploy."
+    else
+        echo "🔄 Starting operation (Build & Copy)..."
+        # We need to make sure npm packages are installed/updated if package.json or package-lock.json changed
+        if [[ "$CHANGED_FILES" == *"package.json"* || "$CHANGED_FILES" == *"package-lock.json"* ]]; then
+            echo "📦 package.json changed, installing dependencies..."
+            npm install
+        fi
+        
+        if npm run build:opt; then
+            echo "✅ Build successful."
+        else
+            echo "❌ Build error! Operation stopped."
+            exit 1
+        fi
+        
+        echo "4. Copying files to web directory..."
+        sudo cp -r "$REPO_DIR/dist/." "$TARGET_DIR/"
+        sudo chown -R www-data:www-data "$TARGET_DIR"
+        cd
+        echo "--- 🎉 Successfully Completed! ---"
+    fi
+fi
