@@ -46,7 +46,7 @@
 			"i18n": {
 				"type": "sap.ui.model.resource.ResourceModel",
 				"settings": {
-					"bundleUrl": "i18n/i18n.properties",
+					"bundleName": "ui5.aghd.i18n.i18n",
 					"supportedLocales": ["en", "de", "tr"],
 					"fallbackLocale": "en",
 					"async": true
