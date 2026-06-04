@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "ui5 build --clean-dest",
-    "build:opt": "ui5 build self-contained --clean-dest --all && node -e \"const fs=require('fs');const p='dist/index.html';let c=fs.readFileSync(p,'utf8');c=c.replace('resources/sap-ui-custom.js','resources/sap-ui-custom.js?v=' + Date.now());fs.writeFileSync(p,c);console.log('Added cache buster to sap-ui-custom.js')\"",
+    "build:opt": "ui5 build self-contained --clean-dest --all --include-task generateVersionInfo && node -e \"const fs=require('fs');const p='dist/index.html';let c=fs.readFileSync(p,'utf8');c=c.replace('resources/sap-ui-custom.js','resources/sap-ui-custom.js?v=' + Date.now());c=c.replace('data-sap-ui-async=\\\"true\\\"','data-sap-ui-async=\\\"true\\\" data-sap-ui-preload=\\\"\\\"');fs.writeFileSync(p,c);console.log('Added cache buster and preload configuration to index.html')\"",
     "start": "ui5 serve --port 8085 -o index.html",
     "start-coverage": "ui5 serve --port 8085 --config ui5-coverage.yaml",
     "start:dist": "ui5 serve --port 8085 -o index.html --config ui5-dist.yaml",
