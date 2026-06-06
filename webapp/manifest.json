@@ -10,7 +10,10 @@
 			"version": "1.0.1"
 		}
 	},
-	"sap.fiori": {},
+	"sap.fiori": {
+		"registrationIds": [],
+		"archeType": "transactional"
+	},
 	"sap.ui": {
 		"technology": "UI5",
 		"icons": {
@@ -60,9 +63,7 @@
 				}
 			]
 		},
-		"resourceRoots": {
-			"@google": "./thirdparty/@google"
-		},
+
 		"routing": {
 			"config": {
 				"routerClass": "sap.m.routing.Router",

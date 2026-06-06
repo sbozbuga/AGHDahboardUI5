@@ -1,6 +1,6 @@
 import BaseApiService from "./BaseApiService";
 import { Constants } from "../model/Constants";
-import SettingsService from "./SettingsService";
+
 import type { RawDHCPStatus } from "../model/AdGuardTypes";
 import Log from "sap/base/Log";
 
@@ -26,6 +26,7 @@ export interface ClientMappingSource {
 	name: string;
 	ids?: string[] | string;
 	ip?: string;
+	mac?: string;
 }
 
 /**
@@ -58,7 +59,6 @@ export default class ClientService extends BaseApiService {
 
 		try {
 			this._clientMap.clear();
-			this._loadCustomClients();
 			const data = await this._request<RawClientsData>(Constants.ApiEndpoints.Clients);
 			this._clients = Array.isArray(data.clients) ? data.clients : [];
 
@@ -88,7 +88,6 @@ export default class ClientService extends BaseApiService {
 			this._lastFetchTime = now;
 			return this._clients;
 		} catch (error) {
-			this._loadCustomClients(); // Still load local even if API fails
 			// Security Enhancement: Use framework logging to prevent data leakage in browser console.
 			Log.error("Failed to fetch clients", (error as Error).message || "Unknown error");
 			return [];
@@ -123,31 +122,16 @@ export default class ClientService extends BaseApiService {
 			idsToMap.push(c.ip);
 		}
 
+		// Handle c.mac if it exists (common for auto_clients)
+		if (typeof c.mac === "string" && c.mac) {
+			idsToMap.push(c.mac);
+		}
+
 		// Map all gathered identifiers
 		for (const id of idsToMap) {
 			const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
 			if (overwrite || !this._clientMap.has(normalizedId)) {
 				this._clientMap.set(normalizedId, c.name);
-			}
-		}
-	}
-
-	private _loadCustomClients(): void {
-		const raw = SettingsService.getInstance().getCustomClients();
-		if (!raw) return;
-
-		const lines = raw.split("\n");
-		for (const line of lines) {
-			const trimmed = line.trim();
-			if (!trimmed) continue;
-
-			// Support space or tab separation: "IP Name" or "IP   Name"
-			const parts = trimmed.split(/\s+/);
-			if (parts.length >= 2) {
-				const id = parts[0];
-				const name = parts.slice(1).join(" ");
-				const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
-				this._clientMap.set(normalizedId, name);
 			}
 		}
 	}

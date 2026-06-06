@@ -1,8 +1,8 @@
 import Storage from "sap/ui/util/Storage";
 
 /**
- * Service for managing local dashboard settings like the AdGuard Home base URL,
- * query scan depth, and custom client names.
+ * Service for managing local dashboard settings like the AdGuard Home base URL
+ * and query scan depth.
  * @namespace ui5.aghd.service
  */
 export default class SettingsService {
@@ -10,13 +10,11 @@ export default class SettingsService {
 	private storage: Storage;
 	private readonly STORAGE_KEY_BASE_URL = "aghd_base_url";
 	private readonly STORAGE_KEY_SCAN_DEPTH = "dashboard_scan_depth";
-	private readonly STORAGE_KEY_CUSTOM_CLIENTS = "aghd_custom_clients";
 	private readonly DEFAULT_SCAN_DEPTH = 1000;
 
 	// In-memory cache to avoid synchronous storage access
 	private _baseUrl: string | null = null;
 	private _scanDepth: number | null = null;
-	private _customClients: string | null = null;
 
 	private constructor() {
 		this.storage = new Storage(Storage.Type.local, "aghd_settings");
@@ -25,7 +23,6 @@ export default class SettingsService {
 		window.addEventListener("storage", (e) => {
 			if (e.key === this.STORAGE_KEY_BASE_URL) this._baseUrl = null;
 			if (e.key === this.STORAGE_KEY_SCAN_DEPTH) this._scanDepth = null;
-			if (e.key === this.STORAGE_KEY_CUSTOM_CLIENTS) this._customClients = null;
 		});
 	}
 
@@ -109,19 +106,5 @@ export default class SettingsService {
 		}
 		this._scanDepth = depth;
 		this.storage.put(this.STORAGE_KEY_SCAN_DEPTH, depth);
-	}
-
-	public getCustomClients(): string {
-		if (this._customClients !== null) {
-			return this._customClients;
-		}
-		const val = this.storage.get(this.STORAGE_KEY_CUSTOM_CLIENTS);
-		this._customClients = typeof val === "string" ? val : "";
-		return this._customClients;
-	}
-
-	public setCustomClients(list: string): void {
-		this._customClients = list;
-		this.storage.put(this.STORAGE_KEY_CUSTOM_CLIENTS, list);
 	}
 }

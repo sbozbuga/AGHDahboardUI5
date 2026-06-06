@@ -17,20 +17,6 @@
 					text="Leave empty to use relative path (Proxy Mode)."
 					class="sapUiTinyMarginBottom"
 				/>
-
-				<Label text="{i18n>customClientsTitle}" labelFor="customClientsInput" class="sapUiSmallMarginTop" />
-				<TextArea
-					id="customClientsInput"
-					value="{/customClients}"
-					placeholder="192.168.1.5 iPhone&#10;fe80::... SmartTV"
-					rows="4"
-					width="100%"
-					growing="true"
-					showExceededText="true"
-					maxLength="2000"
-					ariaDescribedBy="customClientsHelpText"
-				/>
-				<Text id="customClientsHelpText" text="{i18n>customClientsHelpText}" class="sapUiTinyMarginTop" />
 			</VBox>
 		</content>
 		<buttons>
