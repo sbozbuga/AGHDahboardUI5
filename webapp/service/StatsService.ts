@@ -203,8 +203,10 @@ export default class StatsService extends BaseApiService {
 			for (const e of data.data) {
 				// Optimization: Date.parse is significantly faster than new Date() for ISO strings
 				const logTimeMs = Date.parse(e.time);
-				if (startTimeMs && logTimeMs < startTimeMs) continue;
+				// Skip newer logs that haven't reached the end time yet
 				if (endTimeMs && logTimeMs > endTimeMs) continue;
+				// Since logs are ordered newest-to-oldest, once we hit a log older than the start time, we can stop
+				if (startTimeMs && logTimeMs < startTimeMs) break;
 
 				total++;
 				const isBlocked = !!(e.filterId && e.filterId > 0) || e.reason === "FilteredBlockedService";

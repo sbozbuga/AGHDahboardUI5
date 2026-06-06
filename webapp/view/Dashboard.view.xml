@@ -61,7 +61,7 @@
 				tooltip="{i18n>viewQueryLog}"
 			>
 				<TileContent>
-					<NumericContent value="{/num_dns_queries}" icon="sap-icon://line-chart" />
+					<NumericContent value="{/num_dns_queries}" icon="sap-icon://line-chart" truncateValueTo="8" />
 				</TileContent>
 			</GenericTile>
 
@@ -73,7 +73,12 @@
 				tooltip="{i18n>viewBlockedQueryLog}"
 			>
 				<TileContent>
-					<NumericContent value="{/num_blocked_filtering}" icon="sap-icon://shield" valueColor="Error" />
+					<NumericContent
+						value="{/num_blocked_filtering}"
+						icon="sap-icon://shield"
+						valueColor="Error"
+						truncateValueTo="8"
+					/>
 				</TileContent>
 			</GenericTile>
 
@@ -91,6 +96,7 @@
 						scale="ms"
 						icon="sap-icon://performance"
 						valueColor="{path: '/avg_processing_time', formatter: '.formatter.formatElapsedColor'}"
+						truncateValueTo="8"
 					/>
 				</TileContent>
 			</GenericTile>
@@ -104,7 +110,13 @@
 				tooltip="{i18n>viewBlockedQueryLogs}"
 			>
 				<TileContent>
-					<NumericContent value="{/block_percentage}" scale="%" icon="sap-icon://pie-chart" valueColor="Critical" />
+					<NumericContent
+						value="{/block_percentage}"
+						scale="%"
+						icon="sap-icon://pie-chart"
+						valueColor="Critical"
+						truncateValueTo="8"
+					/>
 				</TileContent>
 			</GenericTile>
 
