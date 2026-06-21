@@ -15,6 +15,7 @@ import type { LogEntry, AdvancedFilterRule } from "../model/AdGuardTypes";
 import ViewSettingsItem from "sap/m/ViewSettingsItem";
 import { Constants } from "../model/Constants";
 import BaseController from "./BaseController";
+import FilterHelper from "../model/FilterHelper";
 
 interface RouteArguments {
 	"?query"?: {
@@ -214,57 +215,24 @@ export default class Logs extends BaseController {
 
 		const aFilters: Filter[] = [];
 
-		this._addSearchFilters(aFilters);
-		this._addViewSettingsFilters(aFilters);
-		this._addAdvancedFilters(aFilters);
+		const searchFilter = FilterHelper.getSearchFilter(this._sSearchQuery);
+		if (searchFilter) {
+			aFilters.push(searchFilter);
+		}
+
+		const viewSettingsFilter = FilterHelper.getViewSettingsFilter(this._aViewSettingsFilters);
+		if (viewSettingsFilter) {
+			aFilters.push(viewSettingsFilter);
+		}
+
+		const viewModel = this.getViewModel("view");
+		const advancedRules = viewModel.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
+		const advancedFilters = FilterHelper.getAdvancedFilters(advancedRules);
+		if (advancedFilters.length > 0) {
+			aFilters.push(...advancedFilters);
+		}
 
 		binding.filter(aFilters);
-	}
-
-	private _addSearchFilters(aFilters: Filter[]): void {
-		if (this._sSearchQuery && this._sSearchQuery.length > 0) {
-			aFilters.push(
-				new Filter({
-					filters: [
-						new Filter(Constants.ColumnIds.QuestionName, FilterOperator.Contains, this._sSearchQuery),
-						new Filter(Constants.ColumnIds.Client, FilterOperator.Contains, this._sSearchQuery)
-					],
-					and: false
-				})
-			);
-		}
-	}
-
-	private _addViewSettingsFilters(aFilters: Filter[]): void {
-		if (this._aViewSettingsFilters && this._aViewSettingsFilters.length > 0) {
-			aFilters.push(...this._aViewSettingsFilters);
-		}
-	}
-
-	private _addAdvancedFilters(aFilters: Filter[]): void {
-		const viewModel = this.getViewModel("view");
-		const advancedFilters = viewModel.getProperty(Constants.ModelProperties.AdvancedFilters) as AdvancedFilterRule[];
-
-		if (!advancedFilters || advancedFilters.length === 0) return;
-
-		for (const f of advancedFilters) {
-			if (f.value === "") continue;
-
-			let value: string | number | boolean = f.value;
-			const operator = f.operator as FilterOperator;
-
-			// Type conversion for numeric/boolean columns
-			if (f.column === Constants.ColumnIds.ElapsedMs) {
-				value = parseFloat(f.value);
-			} else if (f.column === Constants.ColumnIds.Blocked) {
-				const sVal = String(f.value).toLowerCase();
-				value = sVal === "true" || sVal === "1" || sVal === "yes";
-			} else if (f.column === Constants.ColumnIds.FilterId) {
-				value = parseInt(String(f.value), 10);
-			}
-
-			aFilters.push(new Filter(f.column, operator, value));
-		}
 	}
 
 	public onNavBack(): void {

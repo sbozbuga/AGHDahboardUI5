@@ -415,7 +415,7 @@
 					<f:header>
 						<card:Header
 							id="cardHeaderSlowestQueries"
-							title="{i18n>slowestQueries}"
+							title="{parts:[{path:'i18n>slowestQueries'}, {path:'view>/scanDepth'}], formatter: '.formatter.formatMessage'}"
 							iconSrc="sap-icon://time-account"
 						/>
 					</f:header>
