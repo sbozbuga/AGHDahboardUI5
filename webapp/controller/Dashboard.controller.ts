@@ -144,6 +144,7 @@ export default class Dashboard extends BaseController {
 		try {
 			const viewModel = this.getViewModel("view");
 			const period = viewModel.getProperty("/selectedTimePeriod") as string;
+			const scanDepth = Number(viewModel.getProperty("/scanDepth")) || 1000;
 
 			// Check for new logs before fetching heavy metrics
 			// We fetch stats (lightweight if period is 'all') and the latest log entry (lightweight)
@@ -172,7 +173,7 @@ export default class Dashboard extends BaseController {
 				!this._lastSlowestQueryFetchTime || now - this._lastSlowestQueryFetchTime >= Dashboard.SLOWEST_QUERY_INTERVAL;
 
 			if (isDataNew && isTimeDue) {
-				slowest = await StatsService.getInstance().getSlowestQueries(1000);
+				slowest = await StatsService.getInstance().getSlowestQueries(scanDepth);
 				this._lastLatestTime = latestTime;
 				this._lastSlowestQueryFetchTime = now;
 				slowestChanged = true;

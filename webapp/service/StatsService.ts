@@ -117,8 +117,8 @@ export default class StatsService extends BaseApiService {
 
 			for (const e of data.data) {
 				const rawElapsed = e.elapsedMs;
-				// Optimization: Native Number() is faster than typeof check + parseFloat
-				const val = Number(rawElapsed) || 0;
+				// Optimization: Fast-path type check before Number() avoids constructor overhead when already a number
+				const val = (typeof rawElapsed === "number" ? rawElapsed : Number(rawElapsed)) || 0;
 
 				if (val <= 0) continue;
 
@@ -226,7 +226,8 @@ export default class StatsService extends BaseApiService {
 				const clientIp = e.client;
 				clients.set(clientIp, (clients.get(clientIp) || 0) + 1);
 
-				const procTime = Number(e.elapsedMs) || 0;
+				// Optimization: Fast-path type check before Number() avoids constructor overhead when already a number
+				const procTime = (typeof e.elapsedMs === "number" ? e.elapsedMs : Number(e.elapsedMs)) || 0;
 				totalProcessingTime += procTime;
 			}
 

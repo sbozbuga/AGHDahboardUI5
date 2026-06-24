@@ -41,7 +41,8 @@ export default class LogService extends BaseApiService {
 		const processedList: LogEntry[] = [];
 
 		for (const rawEntry of rawList) {
-			const elapsedMs = Number(rawEntry.elapsedMs) || 0;
+			// Optimization: Fast-path type check before Number() avoids constructor overhead when already a number
+			const elapsedMs = (typeof rawEntry.elapsedMs === "number" ? rawEntry.elapsedMs : Number(rawEntry.elapsedMs)) || 0;
 			const reason = rawEntry.reason;
 			const isBlocked = reason === "SafeBrowsing" || (reason && reason.indexOf("Filtered") === 0);
 
