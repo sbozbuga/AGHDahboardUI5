@@ -42,13 +42,13 @@
 				</headerToolbar>
 				<columns>
 					<Column width="30%">
-						<Text text="{i18n>column}" />
+						<Text id="colHeaderColumn" text="{i18n>column}" />
 					</Column>
 					<Column width="30%">
-						<Text text="{i18n>operator}" />
+						<Text id="colHeaderOperator" text="{i18n>operator}" />
 					</Column>
 					<Column width="30%">
-						<Text text="{i18n>value}" />
+						<Text id="colHeaderValue" text="{i18n>value}" />
 					</Column>
 					<Column width="10%" hAlign="End">
 						<Text text="" />
@@ -57,7 +57,12 @@
 				<items>
 					<ColumnListItem>
 						<cells>
-							<ComboBox tooltip="{i18n>column}" selectedKey="{view>column}" width="100%">
+							<ComboBox
+								tooltip="{i18n>column}"
+								ariaLabelledBy="colHeaderColumn"
+								selectedKey="{view>column}"
+								width="100%"
+							>
 								<core:Item key="time" text="Time" />
 								<core:Item key="client" text="Client" />
 								<core:Item key="question/name" text="Question" />
@@ -70,7 +75,12 @@
 								<core:Item key="filterId" text="Filter ID" />
 								<core:Item key="rule" text="Rule" />
 							</ComboBox>
-							<ComboBox tooltip="{i18n>operator}" selectedKey="{view>operator}" width="100%">
+							<ComboBox
+								tooltip="{i18n>operator}"
+								ariaLabelledBy="colHeaderOperator"
+								selectedKey="{view>operator}"
+								width="100%"
+							>
 								<core:Item key="EQ" text="Equals" />
 								<core:Item key="Contains" text="Contains" />
 								<core:Item key="GT" text="Greater Than" />
@@ -83,6 +93,7 @@
 							</ComboBox>
 							<Input
 								tooltip="{i18n>value}"
+								ariaLabelledBy="colHeaderValue"
 								value="{view>value}"
 								width="100%"
 								placeholder="{i18n>value}"
