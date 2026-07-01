@@ -38,9 +38,11 @@ export default class LogService extends BaseApiService {
 		]);
 
 		const rawList = data.data || [];
-		const processedList: LogEntry[] = [];
+		const len = rawList.length;
+		const processedList = new Array(len) as LogEntry[];
 
-		for (const rawEntry of rawList) {
+		for (let i = 0; i < len; i++) {
+			const rawEntry = rawList[i];
 			// Optimization: Fast-path type check before Number() avoids constructor overhead when already a number
 			const elapsedMs = (typeof rawEntry.elapsedMs === "number" ? rawEntry.elapsedMs : Number(rawEntry.elapsedMs)) || 0;
 			const reason = rawEntry.reason;
@@ -52,11 +54,12 @@ export default class LogService extends BaseApiService {
 				rawEntry.upstream = filterName || rawEntry.rule || rawEntry.reason;
 			}
 
-			processedList.push({
+			// Optimization: Pre-allocated array is faster than push
+			processedList[i] = {
 				...rawEntry,
 				elapsedMs,
 				blocked: !!isBlocked
-			});
+			};
 		}
 
 		return { data: processedList };
