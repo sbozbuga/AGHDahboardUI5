@@ -43,3 +43,6 @@
 ## 2026-03-24 - Immediate Feedback for Async Actions
 **Learning:** By default, UI5 delays the display of the busy indicator by 1000ms. For standard network requests taking 300-900ms, the user receives no visual feedback, causing the application to feel unresponsive or frozen during critical operations like data fetching or form submission.
 **Action:** Set the `busyIndicatorDelay="0"` property on root `<mvc:View>` or `<App>` tags to guarantee immediate visual feedback for application-level async operations, significantly improving perceived performance and micro-UX.
+## 2026-07-08 - Contextual UI Controls
+**Learning:** Buttons associated with data lists (like 'Copy All' or 'Clear All') create false affordances when the underlying list is empty, leading to confusing user experiences or errors.
+**Action:** Always bind the `enabled` or `visible` properties of list-dependent action buttons to the length of the associated data model, ensuring they only appear or become active when actionable data exists.
