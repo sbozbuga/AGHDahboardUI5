@@ -39,12 +39,14 @@ export default class LogService extends BaseApiService {
 
 		const rawList = data.data || [];
 		const len = rawList.length;
-		const processedList = new Array(len) as LogEntry[];
 
+		// ⚡ Bolt: Mutating raw entries in-place avoids massive object allocation
+		// and GC pressure in this high-frequency loop compared to the spread operator.
 		for (let i = 0; i < len; i++) {
-			const rawEntry = rawList[i];
+			const rawEntry = rawList[i] as unknown as LogEntry;
 			// Optimization: Fast-path type check before Number() avoids constructor overhead when already a number
-			const elapsedMs = (typeof rawEntry.elapsedMs === "number" ? rawEntry.elapsedMs : Number(rawEntry.elapsedMs)) || 0;
+			rawEntry.elapsedMs =
+				(typeof rawEntry.elapsedMs === "number" ? rawEntry.elapsedMs : Number(rawEntry.elapsedMs)) || 0;
 			const reason = rawEntry.reason;
 			const isBlocked = reason === "SafeBrowsing" || (reason && reason.indexOf("Filtered") === 0);
 
@@ -54,14 +56,9 @@ export default class LogService extends BaseApiService {
 				rawEntry.upstream = filterName || rawEntry.rule || rawEntry.reason;
 			}
 
-			// Optimization: Pre-allocated array is faster than push
-			processedList[i] = {
-				...rawEntry,
-				elapsedMs,
-				blocked: !!isBlocked
-			};
+			rawEntry.blocked = !!isBlocked;
 		}
 
-		return { data: processedList };
+		return { data: rawList as unknown as LogEntry[] };
 	}
 }
