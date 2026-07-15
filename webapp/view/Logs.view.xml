@@ -61,6 +61,7 @@
 							icon="sap-icon://copy"
 							press=".onCopyAllLogs"
 							tooltip="{parts:[{path:'i18n>copyAll'}, {path:'/data', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
+							enabled="{= ${path: '/data', formatter: '.formatter.getLength'} > 0 }"
 						/>
 						<ToolbarSeparator />
 
