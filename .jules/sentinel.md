@@ -1,13 +1,4 @@
-## 2025-03-22 - XSS via Unescaped Confirmation Dialog
-**Vulnerability:** The Base URL configured by the user (or attacker) was being passed directly to `MessageBox.confirm` in the external URL warning without proper encoding. Although the `URL` constructor checks validated the protocol, it did not prevent embedded tags within the URL string from being rendered as HTML by the UI5 component.
-**Learning:** `sap.m.MessageBox` instances may render HTML depending on internal configurations or specific characters. Even when a URL has passed basic parsing (like ensuring `http://` protocol), the raw input string may contain tags like `<script>` that node's `URL` constructor canonicalizes but original raw strings retain.
-**Prevention:** Always sanitize or encode ANY user-supplied or user-configurable string using `sap/base/security/encodeXML` before displaying it in dialogs, error messages, or warnings, even if the string has passed domain-specific validation (like URL parsing).
-## 2024-05-19 - Incomplete Custom HTML Sanitization in formatter.ts
-**Vulnerability:** The custom HTML sanitization function in `formatter.ts` (`formatInsights`) replaced `<`, `>`, and `&`, but failed to replace single (`'`) and double (`"`) quotes. This left the application vulnerable to attribute injection (XSS) if the sanitized string was used in an HTML attribute context.
-**Learning:** Manual HTML sanitization using `replace` often misses critical edge cases like quotes. Attackers can break out of attributes using single or double quotes to inject malicious JavaScript.
-**Prevention:** Always escape quotes (`'` to `&#39;` and `"` to `&quot;`) alongside standard characters, or better yet, rely on established sanitization libraries or UI5's built-in `encodeXML` and safe text controls (`sap.m.FormattedText`) where possible.
-
-## 2025-05-19 - DoS via UI5 maxLength Bypass
-**Vulnerability:** The `Login` view relied solely on the `maxLength` property of `sap.m.Input` controls to restrict the length of usernames and passwords. However, `maxLength` only restricts direct keyboard input in the UI; it does not prevent programmatic updates or direct API calls from inserting massive strings into the JSONModel.
-**Learning:** In SAP UI5, UI-level length restrictions are insufficient for security. Attackers or malicious scripts can bypass `maxLength` by updating the model directly, potentially passing massive strings to backend services or causing client-side memory exhaustion (Denial of Service).
-**Prevention:** Always implement explicit length validation in the controller logic before processing sensitive data or making API calls, even if `maxLength` is set in the view.
+## 2025-07-15 - Unsafe Eval in Content Security Policy
+**Vulnerability:** The 'unsafe-eval' directive was present in the `script-src` of the Content-Security-Policy in `webapp/index.html`.
+**Learning:** It was likely included by default or during early development when relying on framework features that evaluated strings, but modern UI5 applications and pre-compiled views generally don't require it, opening a vector for XSS if an attacker can inject a string to be evaluated.
+**Prevention:** Always verify if `'unsafe-eval'` is strictly necessary for the application framework. For OpenUI5/SAPUI5, it is best practice to remove it and ensure views are pre-compiled and don't rely on runtime evaluation of arbitrary strings.
