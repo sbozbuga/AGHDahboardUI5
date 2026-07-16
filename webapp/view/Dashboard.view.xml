@@ -144,6 +144,7 @@
 								press=".onCopyAllClients"
 								tooltip="{parts:[{path:'i18n>copyAllClients'}, {path:'/top_clients', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 								class="floatingCopyBtn"
+								enabled="{= ${path: '/top_clients', formatter: '.formatter.getLength'} > 0 }"
 							/>
 							<Table
 								ariaLabelledBy="cardHeaderClients"
@@ -214,6 +215,7 @@
 								press=".onCopyAllDomains"
 								tooltip="{parts:[{path:'i18n>copyAllDomains'}, {path:'/top_queried_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 								class="floatingCopyBtn"
+								enabled="{= ${path: '/top_queried_domains', formatter: '.formatter.getLength'} > 0 }"
 							/>
 							<Table
 								ariaLabelledBy="cardHeaderDomains"
@@ -284,6 +286,7 @@
 								press=".onCopyAllBlockedDomains"
 								tooltip="{parts:[{path:'i18n>copyAllBlockedDomains'}, {path:'/top_blocked_domains', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 								class="floatingCopyBtn"
+								enabled="{= ${path: '/top_blocked_domains', formatter: '.formatter.getLength'} > 0 }"
 							/>
 							<Table
 								ariaLabelledBy="cardHeaderBlockedDomains"
@@ -354,6 +357,7 @@
 								press=".onCopyAllFilters"
 								tooltip="{parts:[{path:'i18n>copyAllFilters'}, {path:'/top_filters', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 								class="floatingCopyBtn"
+								enabled="{= ${path: '/top_filters', formatter: '.formatter.getLength'} > 0 }"
 							/>
 							<Table
 								ariaLabelledBy="cardHeaderFilters"
@@ -427,6 +431,7 @@
 								press=".onCopySlowestQueries"
 								tooltip="{parts:[{path:'i18n>copyAllSlowestQueries'}, {path:'/slowest_queries', formatter: '.formatter.getLength'}], formatter: '.formatter.formatMessage'}"
 								class="floatingCopyBtn"
+								enabled="{= ${path: '/slowest_queries', formatter: '.formatter.getLength'} > 0 }"
 							/>
 							<Table
 								ariaLabelledBy="cardHeaderSlowestQueries"

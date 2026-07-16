@@ -113,7 +113,12 @@
 			</Table>
 		</content>
 		<buttons>
-			<Button text="{i18n>clearAllAction}" press=".onClearAdvancedFilters" type="Transparent" />
+			<Button
+				text="{i18n>clearAllAction}"
+				press=".onClearAdvancedFilters"
+				type="Transparent"
+				enabled="{= ${path: 'view>/advancedFilters', formatter: '.formatter.getLength'} > 0 }"
+			/>
 			<Button text="{i18n>applyAction}" press=".onConfirmAdvancedFilter" type="Emphasized" />
 			<Button text="{i18n>cancelAction}" press=".onCancelAdvancedFilter" />
 		</buttons>
