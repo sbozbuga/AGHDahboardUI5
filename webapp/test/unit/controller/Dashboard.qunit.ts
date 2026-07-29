@@ -52,7 +52,9 @@ QUnit.module("Dashboard Polling Logic", {
 		ctx.controller.onRefreshStats = () => Promise.resolve();
 
 		// Spy on setTimeout/clearTimeout
+		// eslint-disable-next-line @typescript-eslint/unbound-method
 		ctx.originalSetTimeout = window.setTimeout;
+		// eslint-disable-next-line @typescript-eslint/unbound-method
 		ctx.originalClearTimeout = window.clearTimeout;
 		ctx.timeoutCalls = 0;
 		ctx.clearTimeoutCalls = 0;

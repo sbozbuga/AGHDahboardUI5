@@ -129,7 +129,11 @@ export default class ClientService extends BaseApiService {
 
 		// Map all gathered identifiers
 		for (const id of idsToMap) {
-			const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
+			// ⚡ Bolt: Fast-path bypasses regex engine for standard IPv4/hostnames
+			const normalizedId =
+				id.indexOf("[") !== -1 || id.indexOf("]") !== -1
+					? id.replace(ClientService.BRACKET_REGEX, "").toLowerCase()
+					: id.toLowerCase();
 			if (overwrite || !this._clientMap.has(normalizedId)) {
 				this._clientMap.set(normalizedId, c.name);
 			}
@@ -175,7 +179,11 @@ export default class ClientService extends BaseApiService {
 	 */
 	public getName(id: string): string {
 		if (!id) return "";
-		const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
+		// ⚡ Bolt: Fast-path bypasses regex engine for standard IPv4/hostnames
+		const normalizedId =
+			id.indexOf("[") !== -1 || id.indexOf("]") !== -1
+				? id.replace(ClientService.BRACKET_REGEX, "").toLowerCase()
+				: id.toLowerCase();
 		return this._clientMap.get(normalizedId) || id;
 	}
 
@@ -184,7 +192,11 @@ export default class ClientService extends BaseApiService {
 	 */
 	public isResolved(id: string): boolean {
 		if (!id) return false;
-		const normalizedId = id.replace(ClientService.BRACKET_REGEX, "").toLowerCase();
+		// ⚡ Bolt: Fast-path bypasses regex engine for standard IPv4/hostnames
+		const normalizedId =
+			id.indexOf("[") !== -1 || id.indexOf("]") !== -1
+				? id.replace(ClientService.BRACKET_REGEX, "").toLowerCase()
+				: id.toLowerCase();
 		return this._clientMap.has(normalizedId);
 	}
 

@@ -8,3 +8,6 @@
 ## 2024-06-03 - Pre-allocated Array Loop Optimization
 **Learning:** In high-frequency array processing (like large log sets), using a traditional `for` loop (`for (let i = 0; i < len; i++)`) with a pre-allocated array (`new Array(len)`) and indexed assignment (`array[i] = value`) is measurably faster and produces less garbage collection overhead compared to a `for...of` loop combined with `Array.prototype.push()`.
 **Action:** When transforming large arrays where the final size is known upfront, prefer pre-allocating the array and using a traditional `for` loop with index-based assignment.
+## 2024-07-29 - Fast-path bracket regex replacement
+**Learning:** Using `String.prototype.replace(regex)` unconditionally introduces unnecessary regex engine overhead. Fast-path these replacements by verifying the presence of the target character with `indexOf()` before applying the regex.
+**Action:** When doing string replacements, verify the presence of target character with `indexOf()` before applying regex.
