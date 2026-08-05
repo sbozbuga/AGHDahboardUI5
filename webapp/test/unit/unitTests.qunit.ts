@@ -9,6 +9,7 @@ import "unit/service/IntegrationServices.qunit";
 import "unit/service/StatsServicePerformance.qunit";
 import "unit/service/StatsServiceSlowestQueriesBenchmark.qunit";
 import "unit/service/StatsServiceAggregationBenchmark.qunit";
+import "unit/service/StatsServicePerformanceLoops.qunit";
 import "unit/service/SettingsService.qunit";
 import "unit/controller/DashboardPerformance.qunit";
 import "unit/model/formatter.qunit";
