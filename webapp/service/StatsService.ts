@@ -115,7 +115,11 @@ export default class StatsService extends BaseApiService {
 			this._slowestQueriesMap.clear();
 			const domainMap = this._slowestQueriesMap;
 
-			for (const e of data.data) {
+			// ⚡ Bolt: Using traditional for loop instead of for...of avoids Iterator protocol
+			// overhead and GC pressure, providing measurable speedups in high-frequency data parsing
+			const len = data.data.length;
+			for (let i = 0; i < len; i++) {
+				const e = data.data[i];
 				const rawElapsed = e.elapsedMs;
 				// Optimization: Fast-path type check before Number() avoids constructor overhead when already a number
 				const val = (typeof rawElapsed === "number" ? rawElapsed : Number(rawElapsed)) || 0;
@@ -200,7 +204,11 @@ export default class StatsService extends BaseApiService {
 			const startTimeMs = startTime ? startTime.getTime() : undefined;
 			const endTimeMs = endTime ? endTime.getTime() : undefined;
 
-			for (const e of data.data) {
+			// ⚡ Bolt: Using traditional for loop instead of for...of avoids Iterator protocol
+			// overhead and GC pressure, providing measurable speedups in high-frequency data parsing
+			const len = data.data.length;
+			for (let i = 0; i < len; i++) {
+				const e = data.data[i];
 				// Optimization: Date.parse is significantly faster than new Date() for ISO strings
 				const logTimeMs = Date.parse(e.time);
 				// Skip newer logs that haven't reached the end time yet
@@ -331,7 +339,11 @@ export default class StatsService extends BaseApiService {
 
 			const filterCounts = new Map<number, number>();
 
-			for (const e of data.data) {
+			// ⚡ Bolt: Using traditional for loop instead of for...of avoids Iterator protocol
+			// overhead and GC pressure, providing measurable speedups in high-frequency data parsing
+			const len = data.data.length;
+			for (let i = 0; i < len; i++) {
+				const e = data.data[i];
 				// AdGuard Home API uses 'reason' or 'status' to indicate filtering blocks.
 				// We check 'filterId' being non-zero as a reliable indicator of a list block.
 				if (e.filterId && e.filterId > 0) {
