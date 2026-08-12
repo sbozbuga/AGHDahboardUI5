@@ -250,7 +250,9 @@ export default class BaseController extends Controller {
 
 		// Quote if necessary
 		if (BaseController.CSV_QUOTES_NEEDED_REGEX.test(str)) {
-			str = '"' + str.replace(BaseController.CSV_QUOTE_REPLACE_REGEX, '""') + '"';
+			// Optimization: Fast-path bypasses regex engine when quotes are not present
+			const escapedStr = str.indexOf('"') !== -1 ? str.replace(BaseController.CSV_QUOTE_REPLACE_REGEX, '""') : str;
+			str = '"' + escapedStr + '"';
 		}
 
 		return str;
