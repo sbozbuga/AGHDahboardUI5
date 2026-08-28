@@ -11,3 +11,6 @@
 ## 2024-07-29 - Fast-path bracket regex replacement
 **Learning:** Using `String.prototype.replace(regex)` unconditionally introduces unnecessary regex engine overhead. Fast-path these replacements by verifying the presence of the target character with `indexOf()` before applying the regex.
 **Action:** When doing string replacements, verify the presence of target character with `indexOf()` before applying regex.
+## 2024-08-05 - Replacing for...of with traditional for loop in V8
+**Learning:** In high-frequency loop processing over large data arrays in V8 (such as parsing thousands of log entries), a traditional `for` loop (`for (let i = 0; i < len; i++)`) is measurably faster and avoids the Iterator protocol overhead and garbage collection pressure caused by `for...of`.
+**Action:** Prefer traditional `for` loops with pre-computed length (`const len = arr.length`) over `for...of` when iterating through large, high-cardinality data arrays.
