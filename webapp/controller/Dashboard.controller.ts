@@ -19,7 +19,7 @@ export default class Dashboard extends BaseController {
 	// formatter = formatter; -> Inherited
 	private _timer: ReturnType<typeof setTimeout> | undefined;
 	private _isPolling = false;
-	private _lastLatestTime: Date | undefined;
+	private _lastLatestTimeMs: number = 0;
 	private _lastSlowestQueryFetchTime: number | undefined;
 	private static readonly REFRESH_INTERVAL = 15000;
 	private static readonly SLOWEST_QUERY_INTERVAL = 60000; // 1 minute throttle for heavy queries
@@ -154,10 +154,15 @@ export default class Dashboard extends BaseController {
 			]);
 
 			const latestLogEntry = latestLog.data.length > 0 ? latestLog.data[0] : undefined;
-			const latestTimeStr = latestLogEntry ? latestLogEntry.time : undefined;
-			// Parse time if it's a string (new optimization)
-			const latestTime =
-				latestTimeStr instanceof Date ? latestTimeStr : latestTimeStr ? new Date(latestTimeStr) : undefined;
+			const latestTimeRaw = latestLogEntry ? latestLogEntry.time : undefined;
+
+			// ⚡ Bolt: Use Date.parse to get timestamp directly, avoiding new Date() allocation
+			const latestTimeMs =
+				latestTimeRaw instanceof Date
+					? latestTimeRaw.getTime()
+					: typeof latestTimeRaw === "string"
+						? Date.parse(latestTimeRaw)
+						: 0;
 
 			const currentData = model.getData() as AdGuardStats & { slowest_queries: unknown[] };
 
@@ -167,14 +172,13 @@ export default class Dashboard extends BaseController {
 			// Only fetch heavy slowest queries if new data arrived (or first run)
 			// AND enough time has passed since last fetch to avoid server load
 			const now = Date.now();
-			const isDataNew =
-				(latestTime ? latestTime.getTime() : 0) !== (this._lastLatestTime ? this._lastLatestTime.getTime() : 0);
+			const isDataNew = latestTimeMs !== this._lastLatestTimeMs;
 			const isTimeDue =
 				!this._lastSlowestQueryFetchTime || now - this._lastSlowestQueryFetchTime >= Dashboard.SLOWEST_QUERY_INTERVAL;
 
 			if (isDataNew && isTimeDue) {
 				slowest = await StatsService.getInstance().getSlowestQueries(scanDepth);
-				this._lastLatestTime = latestTime;
+				this._lastLatestTimeMs = latestTimeMs;
 				this._lastSlowestQueryFetchTime = now;
 				slowestChanged = true;
 			}
