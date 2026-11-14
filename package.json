@@ -45,7 +45,7 @@
     "typescript-eslint": "^8.57.2",
     "ui5-middleware-livereload": "^3.3.0",
     "ui5-middleware-simpleproxy": "^3.7.0",
-    "ui5-test-runner": "^5.13.0",
+    "ui5-test-runner": "^6.0.7",
     "ui5-tooling-modules": "^3.35.0",
     "ui5-tooling-transpile": "^3.11.0"
   },
